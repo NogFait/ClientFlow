@@ -1,0 +1,50 @@
+.detailGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 calc(50% - var(--spacing-4));
+  min-width: 160px;
+}
+
+.fullWidth {
+  flex: 1 1 100%;
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.value {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  width: fit-content;
+}
+
+.pagado {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.pendiente {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}

@@ -1,0 +1,90 @@
+/* ClientCard — Table Row Styles */
+
+.row {
+  transition: background-color var(--transition-fast);
+}
+
+.row:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.cellName {
+  padding: var(--spacing-3) var(--spacing-4);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.cell {
+  padding: var(--spacing-3) var(--spacing-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.cellActions {
+  padding: var(--spacing-3) var(--spacing-4);
+  display: flex;
+  gap: 4px;
+}
+
+/* Badge Styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.badgeActivo {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.badgePendiente {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.badgeInactivo {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-500);
+}
+
+/* Action Buttons */
+.actionBtn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: 4px 12px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  line-height: 1.5;
+}
+
+.actionBtn:hover {
+  border-color: var(--color-border-hover);
+}
+
+.actionView:hover {
+  background-color: var(--color-primary-50);
+  border-color: var(--color-primary-200);
+  color: var(--color-primary-600);
+}
+
+.actionEdit:hover {
+  background-color: var(--color-info-bg);
+  border-color: var(--color-info);
+  color: var(--color-info-text);
+}
+
+.actionDelete:hover {
+  background-color: var(--color-error-bg);
+  border-color: var(--color-error);
+  color: var(--color-error-text);
+}

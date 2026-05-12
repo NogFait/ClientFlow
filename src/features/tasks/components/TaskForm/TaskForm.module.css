@@ -1,0 +1,96 @@
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin-bottom: 6px; /* 6px is not in tokens, but we'll use it as per spec */
+  display: block;
+}
+
+.input,
+.select,
+.textarea {
+  height: 42px; /* inputs/selects */
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  transition: var(--transition-base);
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
+}
+
+.textarea {
+  min-height: 80px;
+  padding: 12px;
+  resize: vertical;
+}
+
+.inputError {
+  border-color: var(--color-error);
+}
+
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-4);
+}
+
+.cancelBtn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: var(--transition-base);
+  color: var(--color-text-primary);
+}
+
+.cancelBtn:hover {
+  background: var(--color-bg-hover);
+}
+
+.submitBtn {
+  background: var(--color-primary-600);
+  color: var(--color-text-inverse);
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--color-primary-700);
+}
+
+.submitBtnDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+  margin-top: 4px; /* 4px is spacing-1? Actually spacing-1 is 4px, but we'll use 4px as per typical error margin */
+  display: block;
+}

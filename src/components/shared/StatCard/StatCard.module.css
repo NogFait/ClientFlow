@@ -1,0 +1,86 @@
+.card {
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-5);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition-base), border-color var(--transition-base), transform var(--transition-base);
+  width: 100%;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-hover);
+  transform: translateY(-1px);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-3);
+}
+
+.iconWrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconDefault {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-600);
+}
+
+.iconPrimary {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-600);
+}
+
+.iconSuccess {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.iconWarning {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.iconError {
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-1);
+}
+
+.value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.valuePrimary {
+  color: var(--color-primary-600);
+}
+
+.valueSuccess {
+  color: var(--color-success);
+}
+
+.valueWarning {
+  color: var(--color-warning);
+}
+
+.valueError {
+  color: var(--color-error);
+}
