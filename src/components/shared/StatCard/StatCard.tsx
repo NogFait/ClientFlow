@@ -4,6 +4,9 @@ import styles from "./StatCard.module.css"
 interface StatCardProps {
   label: string
   value: string | number
+  primaryLabel?: string
+  secondaryValue?: string | number
+  secondaryLabel?: string
   icon?: LucideIcon
   variant?: "default" | "primary" | "success" | "warning" | "error"
 }
@@ -24,7 +27,7 @@ const valueVariantMap: Record<string, string> = {
   error: "valueError",
 }
 
-const StatCard = ({ label, value, icon: Icon, variant = "default" }: StatCardProps) => {
+const StatCard = ({ label, value, primaryLabel, secondaryValue, secondaryLabel, icon: Icon, variant = "default" }: StatCardProps) => {
   const iconVariant = variantClassMap[variant]
   const valueVariant = valueVariantMap[variant]
 
@@ -38,7 +41,20 @@ const StatCard = ({ label, value, icon: Icon, variant = "default" }: StatCardPro
         )}
       </div>
       <p className={styles.label}>{label}</p>
-      <p className={`${styles.value} ${valueVariant ? styles[valueVariant] : ""}`}>{value}</p>
+      {secondaryValue !== undefined ? (
+        <div className={styles.splitValues}>
+          <div className={styles.valueRow}>
+            <span className={`${styles.value} ${valueVariant ? styles[valueVariant] : ""}`}>{value}</span>
+            {primaryLabel && <span className={styles.subLabel}>{primaryLabel}</span>}
+          </div>
+          <div className={styles.valueRow}>
+            <span className={`${styles.value} ${valueVariant ? styles[valueVariant] : ""}`}>{secondaryValue}</span>
+            {secondaryLabel && <span className={styles.subLabel}>{secondaryLabel}</span>}
+          </div>
+        </div>
+      ) : (
+        <p className={`${styles.value} ${valueVariant ? styles[valueVariant] : ""}`}>{value}</p>
+      )}
     </article>
   )
 }

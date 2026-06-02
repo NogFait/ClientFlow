@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { supabase } from "../../services/supabaseClient"
 import { getClients } from "../../features/clients/services"
 import { getProjects } from "../../features/projects/services"
 import { getPayments } from "../../features/payments/services"
 import { getTasks } from "../../features/tasks/services"
-import { Users, Briefcase, DollarSign, Clock } from "lucide-react"
+import { Users, Briefcase, DollarSign, Clock, Calendar } from "lucide-react"
+import type { ITask } from "../../features/tasks/types"
 import StatCard from "../../components/shared/StatCard/StatCard"
 import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import Loader from "../../components/shared/Loader/Loader"
+import { BarChart } from "../../components/charts/BarChart"
 import styles from "./DashboardPage.module.css"
 
 const MONTHS = [
@@ -21,8 +24,18 @@ const DashboardPage = () => {
   const [activeProjects, setActiveProjects] = useState(0)
   const [monthlyIncome, setMonthlyIncome] = useState(0)
   const [pendingTasks, setPendingTasks] = useState(0)
+  const [progressTasks, setProgressTasks] = useState(0)
   const [monthlyEarnings, setMonthlyEarnings] = useState<{ month: string; total: number }[]>([])
+  const [upcomingTasks, setUpcomingTasks] = useState<(ITask & { proyectos?: { name: string } | null })[]>([])
   const [loading, setLoading] = useState(true)
+
+  const priorityColor: Record<string, string> = {
+    low: "var(--color-success)",
+    medium: "var(--color-warning)",
+    high: "var(--color-error)",
+  }
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -38,6 +51,7 @@ const DashboardPage = () => {
       setTotalClients(clients.length)
       setActiveProjects(projects.filter(p => p.status === "activo").length)
       setPendingTasks(tasks.filter(t => t.status === "pendiente").length)
+      setProgressTasks(tasks.filter(t => t.status === "en_progreso").length)
 
       const now = new Date()
       const currentMonth = now.getMonth()
@@ -68,11 +82,26 @@ const DashboardPage = () => {
           .map(([month, total]) => ({ month, total }))
           .sort((a, b) => b.month.localeCompare(a.month)),
       )
+
+      const upcoming = tasks
+        .filter(t => t.status !== "hechas" && t.due_date)
+        .sort((a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime())
+        .slice(0, 8)
+      setUpcomingTasks(upcoming)
     }).catch(() => {})
     .finally(() => setLoading(false))
   }, [])
 
   const fmt = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  const chartData = monthlyEarnings
+    .slice()
+    .reverse()
+    .map(({ month, total }) => {
+      const [y, m] = month.split("-")
+      const label = `${MONTHS[Number(m) - 1]} ${y}`
+      return { key: label, value: total }
+    })
 
   return (
     <div>
@@ -85,39 +114,63 @@ const DashboardPage = () => {
           <StatCard label="Total clientes" value={totalClients} icon={Users} variant="primary" />
           <StatCard label="Proyectos Activos" value={activeProjects} icon={Briefcase} variant="success" />
           <StatCard label="Ingreso Mensual" value={`$${fmt(monthlyIncome)}`} icon={DollarSign} variant="primary" />
-          <StatCard label="Tareas pendientes" value={pendingTasks} icon={Clock} variant="warning" />
+          <StatCard label="Tareas" value={pendingTasks} primaryLabel="Pendiente" secondaryValue={progressTasks} secondaryLabel="En Progreso" icon={Clock} variant="warning" />
         </div>
       )}
 
-      <section>
-        <h2>Estadísticas Mensuales</h2>
-        {loading ? (
-          <div className={styles.loaderSection}><Loader /></div>
-        ) : monthlyEarnings.length === 0 ? (
-          <p>Aún no hay cobros registrados.</p>
-        ) : (
-          <div className={styles.tableWrapper}><table className={styles.statsTable}>
-            <thead>
-              <tr>
-                <th>Mes</th>
-                <th>Total Cobrado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {monthlyEarnings.map(({ month, total }) => {
-                const [year, m] = month.split("-")
-                const label = `${MONTHS[Number(m) - 1]} ${year}`
-                return (
-                  <tr key={month}>
-                    <td>{label}</td>
-                    <td className={styles.amount}>${fmt(total)}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table></div>
-        )}
-      </section>
+      {!loading && (
+        <div className={styles.dashboardGrid}>
+          <section>
+            <h2 className={styles.sectionTitle}>Estadísticas Mensuales</h2>
+            {chartData.length === 0 ? (
+              <p className={styles.emptyState}>Aún no hay cobros registrados.</p>
+            ) : (
+              <div className={styles.card}>
+                <BarChart data={chartData} />
+              </div>
+            )}
+          </section>
+
+          <section>
+            <h2 className={styles.sectionTitle}>Próximas Tareas</h2>
+            {upcomingTasks.length === 0 ? (
+              <p className={styles.emptyState}>No hay tareas pendientes con fecha.</p>
+            ) : (
+              <div className={styles.card}>
+                <ul className={styles.taskList}>
+                  {upcomingTasks.map(task => {
+                    const due = new Date(task.due_date!)
+                    const today = new Date()
+                    today.setHours(0, 0, 0, 0)
+                    const isOverdue = due.getTime() < today.getTime()
+                    const formatted = due.toLocaleDateString("es-AR", {
+                      day: "2-digit",
+                      month: "short",
+                    })
+
+                    return (
+                      <li key={task.id} className={`${styles.taskItem} ${isOverdue ? styles.taskOverdue : ""}`} onClick={() => navigate("/tasks")}>
+                        <span
+                          className={styles.taskPriority}
+                          style={{ background: priorityColor[task.priority] }}
+                        />
+                        <div className={styles.taskBody}>
+                          <span className={styles.taskTitle}>{task.title}</span>
+                          <span className={styles.taskProject}>{task.proyectos?.name ?? "—"}</span>
+                        </div>
+                        <div className={styles.taskDate}>
+                          <Calendar size={12} />
+                          <span>{formatted}</span>
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
     </div>
   )
 }

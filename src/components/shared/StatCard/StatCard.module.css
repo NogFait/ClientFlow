@@ -84,3 +84,21 @@
 .valueError {
   color: var(--color-error);
 }
+
+.splitValues {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-4);
+}
+
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-2);
+}
+
+.subLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+}
