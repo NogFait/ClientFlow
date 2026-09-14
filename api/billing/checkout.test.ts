@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-import { createCheckoutHandler } from "./checkout"
-import type { SubscriptionRow } from "../../src/features/billing/domain/subscription"
+import { createCheckoutHandler } from "./checkout.js"
+import type { SubscriptionRow } from "../../src/features/billing/domain/subscription.js"
 
 function fakeRes() {
   const res = {

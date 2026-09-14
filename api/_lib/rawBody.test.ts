@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { readRawBody } from "./rawBody"
+import { readRawBody } from "./rawBody.js"
 
 function fakeStream(chunks: Array<string | Buffer>) {
   return {

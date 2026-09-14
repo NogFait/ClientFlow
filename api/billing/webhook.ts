@@ -1,12 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node"
-import type { MinimalResponse } from "../_lib/auth"
-import type { BillingRepo } from "../_lib/billingRepo"
-import { createSupabaseBillingRepo } from "../_lib/billingRepo"
-import { getBillingProvider } from "../_lib/billing"
-import { readRawBody, type RawBodySource } from "../_lib/rawBody"
-import { getSupabaseAdmin } from "../_lib/supabaseAdmin"
-import { applySubscriptionEvent, type SubscriptionRow } from "../../src/features/billing/domain/subscription"
-import { InvalidSignatureError, type BillingProvider } from "../../src/features/billing/ports/BillingProvider"
+import type { MinimalResponse } from "../_lib/auth.js"
+import type { BillingRepo } from "../_lib/billingRepo.js"
+import { createSupabaseBillingRepo } from "../_lib/billingRepo.js"
+import { getBillingProvider } from "../_lib/billing.js"
+import { readRawBody, type RawBodySource } from "../_lib/rawBody.js"
+import { getSupabaseAdmin } from "../_lib/supabaseAdmin.js"
+import { applySubscriptionEvent, type SubscriptionRow } from "../../src/features/billing/domain/subscription.js"
+import { InvalidSignatureError, type BillingProvider } from "../../src/features/billing/ports/BillingProvider.js"
 
 // Vercel must not parse the body as JSON — HMAC verification needs the exact
 // original bytes (design §3 "raw body handling").

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import type { SupabaseClient } from "@supabase/supabase-js"
-import { createSupabaseBillingRepo } from "./billingRepo"
+import { createSupabaseBillingRepo } from "./billingRepo.js"
 
 // A minimal fake of supabase-js's chainable query builder: every chain
 // method returns the same object (so any call order works), and the object

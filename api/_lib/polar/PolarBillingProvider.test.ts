@@ -2,8 +2,8 @@ import { describe, expect, it, vi, beforeEach } from "vitest"
 import type { Polar } from "@polar-sh/sdk"
 import { SDKValidationError } from "@polar-sh/sdk/models/errors/sdkvalidationerror.js"
 import { WebhookVerificationError } from "@polar-sh/sdk/webhooks"
-import { InvalidSignatureError } from "../../../src/features/billing/ports/BillingProvider"
-import { PolarBillingProvider } from "./PolarBillingProvider"
+import { InvalidSignatureError } from "../../../src/features/billing/ports/BillingProvider.js"
+import { PolarBillingProvider } from "./PolarBillingProvider.js"
 
 const validateEventMock = vi.fn()
 

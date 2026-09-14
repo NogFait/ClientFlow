@@ -2,14 +2,14 @@ import type { Polar } from "@polar-sh/sdk"
 import type { Subscription } from "@polar-sh/sdk/models/components/subscription.js"
 import { SDKValidationError } from "@polar-sh/sdk/models/errors/sdkvalidationerror.js"
 import { validateEvent } from "@polar-sh/sdk/webhooks"
-import type { PolarEnv } from "../env"
+import type { PolarEnv } from "../env.js"
 import type {
   BillingEvent,
   BillingProvider,
   NormalizedSubscription,
   PaidPlanCode,
-} from "../../../src/features/billing/ports/BillingProvider"
-import { InvalidSignatureError } from "../../../src/features/billing/ports/BillingProvider"
+} from "../../../src/features/billing/ports/BillingProvider.js"
+import { InvalidSignatureError } from "../../../src/features/billing/ports/BillingProvider.js"
 
 // Server-only adapter (design §2). Implements the domain-owned BillingProvider
 // port using the real @polar-sh/sdk (v0.49.0) surface — verified against the

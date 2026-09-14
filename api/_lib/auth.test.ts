@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { getUserFromRequest, sendUnauthorized } from "./auth"
+import { getUserFromRequest, sendUnauthorized } from "./auth.js"
 
 function fakeSupabase(getUserImpl: (token: string) => Promise<{ data: { user: { id: string; email: string | null } | null }; error: unknown }>) {
   return { auth: { getUser: vi.fn(getUserImpl) } } as unknown as Parameters<typeof getUserFromRequest>[1]

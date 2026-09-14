@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-import { getBillingProviderId, getPolarEnv, getSupabaseAdminEnv, getWebhookSecret } from "./env"
+import { getBillingProviderId, getPolarEnv, getSupabaseAdminEnv, getWebhookSecret } from "./env.js"
 
 const ALL_KEYS = [
   "POLAR_ACCESS_TOKEN",

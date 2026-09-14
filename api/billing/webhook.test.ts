@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest"
-import { processWebhookRequest, createWebhookHandler } from "./webhook"
-import { InvalidSignatureError } from "../../src/features/billing/ports/BillingProvider"
-import type { NormalizedSubscription } from "../../src/features/billing/ports/BillingProvider"
-import type { SubscriptionRow } from "../../src/features/billing/domain/subscription"
+import { processWebhookRequest, createWebhookHandler } from "./webhook.js"
+import { InvalidSignatureError } from "../../src/features/billing/ports/BillingProvider.js"
+import type { NormalizedSubscription } from "../../src/features/billing/ports/BillingProvider.js"
+import type { SubscriptionRow } from "../../src/features/billing/domain/subscription.js"
 
 function baseRow(overrides: Partial<SubscriptionRow> = {}): SubscriptionRow {
   return {

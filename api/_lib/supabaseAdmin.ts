@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
-import { getSupabaseAdminEnv } from "./env"
+import { getSupabaseAdminEnv } from "./env.js"
 
 // Service-role client factory (design §3) — bypasses RLS. Only ever used
 // server-side (Vercel Functions), never imported by src/**. Memoized so a

@@ -1,7 +1,7 @@
 import { Polar } from "@polar-sh/sdk"
-import type { BillingProvider } from "../../src/features/billing/ports/BillingProvider"
-import { getBillingProviderId, getPolarEnv, getWebhookSecret } from "./env"
-import { PolarBillingProvider } from "./polar/PolarBillingProvider"
+import type { BillingProvider } from "../../src/features/billing/ports/BillingProvider.js"
+import { getBillingProviderId, getPolarEnv, getWebhookSecret } from "./env.js"
+import { PolarBillingProvider } from "./polar/PolarBillingProvider.js"
 
 // Provider selection (design §2/§3) — switches on BILLING_PROVIDER, default
 // "polar". getWebhookSecret is passed as a thunk, not called here: checkout

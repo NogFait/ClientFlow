@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-import { createPortalHandler } from "./portal"
-import type { SubscriptionRow } from "../../src/features/billing/domain/subscription"
+import { createPortalHandler } from "./portal.js"
+import type { SubscriptionRow } from "../../src/features/billing/domain/subscription.js"
 
 function fakeRes() {
   const res = {

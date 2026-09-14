@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { resolveAppOrigin } from "./http"
+import { resolveAppOrigin } from "./http.js"
 
 describe("resolveAppOrigin", () => {
   it("prefers the Origin header when present", () => {

@@ -1,12 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node"
-import type { AuthenticatedUser, MinimalRequest, MinimalResponse } from "../_lib/auth"
-import { getUserFromRequest, sendUnauthorized } from "../_lib/auth"
-import type { BillingRepo } from "../_lib/billingRepo"
-import { createSupabaseBillingRepo } from "../_lib/billingRepo"
-import { getBillingProvider } from "../_lib/billing"
-import { resolveAppOrigin, type HeaderBag } from "../_lib/http"
-import { getSupabaseAdmin } from "../_lib/supabaseAdmin"
-import type { BillingProvider, PaidPlanCode } from "../../src/features/billing/ports/BillingProvider"
+import type { AuthenticatedUser, MinimalRequest, MinimalResponse } from "../_lib/auth.js"
+import { getUserFromRequest, sendUnauthorized } from "../_lib/auth.js"
+import type { BillingRepo } from "../_lib/billingRepo.js"
+import { createSupabaseBillingRepo } from "../_lib/billingRepo.js"
+import { getBillingProvider } from "../_lib/billing.js"
+import { resolveAppOrigin, type HeaderBag } from "../_lib/http.js"
+import { getSupabaseAdmin } from "../_lib/supabaseAdmin.js"
+import type { BillingProvider, PaidPlanCode } from "../../src/features/billing/ports/BillingProvider.js"
 
 export interface CheckoutRequest extends MinimalRequest {
   method?: string

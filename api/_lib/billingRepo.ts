@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
-import type { SubscriptionRow } from "../../src/features/billing/domain/subscription"
+import type { SubscriptionRow } from "../../src/features/billing/domain/subscription.js"
 
 // Persistence layer shared by the checkout/portal/webhook handlers — keeps
 // them free of raw supabase-js query-builder chains so their own tests can
