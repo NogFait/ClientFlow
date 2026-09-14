@@ -4,7 +4,7 @@
 -- Run with: supabase test db (spins up local Postgres via `supabase start`).
 
 BEGIN;
-SELECT plan(10);
+SELECT plan(17);
 
 -- Fixture users -------------------------------------------------------
 INSERT INTO auth.users (id, email)
@@ -76,6 +76,40 @@ SELECT is(
 SELECT is(
   (SELECT count(*)::int FROM public.plans WHERE code = 'pro_yearly'),
   1, 'plans: authenticated user can SELECT the pro_yearly plan'
+);
+
+-- plans catalog: exact codes + exact limits (WARNING from
+-- sdd/saas-conversion/verify-report-m1 #1132 — prior coverage was indirect
+-- only, inferred by combining this file's row-existence checks with
+-- get_entitlements_test.sql's limit values via the RPC, never the raw table).
+SELECT set_eq(
+  'SELECT code FROM public.plans',
+  ARRAY['free', 'pro_monthly', 'pro_yearly'],
+  'plans: catalog contains exactly free, pro_monthly, pro_yearly — no more, no less'
+);
+SELECT is(
+  (SELECT limits ->> 'clientes' FROM public.plans WHERE code = 'free'),
+  '3', 'plans: free.limits.clientes is 3'
+);
+SELECT is(
+  (SELECT limits ->> 'proyectos' FROM public.plans WHERE code = 'free'),
+  '5', 'plans: free.limits.proyectos is 5'
+);
+SELECT is(
+  (SELECT limits -> 'clientes' FROM public.plans WHERE code = 'pro_monthly'),
+  'null'::jsonb, 'plans: pro_monthly.limits.clientes is unlimited (json null)'
+);
+SELECT is(
+  (SELECT limits -> 'proyectos' FROM public.plans WHERE code = 'pro_monthly'),
+  'null'::jsonb, 'plans: pro_monthly.limits.proyectos is unlimited (json null)'
+);
+SELECT is(
+  (SELECT limits -> 'clientes' FROM public.plans WHERE code = 'pro_yearly'),
+  'null'::jsonb, 'plans: pro_yearly.limits.clientes is unlimited (json null)'
+);
+SELECT is(
+  (SELECT limits -> 'proyectos' FROM public.plans WHERE code = 'pro_yearly'),
+  'null'::jsonb, 'plans: pro_yearly.limits.proyectos is unlimited (json null)'
 );
 
 RESET ROLE;
