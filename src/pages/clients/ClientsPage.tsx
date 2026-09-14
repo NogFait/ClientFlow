@@ -9,26 +9,44 @@ import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import { UserCheck, Clock, UserX } from "lucide-react"
 import StatCard from "../../components/shared/StatCard/StatCard"
 import Loader from "../../components/shared/Loader/Loader"
+import { useEntitlementsContext } from "../../features/billing/context/entitlementsContext"
+import { canCreate } from "../../features/billing/domain/entitlements"
+import type { LimitExceededError } from "../../features/billing/domain/errors"
+import UpgradePrompt from "../../features/billing/components/UpgradePrompt/UpgradePrompt"
 import styles from "./ClientsPage.module.css"
 
 type ModalMode = "create" | "edit" | "view" | null
+
+interface UpgradePromptState {
+  limit: number
+  current: number
+}
 
 const ClientsPage = () => {
   const [clients, setClients] = useState<IClient[]>([])
   const [modalMode, setModalMode] = useState<ModalMode>(null)
   const [selectedClient, setSelectedClient] = useState<IClient | null>(null)
   const [loading, setLoading] = useState(true)
+  const [upgradePrompt, setUpgradePrompt] = useState<UpgradePromptState | null>(null)
+  const { entitlements, refresh: refreshEntitlements } = useEntitlementsContext()
 
   const refreshClients = async () => {
     const updated = await getClients()
     setClients(updated)
   }
 
+  const handleLimitExceeded = (error: LimitExceededError) => {
+    setModalMode(null)
+    setSelectedClient(null)
+    setUpgradePrompt({ limit: error.limit, current: error.current })
+  }
+
   const { register, handleSubmit, onSubmit, reset, errors, isSubmitting } = useClientForm(() => {
     setModalMode(null)
     setSelectedClient(null)
     refreshClients()
-  }, selectedClient ?? undefined)
+    refreshEntitlements()
+  }, selectedClient ?? undefined, handleLimitExceeded)
 
   const closeModal = () => {
     setModalMode(null)
@@ -57,10 +75,26 @@ const ClientsPage = () => {
       try {
         await deleteClient(client.id!)
         refreshClients()
+        refreshEntitlements()
       } catch {
         setDeleteError("No se pudo eliminar el cliente. Intentalo de nuevo.")
       }
     }
+  }
+
+  const handleNewClientAction = () => {
+    // Soft pre-check (design §5 / spec plan-catalog-entitlements): avoid
+    // opening the form at all when the Free limit is already reached —
+    // Postgres' check_plan_limit() trigger remains the authoritative gate.
+    if (!canCreate(entitlements, "clientes")) {
+      setUpgradePrompt({
+        limit: entitlements?.limits.clientes ?? 0,
+        current: entitlements?.usage.clientes ?? 0,
+      })
+      return
+    }
+    setSelectedClient(null)
+    setModalMode("create")
   }
 
   const modalTitle = modalMode === "create" ? "Nuevo Cliente"
@@ -74,7 +108,7 @@ const ClientsPage = () => {
         title="Clientes"
         description="Gestione las relaciones con sus clientes, realice un seguimiento de su estado y supervise sus niveles de inversión desde una única vista unificada."
         actionLabel="Nuevo Cliente"
-        onAction={() => { setSelectedClient(null); setModalMode("create") }}
+        onAction={handleNewClientAction}
       />
 
       {deleteError && (
@@ -161,6 +195,16 @@ const ClientsPage = () => {
           />
         )}
       </Modal>
+
+      {upgradePrompt && (
+        <UpgradePrompt
+          isOpen
+          resource="clientes"
+          limit={upgradePrompt.limit}
+          current={upgradePrompt.current}
+          onClose={() => setUpgradePrompt(null)}
+        />
+      )}
     </div>
   )
 }

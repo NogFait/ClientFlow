@@ -1,8 +1,13 @@
 import { useForm } from "react-hook-form"
 import type { IProject } from "../types"
 import { createProject, updateProject } from "../services"
+import { LimitExceededError } from "../../billing/domain/errors"
 
-export function useProjectForm(onSuccess:()=> void, defaultValues?:IProject){
+export function useProjectForm(
+    onSuccess:()=> void,
+    defaultValues?:IProject,
+    onLimitExceeded?: (error: LimitExceededError) => void,
+){
     const {register, handleSubmit, reset, setError, formState: {errors, isSubmitting}} = useForm<IProject>({values: defaultValues})
 
     const onSubmit = async (data: IProject) =>{
@@ -16,7 +21,11 @@ export function useProjectForm(onSuccess:()=> void, defaultValues?:IProject){
             }
             reset()
             onSuccess()
-        } catch {
+        } catch (error) {
+            if (error instanceof LimitExceededError && onLimitExceeded) {
+                onLimitExceeded(error)
+                return
+            }
             setError("root.serverError", {
                 type: "manual",
                 message: "Ocurrió un error al guardar el proyecto. Intentalo de nuevo.",

@@ -13,9 +13,18 @@ import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import { Briefcase, PauseCircle, CheckCircle, DollarSign } from "lucide-react"
 import StatCard from "../../components/shared/StatCard/StatCard"
 import Loader from "../../components/shared/Loader/Loader"
+import { useEntitlementsContext } from "../../features/billing/context/entitlementsContext"
+import { canCreate } from "../../features/billing/domain/entitlements"
+import type { LimitExceededError } from "../../features/billing/domain/errors"
+import UpgradePrompt from "../../features/billing/components/UpgradePrompt/UpgradePrompt"
 import styles from "./ProjectsPage.module.css"
 
 type ModalMode = "create" | "edit" | "view" | null
+
+interface UpgradePromptState {
+  limit: number
+  current: number
+}
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState<(IProject & { clientes?: { name: string } | null })[]>([])
@@ -24,17 +33,26 @@ const ProjectsPage = () => {
   const [selectedProject, setSelectedProject] = useState<IProject | null>(null)
   const [payments, setPayments] = useState<IPayment[]>([])
   const [loading, setLoading] = useState(true)
+  const [upgradePrompt, setUpgradePrompt] = useState<UpgradePromptState | null>(null)
+  const { entitlements, refresh: refreshEntitlements } = useEntitlementsContext()
 
   const refreshProjects = async () => {
     const updated = await getProjects()
     setProjects(updated)
   }
 
+  const handleLimitExceeded = (error: LimitExceededError) => {
+    setModalMode(null)
+    setSelectedProject(null)
+    setUpgradePrompt({ limit: error.limit, current: error.current })
+  }
+
   const { register, handleSubmit, onSubmit, reset, errors, isSubmitting } = useProjectForm(() => {
     setModalMode(null)
     setSelectedProject(null)
     refreshProjects()
-  }, selectedProject ?? undefined)
+    refreshEntitlements()
+  }, selectedProject ?? undefined, handleLimitExceeded)
 
   const closeModal = () => {
     setModalMode(null)
@@ -67,10 +85,25 @@ const ProjectsPage = () => {
       try {
         await deleteProject(project.id!)
         refreshProjects()
+        refreshEntitlements()
       } catch {
         setDeleteError("No se pudo eliminar el proyecto. Intentalo de nuevo.")
       }
     }
+  }
+
+  const handleNewProjectAction = () => {
+    // Soft pre-check (design §5 / spec plan-catalog-entitlements) — mirrors
+    // ClientsPage. Postgres' check_plan_limit() trigger stays authoritative.
+    if (!canCreate(entitlements, "proyectos")) {
+      setUpgradePrompt({
+        limit: entitlements?.limits.proyectos ?? 0,
+        current: entitlements?.usage.proyectos ?? 0,
+      })
+      return
+    }
+    setSelectedProject(null)
+    setModalMode("create")
   }
 
   const modalTitle = modalMode === "create" ? "Nuevo Proyecto"
@@ -99,7 +132,7 @@ const ProjectsPage = () => {
         title="Proyectos"
         description="Gestiona tu trabajo activo y tus relaciones con los clientes."
         actionLabel="Nuevo Proyecto"
-        onAction={() => { setSelectedProject(null); setModalMode("create") }}
+        onAction={handleNewProjectAction}
       />
 
       {deleteError && (
@@ -184,6 +217,16 @@ const ProjectsPage = () => {
           />
         )}
       </Modal>
+
+      {upgradePrompt && (
+        <UpgradePrompt
+          isOpen
+          resource="proyectos"
+          limit={upgradePrompt.limit}
+          current={upgradePrompt.current}
+          onClose={() => setUpgradePrompt(null)}
+        />
+      )}
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { supabase } from "../../services/supabaseClient";
+import { mapSupabaseError } from "../../services/supabaseErrors";
 import type { IClient } from "./types";
 
 
@@ -18,7 +19,7 @@ export async function createClient(client:IClient) {
     const { data: { user } } = await supabase.auth.getUser()
     const {error} = await supabase
         .from("clientes").insert({ ...client, user_id: user?.id })
-    if (error) throw new Error(error.message)
+    if (error) throw mapSupabaseError(error)
 }
 
 //Actualizar Cliente

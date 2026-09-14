@@ -1,4 +1,5 @@
 import { supabase } from "../../services/supabaseClient";
+import { mapSupabaseError } from "../../services/supabaseErrors";
 import type { IProject } from "./types";
 
 //Obtener Proyectos
@@ -24,7 +25,7 @@ export async function createProject(project: IProject){
             start_date: project.start_date || null,
             end_date: project.end_date || null,
         })
-    if (error) throw new Error(error.message)
+    if (error) throw mapSupabaseError(error)
 }
 
 // actualizar proyecto
