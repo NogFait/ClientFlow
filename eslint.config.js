@@ -22,4 +22,13 @@ export default defineConfig([
       '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     },
   },
+  {
+    files: ['api/**/*.{ts,tsx}'],
+    languageOptions: {
+      globals: globals.node,
+    },
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])
