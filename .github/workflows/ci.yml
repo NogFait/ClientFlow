@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  SUPABASE_PROJECT_REF: cvqwxjaqcmezfvahyfiv
+
+jobs:
+  quality:
+    name: Lint, typecheck, test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm tsc -b
+
+      - name: Test
+        run: pnpm test
+
+  db:
+    name: Database tests (pgTAP)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Run pgTAP suite
+        run: supabase test db
+
+  drift:
+    name: Schema drift check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: [quality]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link to remote project
+        run: supabase link --project-ref ${{ env.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Check for schema drift
+        run: |
+          diff_output="$(supabase db diff --linked --schema public)"
+          if [ -n "$diff_output" ]; then
+            echo "$diff_output"
+            echo "::error::Schema drift detected between migrations and the linked project."
+            exit 1
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
