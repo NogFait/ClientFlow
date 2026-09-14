@@ -30,20 +30,21 @@ const ProjectsPage = () => {
     setProjects(updated)
   }
 
+  const { register, handleSubmit, onSubmit, reset, errors, isSubmitting } = useProjectForm(() => {
+    setModalMode(null)
+    setSelectedProject(null)
+    refreshProjects()
+  }, selectedProject ?? undefined)
+
   const closeModal = () => {
     setModalMode(null)
     setSelectedProject(null)
     reset()
   }
 
-  const { register, handleSubmit, onSubmit, reset, errors, isSubmitting } = useProjectForm(() => {
-    closeModal()
-    refreshProjects()
-  }, selectedProject ?? undefined)
-
   useEffect(() => {
     Promise.all([
-      refreshProjects(),
+      getProjects().then(setProjects).catch(() => {}),
       getClients().then(setClients).catch(() => {}),
       getPayments().then(setPayments).catch(() => {}),
     ]).finally(() => setLoading(false))

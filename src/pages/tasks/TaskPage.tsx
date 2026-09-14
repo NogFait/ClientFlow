@@ -31,20 +31,21 @@ const TaskPage = () => {
     setTasks(updated)
   }
 
+  const { register, handleSubmit, onSubmit, reset, errors, isSubmitting } = useTaskForm(() => {
+    setModalMode(null)
+    setSelectedTask(null)
+    refreshTasks()
+  }, selectedTask ?? undefined)
+
   const closeModal = () => {
     setModalMode(null)
     setSelectedTask(null)
     reset()
   }
 
-  const { register, handleSubmit, onSubmit, reset, errors, isSubmitting } = useTaskForm(() => {
-    closeModal()
-    refreshTasks()
-  }, selectedTask ?? undefined)
-
   useEffect(() => {
     Promise.all([
-      refreshTasks(),
+      getTasks().then(setTasks).catch(() => {}),
       getProjects().then(setProjects).catch(() => {}),
     ]).finally(() => setLoading(false))
   }, [])

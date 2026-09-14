@@ -24,19 +24,20 @@ const ClientsPage = () => {
     setClients(updated)
   }
 
+  const { register, handleSubmit, onSubmit, reset, errors, isSubmitting } = useClientForm(() => {
+    setModalMode(null)
+    setSelectedClient(null)
+    refreshClients()
+  }, selectedClient ?? undefined)
+
   const closeModal = () => {
     setModalMode(null)
     setSelectedClient(null)
     reset()
   }
 
-  const { register, handleSubmit, onSubmit, reset, errors, isSubmitting } = useClientForm(() => {
-    closeModal()
-    refreshClients()
-  }, selectedClient ?? undefined)
-
   useEffect(() => {
-    refreshClients().finally(() => setLoading(false))
+    getClients().then(setClients).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   const handleView = (client: IClient) => {

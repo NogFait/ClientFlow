@@ -28,20 +28,21 @@ const PaymentsPage = () => {
     setPayments(updated)
   }
 
+  const { register, handleSubmit, onSubmit, reset, errors, isSubmitting } = usePaymentForm(() => {
+    setModalOpen(false)
+    setEditingPayment(null)
+    refreshPayments()
+  }, editingPayment ?? undefined)
+
   const closeModal = () => {
     setModalOpen(false)
     setEditingPayment(null)
     reset()
   }
 
-  const { register, handleSubmit, onSubmit, reset, errors, isSubmitting } = usePaymentForm(() => {
-    closeModal()
-    refreshPayments()
-  }, editingPayment ?? undefined)
-
   useEffect(() => {
     Promise.all([
-      refreshPayments(),
+      getPayments().then(setPayments).catch(() => {}),
       getProjects().then(setProjects).catch(() => {}),
     ]).finally(() => setLoading(false))
   }, [])
