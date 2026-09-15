@@ -103,6 +103,20 @@
   border-color: var(--color-border-hover);
 }
 
+/* "Ver" is a Link styled like its sibling buttons; the violet hover marks it
+   as the primary way into the project hub. */
+.actionView {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.actionView:hover {
+  background-color: var(--color-primary-50);
+  border-color: var(--color-primary-300);
+  color: var(--color-primary-700);
+}
+
 .actionEdit:hover {
   background-color: var(--color-info-bg);
   border-color: var(--color-info);

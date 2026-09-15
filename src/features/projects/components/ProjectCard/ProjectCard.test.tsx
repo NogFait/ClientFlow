@@ -12,9 +12,9 @@ const project: IProject & { clientes?: { name: string } | null } = {
   clientes: { name: "Acme" },
 }
 
-// The whole card is the "ver" affordance — clicking or activating it with
-// the keyboard navigates to the project hub. A probe route stands in for
-// the real hub page so these tests prove navigation actually happened.
+// "Ver" is the discoverable link into the project hub; clicking the card body
+// is a mouse shortcut to the same place. A probe route stands in for the real
+// hub page so these tests prove navigation actually happened.
 function renderCard(onEdit = vi.fn(), onDelete = vi.fn()) {
   return render(
     <MemoryRouter initialEntries={["/projects"]}>
@@ -26,41 +26,49 @@ function renderCard(onEdit = vi.fn(), onDelete = vi.fn()) {
   )
 }
 
-describe("ProjectCard — whole card opens the hub", () => {
-  it("exposes the card as an accessible link named after the project", () => {
+describe("ProjectCard — 'Ver' opens the hub", () => {
+  it("renders a visible 'Ver' link to /projects/:id", () => {
     renderCard()
 
-    const card = screen.getByRole("link", { name: "Abrir proyecto Sitio Web" })
-    expect(card).toHaveAttribute("tabindex", "0")
+    const ver = screen.getByRole("link", { name: "Ver proyecto Sitio Web" })
+    expect(ver).toHaveTextContent("Ver")
+    expect(ver).toHaveAttribute("href", "/projects/p1")
   })
 
-  it("navigates to /projects/:id when the card body is clicked", async () => {
+  it("navigates to the hub when 'Ver' is clicked", async () => {
     const user = userEvent.setup()
     renderCard()
 
-    await user.click(screen.getByRole("link", { name: "Abrir proyecto Sitio Web" }))
+    await user.click(screen.getByRole("link", { name: "Ver proyecto Sitio Web" }))
 
     expect(await screen.findByText("Project Hub Mock")).toBeInTheDocument()
   })
 
-  it("navigates on Enter while the card is focused (triangulation: keyboard)", async () => {
+  it("reaches 'Ver' with the keyboard and activates it with Enter (triangulation: keyboard)", async () => {
     const user = userEvent.setup()
     renderCard()
 
-    screen.getByRole("link", { name: "Abrir proyecto Sitio Web" }).focus()
+    await user.tab()
+    expect(screen.getByRole("link", { name: "Ver proyecto Sitio Web" })).toHaveFocus()
     await user.keyboard("{Enter}")
 
     expect(await screen.findByText("Project Hub Mock")).toBeInTheDocument()
   })
 
-  it("navigates on Space while the card is focused (triangulation: second key)", async () => {
+  it("also navigates when the card body is clicked (mouse shortcut)", async () => {
     const user = userEvent.setup()
     renderCard()
 
-    screen.getByRole("link", { name: "Abrir proyecto Sitio Web" }).focus()
-    await user.keyboard(" ")
+    await user.click(screen.getByTestId("project-card-p1"))
 
     expect(await screen.findByText("Project Hub Mock")).toBeInTheDocument()
+  })
+
+  it("does not expose the card itself as a link (no nested interactive elements)", () => {
+    renderCard()
+
+    expect(screen.queryByRole("link", { name: /Abrir proyecto/ })).not.toBeInTheDocument()
+    expect(screen.getAllByRole("link")).toHaveLength(1)
   })
 })
 

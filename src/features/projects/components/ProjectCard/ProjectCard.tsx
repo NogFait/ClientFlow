@@ -1,5 +1,5 @@
-import type { KeyboardEvent, MouseEvent } from "react"
-import { useNavigate } from "react-router-dom"
+import type { MouseEvent } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import { Play, Pause, CheckCircle } from "lucide-react"
 import type { IProject } from "../../types"
 import { formatCurrency } from "../../../../utils/currency"
@@ -17,15 +17,12 @@ interface ProjectCardProps {
   onDelete: (project: IProject) => void
 }
 
-const isActivationKey = (key: string) => key === "Enter" || key === " "
-
-// The whole card is the "ver" affordance and navigates to the project hub
-// (/projects/:id) — it replaces the old dedicated "Ver" button/link. The
-// card root is exposed as role="link" (not a native <a>, since it wraps
-// interactive Editar/Eliminar buttons — nesting a real <a> around buttons
-// would be invalid HTML) with keyboard support for Enter/Space. Editar and
-// Eliminar stop propagation on both click and keydown so they don't also
-// trigger the card's own navigation.
+// "Ver" is the discoverable, accessible way into the project hub
+// (/projects/:id): a real <Link>, reachable with Tab. Clicking anywhere else
+// on the card is a mouse shortcut to the same place — a convenience, not the
+// affordance, so the card itself is not exposed as a link (a role="link" div
+// wrapping buttons and a link would nest interactive elements). Editar and
+// Eliminar stop propagation so they never trigger the card shortcut.
 const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
   const navigate = useNavigate()
   const config = statusConfig[project.status] ?? statusConfig.activo
@@ -34,13 +31,9 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
   const badgeClass = `badge${statusKey}` as keyof typeof styles
   const hubPath = `/projects/${project.id}`
 
-  const goToHub = () => navigate(hubPath)
+  const handleCardClick = () => navigate(hubPath)
 
-  const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (!isActivationKey(event.key)) return
-    event.preventDefault()
-    goToHub()
-  }
+  const stop = (event: MouseEvent<HTMLElement>) => event.stopPropagation()
 
   const handleEdit = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
@@ -52,19 +45,8 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
     onDelete(project)
   }
 
-  const stopActivationKeyPropagation = (event: KeyboardEvent<HTMLButtonElement>) => {
-    if (isActivationKey(event.key)) event.stopPropagation()
-  }
-
   return (
-    <div
-      className={styles.card}
-      role="link"
-      tabIndex={0}
-      aria-label={`Abrir proyecto ${project.name}`}
-      onClick={goToHub}
-      onKeyDown={handleCardKeyDown}
-    >
+    <div className={styles.card} onClick={handleCardClick} data-testid={`project-card-${project.id}`}>
       <div className={styles.header}>
         <span className={`${styles.badge} ${styles[badgeClass]}`}>
           <Icon size={12} />
@@ -81,18 +63,18 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
         {project.budget != null ? formatCurrency(project.budget) : "—"}
       </p>
       <div className={styles.actions}>
-        <button
-          className={`${styles.actionBtn} ${styles.actionEdit}`}
-          onClick={handleEdit}
-          onKeyDown={stopActivationKeyPropagation}
+        <Link
+          to={hubPath}
+          className={`${styles.actionBtn} ${styles.actionView}`}
+          aria-label={`Ver proyecto ${project.name}`}
+          onClick={stop}
         >
+          Ver
+        </Link>
+        <button className={`${styles.actionBtn} ${styles.actionEdit}`} onClick={handleEdit}>
           Editar
         </button>
-        <button
-          className={`${styles.actionBtn} ${styles.actionDelete}`}
-          onClick={handleDelete}
-          onKeyDown={stopActivationKeyPropagation}
-        >
+        <button className={`${styles.actionBtn} ${styles.actionDelete}`} onClick={handleDelete}>
           Eliminar
         </button>
       </div>
