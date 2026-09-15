@@ -14,6 +14,13 @@ export default defineConfig({
           environment: 'jsdom',
           setupFiles: ['src/test/setup.ts'],
           include: ['src/**/*.test.{ts,tsx}'],
+          // Tests must never depend on the developer's .env: any module that
+          // (transitively) imports supabaseClient.ts calls createClient(),
+          // which throws without a URL. These dummies keep CI hermetic.
+          env: {
+            VITE_SUPABASE_URL: 'http://localhost:54321',
+            VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+          },
         },
       },
       {
