@@ -1,3 +1,7 @@
+.wrapper {
+  margin-bottom: var(--spacing-8);
+}
+
 .header {
   display: flex;
   flex-direction: row;
@@ -5,7 +9,10 @@
   justify-content: space-between;
   align-items: center;
   gap: var(--spacing-3);
-  margin-bottom: var(--spacing-8);
+}
+
+.extra {
+  margin-top: var(--spacing-3);
 }
 
 .title {
