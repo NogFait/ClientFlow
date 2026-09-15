@@ -1,5 +1,5 @@
 import { useSyncExternalStore, type ReactNode } from "react"
-import { X } from "lucide-react"
+import { Info, X } from "lucide-react"
 import { dismiss, getSnapshot, subscribe } from "./toastStore"
 import styles from "./Toast.module.css"
 
@@ -10,6 +10,7 @@ interface ToastProviderProps {
 const variantClass: Record<string, string> = {
   success: "toastSuccess",
   error: "toastError",
+  info: "toastInfo",
 }
 
 // Mounted once in Layout so every page can call useToast(). Reads the
@@ -24,6 +25,9 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
       <div className={styles.stack} role="status" aria-live="polite">
         {toasts.map(toast => (
           <div key={toast.id} className={`${styles.toast} ${styles[variantClass[toast.variant]]}`}>
+            {toast.variant === "info" && (
+              <Info size={16} aria-hidden="true" className={styles.icon} data-testid="toast-icon-info" />
+            )}
             <span className={styles.message}>{toast.message}</span>
             <button
               type="button"

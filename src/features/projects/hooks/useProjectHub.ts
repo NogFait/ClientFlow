@@ -84,9 +84,7 @@ export function useProjectHub(projectId: string): UseProjectHubResult {
     const pendingCount = tasks.filter((t) => t.status !== "hechas").length
     await updateProjectStatus(projectId, status)
     if (status === "completo" && pendingCount > 0) {
-      // No dedicated "info" toast variant exists (see toastStore.ToastVariant) —
-      // success is the closest non-error signal for a non-blocking heads-up.
-      toast.success(`Quedan ${pendingCount} tareas pendientes`)
+      toast.info(`Quedan ${pendingCount} tareas pendientes`)
     }
     refresh()
   }

@@ -180,7 +180,9 @@ describe("useProjectHub", () => {
       })
 
       expect(updateProjectStatusMock).toHaveBeenCalledWith("p1", "completo")
-      expect(getToastSnapshot().some((t) => t.message.includes("1 tareas pendientes"))).toBe(true)
+      expect(
+        getToastSnapshot().some((t) => t.variant === "info" && t.message.includes("1 tareas pendientes")),
+      ).toBe(true)
     })
   })
 })

@@ -29,6 +29,14 @@ describe("toastStore", () => {
     expect(snapshot[1].message).toBe("Segundo")
   })
 
+  it("push accepts the info variant (triangulation: third variant)", () => {
+    push("Quedan 2 tareas pendientes", "info")
+
+    expect(getSnapshot()).toEqual([
+      expect.objectContaining({ message: "Quedan 2 tareas pendientes", variant: "info" }),
+    ])
+  })
+
   it("auto-dismisses a toast after 3 seconds", () => {
     push("Se va solo", "success")
     expect(getSnapshot()).toHaveLength(1)

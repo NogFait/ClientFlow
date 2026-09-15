@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { ToastProvider } from "./ToastProvider"
 import { useToast } from "./useToast"
@@ -11,6 +11,7 @@ function TestTrigger() {
     <div>
       <button onClick={() => toast.success("Cliente guardado")}>disparar éxito</button>
       <button onClick={() => toast.error("Algo falló")}>disparar error</button>
+      <button onClick={() => toast.info("Quedan 2 tareas pendientes")}>disparar info</button>
     </div>
   )
 }
@@ -60,6 +61,35 @@ describe("ToastProvider + useToast", () => {
     await user.click(screen.getByRole("button", { name: "disparar error" }))
 
     expect(await screen.findByText("Algo falló")).toBeInTheDocument()
+  })
+
+  it("shows an info toast with an Info icon (triangulation: third variant)", async () => {
+    const user = userEvent.setup()
+    render(
+      <ToastProvider>
+        <TestTrigger />
+      </ToastProvider>,
+    )
+
+    await user.click(screen.getByRole("button", { name: "disparar info" }))
+
+    const status = await screen.findByRole("status")
+    expect(within(status).getByText("Quedan 2 tareas pendientes")).toBeInTheDocument()
+    expect(within(status).getByTestId("toast-icon-info")).toBeInTheDocument()
+  })
+
+  it("does not render the info icon on a success toast (triangulation: icon is info-only)", async () => {
+    const user = userEvent.setup()
+    render(
+      <ToastProvider>
+        <TestTrigger />
+      </ToastProvider>,
+    )
+
+    await user.click(screen.getByRole("button", { name: "disparar éxito" }))
+
+    const status = await screen.findByRole("status")
+    expect(within(status).queryByTestId("toast-icon-info")).not.toBeInTheDocument()
   })
 
   it("dismisses a toast when its close button is clicked", async () => {

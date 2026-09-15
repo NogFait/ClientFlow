@@ -30,6 +30,14 @@
   background-color: var(--color-error-text);
 }
 
+.toastInfo {
+  background-color: var(--color-info-text);
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
 .message {
   flex: 1;
 }
