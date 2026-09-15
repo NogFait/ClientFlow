@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Outlet } from "react-router-dom"
 import Navbar from "../Navbar/Navbar"
 import Sidebar from "../Sidebar/Sidebar"
@@ -5,12 +6,16 @@ import { EntitlementsProvider } from "../../../features/billing/context/Entitlem
 import styles from "./Layout.module.css"
 
 const Layout = () => {
+  // Lifted here (not inside Sidebar/Navbar) because the mobile drawer's
+  // trigger (Navbar hamburger) and its content (Sidebar) are siblings.
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
+
   return (
     <EntitlementsProvider>
       <div className={styles.layout}>
-        <Sidebar />
+        <Sidebar mobileOpen={mobileNavOpen} onCloseMobile={() => setMobileNavOpen(false)} />
         <div className={styles.main}>
-          <Navbar />
+          <Navbar mobileNavOpen={mobileNavOpen} onOpenMobileNav={() => setMobileNavOpen(true)} />
           <main className={styles.content}>
             <Outlet />
           </main>

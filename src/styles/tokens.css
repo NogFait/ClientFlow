@@ -162,6 +162,16 @@
      ---------------------------------------------------------- */
   --sidebar-width: 260px;
   --sidebar-collapsed-width: 0px;
+  --sidebar-rail-width: 64px;
   --navbar-height: 60px;
   --content-max-width: 1280px;
+
+  /* ----------------------------------------------------------
+     Breakpoints (usable in JS/TS — CSS custom properties can't
+     be interpolated inside @media queries, so media queries in
+     this codebase hardcode these same numbers; keep them in sync)
+     ---------------------------------------------------------- */
+  /* mobile drawer / stacked layouts switch at 767px (matches the
+     "md: 768px" breakpoint below) — see src/hooks/useMediaQuery.ts
+     and any `@media (max-width: 767px)` rule in this codebase. */
 }

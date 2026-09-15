@@ -1,6 +1,18 @@
+import { useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { LayoutDashboard, Users, Briefcase, CheckSquare, CreditCard, Receipt } from "lucide-react"
+import {
+  LayoutDashboard,
+  Users,
+  Briefcase,
+  CheckSquare,
+  CreditCard,
+  Receipt,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react"
 import { BILLING_ENABLED } from "../../../config/features"
+import { useSidebarState } from "./useSidebarState"
+import { useMediaQuery } from "../../../hooks/useMediaQuery"
 import styles from "./Sidebar.module.css"
 
 const navItems = [
@@ -13,31 +25,101 @@ const navItems = [
   ...(BILLING_ENABLED ? [{ path: "/settings/billing", label: "Plan y facturación", icon: Receipt }] : []),
 ]
 
-const Sidebar = () => {
+const MOBILE_QUERY = "(max-width: 767px)"
+
+interface SidebarProps {
+  // Mobile off-canvas drawer state, lifted to Layout so the Navbar hamburger
+  // can open it — undefined/false on desktop where the drawer markup is inert.
+  mobileOpen?: boolean
+  onCloseMobile?: () => void
+}
+
+const noop = () => {}
+
+const Sidebar = ({ mobileOpen = false, onCloseMobile = noop }: SidebarProps) => {
   const location = useLocation()
+  const { collapsed, toggle } = useSidebarState()
+  const isMobile = useMediaQuery(MOBILE_QUERY)
+
+  // Close the drawer whenever the route changes — calling the parent's
+  // setter (not this component's own state) from an effect keyed on
+  // navigation is the standard "close on route change" shape and isn't the
+  // cascading-render pattern react-hooks/set-state-in-effect guards against.
+  useEffect(() => {
+    onCloseMobile()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run on route change
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (!isMobile || !mobileOpen) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onCloseMobile()
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    document.body.style.overflow = "hidden"
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = ""
+    }
+  }, [isMobile, mobileOpen, onCloseMobile])
+
+  const isRail = collapsed && !isMobile
+  const isDrawerOpen = isMobile && mobileOpen
+
+  const asideClassName = [styles.sidebar, isRail && styles.collapsed, isMobile && styles.mobile, isDrawerOpen && styles.drawerOpen]
+    .filter(Boolean)
+    .join(" ")
 
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.logo}>
-        <h1 className={styles.logoTitle}>ClientFlow</h1>
-        <p className={styles.logoSub}>Freelancer CRM</p>
-      </div>
-      <nav className={styles.nav}>
-        {navItems.map(item => {
-          const Icon = item.icon
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`${styles.navItem} ${location.pathname === item.path ? styles.navItemActive : ""}`}
+    <>
+      {isMobile && mobileOpen && (
+        <div className={styles.backdrop} data-testid="sidebar-backdrop" onClick={onCloseMobile} />
+      )}
+      <aside
+        className={asideClassName}
+        role={isDrawerOpen ? "dialog" : undefined}
+        aria-modal={isDrawerOpen ? true : undefined}
+        aria-label={isDrawerOpen ? "Menú de navegación" : undefined}
+      >
+        <div className={styles.logo}>
+          {!isRail && (
+            <>
+              <h1 className={styles.logoTitle}>ClientFlow</h1>
+              <p className={styles.logoSub}>Freelancer CRM</p>
+            </>
+          )}
+          {!isMobile && (
+            <button
+              type="button"
+              className={styles.collapseToggle}
+              onClick={toggle}
+              aria-label={collapsed ? "Expandir sidebar" : "Colapsar sidebar"}
             >
-              <Icon size={18} className={styles.navIcon} />
-              {item.label}
-            </Link>
-          )
-        })}
-      </nav>
-    </aside>
+              {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+            </button>
+          )}
+        </div>
+        <nav className={styles.nav}>
+          {navItems.map((item) => {
+            const Icon = item.icon
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`${styles.navItem} ${location.pathname === item.path ? styles.navItemActive : ""}`}
+                title={isRail ? item.label : undefined}
+                aria-label={isRail ? item.label : undefined}
+              >
+                <Icon size={18} className={styles.navIcon} />
+                {!isRail && item.label}
+              </Link>
+            )
+          })}
+        </nav>
+      </aside>
+    </>
   )
 }
 

@@ -10,3 +10,22 @@ import '@testing-library/jest-dom/vitest'
 afterEach(() => {
   cleanup()
 })
+
+// jsdom does not implement window.matchMedia — provide a default stub so any
+// component using useMediaQuery (e.g. the responsive Sidebar/Navbar) doesn't
+// throw in tests that don't care about viewport width. Defaults to "no
+// match" (desktop). Individual tests can still override window.matchMedia
+// themselves to exercise the mobile path.
+if (!window.matchMedia) {
+  window.matchMedia = (query: string) =>
+    ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    }) as unknown as MediaQueryList
+}
