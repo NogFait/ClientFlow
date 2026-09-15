@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { CheckCircle, Clock, Eye, Pencil, Trash2 } from "lucide-react"
 import type { IPayment } from "../../types"
 import { formatCurrency } from "../../../../utils/currency"
@@ -26,7 +27,10 @@ const PaymentMobileCard = ({ payment, onView, onEdit, onDelete }: PaymentMobileC
   const isPagado = payment.status === "pagado"
   const amount = formatCurrency(Number(payment.amount))
   const clientName = payment.proyectos?.clientes?.name ?? "—"
-  const projectName = payment.proyectos?.name ?? "—"
+  const projectName = payment.proyectos?.name
+  const projectLink = payment.project_id && projectName
+    ? <Link to={`/projects/${payment.project_id}`}>{projectName}</Link>
+    : "—"
 
   return (
     <div className={styles.card}>
@@ -38,7 +42,7 @@ const PaymentMobileCard = ({ payment, onView, onEdit, onDelete }: PaymentMobileC
         </span>
       </div>
       <div className={styles.details}>
-        <span className={styles.detailLine}>{clientName} — {projectName}</span>
+        <span className={styles.detailLine}>{clientName} — {projectLink}</span>
         <span className={styles.detailLine}>
           {payment.payment_date ? new Date(payment.payment_date).toLocaleDateString() : "—"} · {methodLabels[payment.method] ?? payment.method}
         </span>

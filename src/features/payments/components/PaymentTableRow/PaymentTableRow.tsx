@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { CheckCircle, Clock, Eye } from "lucide-react"
 import type { IPayment } from "../../types"
 import { formatCurrency } from "../../../../utils/currency"
@@ -17,7 +18,11 @@ const PaymentTableRow = ({ payment, onView, onEdit, onDelete }: PaymentTableRowP
     <tr className={styles.row}>
       <td className={styles.cell}>{payment.payment_date ? new Date(payment.payment_date).toLocaleDateString() : "—"}</td>
       <td className={styles.cell}>{payment.proyectos?.clientes?.name ?? "—"}</td>
-      <td className={styles.cell}>{payment.proyectos?.name ?? "—"}</td>
+      <td className={styles.cell}>
+        {payment.project_id && payment.proyectos?.name
+          ? <Link to={`/projects/${payment.project_id}`}>{payment.proyectos.name}</Link>
+          : "—"}
+      </td>
       <td className={styles.cellAmount}>
         {formatCurrency(Number(payment.amount))}
       </td>

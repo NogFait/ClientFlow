@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import type { IProject } from "../../features/projects/types"
 import type { IClient } from "../../features/clients/types"
 import type { IPayment } from "../../features/payments/types"
-import { getProjects, deleteProject } from "../../features/projects/services"
+import { getProjects, deleteProject, countPaymentsByProject } from "../../features/projects/services"
 import { getClients } from "../../features/clients/services"
 import { getPayments } from "../../features/payments/services"
 import { useProjectForm } from "../../features/projects/hooks/useProjectForm"
@@ -25,7 +25,7 @@ import UpgradePrompt from "../../features/billing/components/UpgradePrompt/Upgra
 import { formatCurrency } from "../../utils/currency"
 import styles from "./ProjectsPage.module.css"
 
-type ModalMode = "create" | "edit" | "view" | null
+type ModalMode = "create" | "edit" | null
 
 interface UpgradePromptState {
   limit: number
@@ -77,11 +77,6 @@ const ProjectsPage = () => {
     ]).finally(() => setLoading(false))
   }, [])
 
-  const handleView = (project: IProject & { clientes?: { name: string } | null }) => {
-    setSelectedProject(project)
-    setModalMode("view")
-  }
-
   const handleEdit = (project: IProject & { clientes?: { name: string } | null }) => {
     setSelectedProject(project)
     setModalMode("edit")
@@ -91,6 +86,23 @@ const ProjectsPage = () => {
   const { confirm, dialogProps } = useConfirm()
 
   const handleDelete = async (project: IProject) => {
+    // Block & explain (mirrors ClientsPage's handleDelete for clientes with
+    // proyectos) — pagos.project_id has no ON DELETE action, so a project
+    // with pagos would otherwise hit Postgres' 23503 and surface a
+    // confusing failure. Check first and, if blocked, show an
+    // acknowledge-only dialog instead of the delete confirm.
+    const paymentsCount = await countPaymentsByProject(project.id!)
+    if (paymentsCount > 0) {
+      await confirm({
+        title: `No se puede eliminar ${project.name}`,
+        description: `Tiene ${paymentsCount} pago(s) registrado(s). Eliminá esos pagos primero.`,
+        confirmLabel: "Entendido",
+        cancelLabel: null,
+        danger: false,
+      })
+      return
+    }
+
     const confirmed = await confirm({ title: `¿Eliminar el proyecto "${project.name}"?` })
     if (!confirmed) return
     try {
@@ -119,12 +131,7 @@ const ProjectsPage = () => {
 
   const modalTitle = modalMode === "create" ? "Nuevo Proyecto"
     : modalMode === "edit" ? "Editar Proyecto"
-    : modalMode === "view" ? "Detalle del Proyecto"
     : ""
-
-  const selectedWithClient = selectedProject
-    ? projects.find(p => p.id === selectedProject.id)
-    : null
 
   const now = new Date()
   const currentMonth = now.getMonth()
@@ -175,55 +182,13 @@ const ProjectsPage = () => {
           )}
           <div className={styles.projectsGrid}>
           {projects.map(p => (
-            <ProjectCard key={p.id} project={p} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} />
+            <ProjectCard key={p.id} project={p} onEdit={handleEdit} onDelete={handleDelete} />
           ))}
           </div>
         </>
       )}
 
       <Modal isOpen={modalMode !== null} onClose={closeModal} title={modalTitle}>
-        {modalMode === "view" && selectedWithClient && (
-          <div className={styles.viewMode}>
-            <div className={styles.field}>
-              <span className={styles.label}>Nombre</span>
-              <span className={styles.value}>{selectedWithClient.name}</span>
-            </div>
-            <div className={styles.field}>
-              <span className={styles.label}>Cliente</span>
-              <span className={styles.value}>{selectedWithClient.clientes?.name ?? "Sin cliente"}</span>
-            </div>
-            <div className={styles.field}>
-              <span className={styles.label}>Estado</span>
-              <span className={`${styles.badge} ${styles[`badge${selectedWithClient.status.charAt(0).toUpperCase() + selectedWithClient.status.slice(1)}`]}`}>
-                {selectedWithClient.status === "activo" ? "Activo" : selectedWithClient.status === "pausado" ? "Pausado" : "Completado"}
-              </span>
-            </div>
-            <div className={styles.field}>
-              <span className={styles.label}>Presupuesto</span>
-              <span className={styles.valueAmount}>
-                {selectedWithClient.budget != null ? formatCurrency(selectedWithClient.budget) : "—"}
-              </span>
-            </div>
-            <div className={styles.field}>
-              <span className={styles.label}>Inicio</span>
-              <span className={styles.value}>{selectedWithClient.start_date ?? "—"}</span>
-            </div>
-            <div className={styles.field}>
-              <span className={styles.label}>Fin</span>
-              <span className={styles.value}>{selectedWithClient.end_date ?? "—"}</span>
-            </div>
-            <div className={`${styles.field} ${styles.fieldFull}`}>
-              <span className={styles.label}>Descripción</span>
-              <span className={`${styles.value} ${styles.valueMuted}`}>{selectedWithClient.description ?? "—"}</span>
-            </div>
-            <div className={styles.field}>
-              <span className={styles.label}>Creado</span>
-              <span className={styles.value}>{new Date(selectedWithClient.created_at!).toLocaleDateString()}</span>
-            </div>
-            <button className={styles.closeBtn} onClick={closeModal}>Cerrar</button>
-          </div>
-        )}
-
         {(modalMode === "create" || modalMode === "edit") && (
           <ProjectForm
             register={register}

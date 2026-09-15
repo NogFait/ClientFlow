@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import type { ITask } from "../../types"
 import styles from "./TaskCard.module.css"
 
@@ -27,7 +28,11 @@ const TaskCard = ({ task, onView, onEdit, onDelete }: TaskCardProps) => {
       <h4 className={`${styles.title} ${isDone ? styles.titleDone : ""}`}>{task.title}</h4>
       {task.description && <p className={`${styles.description} ${isDone ? styles.descDone : ""}`}>{task.description}</p>}
       <div className={styles.meta}>
-        <span>{task.proyectos?.name ?? "—"}</span>
+        <span>
+          {task.project_id && task.proyectos?.name
+            ? <Link to={`/projects/${task.project_id}`}>{task.proyectos.name}</Link>
+            : "—"}
+        </span>
         {task.due_date && <span>Vence: {new Date(task.due_date).toLocaleDateString()}</span>}
       </div>
       <div className={styles.actions}>

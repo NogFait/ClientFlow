@@ -26,6 +26,7 @@ function renderProjectsPage() {
 const getProjectsMock = vi.fn()
 const createProjectMock = vi.fn()
 const deleteProjectMock = vi.fn()
+const countPaymentsByProjectMock = vi.fn()
 const getClientsMock = vi.fn()
 const getPaymentsMock = vi.fn()
 
@@ -34,6 +35,7 @@ vi.mock("../../features/projects/services", () => ({
   createProject: (project: unknown) => createProjectMock(project),
   updateProject: vi.fn(),
   deleteProject: (id: string) => deleteProjectMock(id),
+  countPaymentsByProject: (id: string) => countPaymentsByProjectMock(id),
 }))
 
 vi.mock("../../features/clients/services", () => ({
@@ -68,6 +70,7 @@ afterEach(() => {
   getProjectsMock.mockReset()
   createProjectMock.mockReset()
   deleteProjectMock.mockReset()
+  countPaymentsByProjectMock.mockReset()
   getClientsMock.mockReset()
   getPaymentsMock.mockReset()
   refreshEntitlementsMock.mockReset()
@@ -197,6 +200,7 @@ describe("ProjectsPage — delete confirmation", () => {
     getProjectsMock.mockResolvedValue([sampleProject])
     getClientsMock.mockResolvedValue([])
     getPaymentsMock.mockResolvedValue([])
+    countPaymentsByProjectMock.mockResolvedValue(0)
 
     renderProjectsPage()
 
@@ -212,6 +216,7 @@ describe("ProjectsPage — delete confirmation", () => {
     getProjectsMock.mockResolvedValue([sampleProject])
     getClientsMock.mockResolvedValue([])
     getPaymentsMock.mockResolvedValue([])
+    countPaymentsByProjectMock.mockResolvedValue(0)
     deleteProjectMock.mockResolvedValue(undefined)
 
     renderProjectsPage()
@@ -228,6 +233,7 @@ describe("ProjectsPage — delete confirmation", () => {
     getProjectsMock.mockResolvedValue([sampleProject])
     getClientsMock.mockResolvedValue([])
     getPaymentsMock.mockResolvedValue([])
+    countPaymentsByProjectMock.mockResolvedValue(0)
 
     renderProjectsPage()
 
@@ -236,6 +242,23 @@ describe("ProjectsPage — delete confirmation", () => {
     await user.click(within(dialog).getByRole("button", { name: "Cancelar" }))
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    expect(deleteProjectMock).not.toHaveBeenCalled()
+  })
+
+  it("blocks deletion and explains when the project has payments, instead of the normal confirm dialog", async () => {
+    const user = userEvent.setup()
+    getProjectsMock.mockResolvedValue([sampleProject])
+    getClientsMock.mockResolvedValue([])
+    getPaymentsMock.mockResolvedValue([])
+    countPaymentsByProjectMock.mockResolvedValue(3)
+
+    renderProjectsPage()
+
+    await user.click(await screen.findByRole("button", { name: /eliminar/i }))
+
+    expect(await screen.findByText('No se puede eliminar Sitio Web')).toBeInTheDocument()
+    expect(screen.getByText(/tiene 3 pago\(s\) registrado\(s\)/i)).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Entendido" })).toBeInTheDocument()
     expect(deleteProjectMock).not.toHaveBeenCalled()
   })
 })

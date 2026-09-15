@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { Play, Pause, CheckCircle } from "lucide-react"
 import type { IProject } from "../../types"
 import { formatCurrency } from "../../../../utils/currency"
@@ -11,16 +12,18 @@ const statusConfig: Record<string, { label: string; icon: typeof Play }> = {
 
 interface ProjectCardProps {
   project: IProject & { clientes?: { name: string } | null }
-  onView: (project: IProject & { clientes?: { name: string } | null }) => void
   onEdit: (project: IProject & { clientes?: { name: string } | null }) => void
   onDelete: (project: IProject) => void
 }
 
-const ProjectCard = ({ project, onView, onEdit, onDelete }: ProjectCardProps) => {
+// "Ver" and the title both link straight to the project hub (/projects/:id)
+// instead of opening a view-only modal — the hub replaces that modal.
+const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
   const config = statusConfig[project.status] ?? statusConfig.activo
   const Icon = config.icon
   const statusKey = project.status.charAt(0).toUpperCase() + project.status.slice(1)
   const badgeClass = `badge${statusKey}` as keyof typeof styles
+  const hubPath = `/projects/${project.id}`
 
   return (
     <div className={styles.card}>
@@ -30,7 +33,9 @@ const ProjectCard = ({ project, onView, onEdit, onDelete }: ProjectCardProps) =>
           {config.label}
         </span>
       </div>
-      <h3 className={styles.title}>{project.name}</h3>
+      <h3 className={styles.title}>
+        <Link to={hubPath}>{project.name}</Link>
+      </h3>
       {project.description && <p className={styles.description}>{project.description}</p>}
       <div className={styles.meta}>
         <span>Cliente: {project.clientes?.name ?? "Sin cliente"}</span>
@@ -40,7 +45,7 @@ const ProjectCard = ({ project, onView, onEdit, onDelete }: ProjectCardProps) =>
         {project.budget != null ? formatCurrency(project.budget) : "—"}
       </p>
       <div className={styles.actions}>
-        <button className={`${styles.actionBtn} ${styles.actionView}`} onClick={() => onView(project)}>Ver</button>
+        <Link className={`${styles.actionBtn} ${styles.actionView}`} to={hubPath}>Ver</Link>
         <button className={`${styles.actionBtn} ${styles.actionEdit}`} onClick={() => onEdit(project)}>Editar</button>
         <button className={`${styles.actionBtn} ${styles.actionDelete}`} onClick={() => onDelete(project)}>Eliminar</button>
       </div>
