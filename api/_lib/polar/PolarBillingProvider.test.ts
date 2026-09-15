@@ -1,16 +1,27 @@
-import { describe, expect, it, vi, beforeEach } from "vitest"
+import { randomBytes } from "node:crypto"
+import { describe, expect, it, vi } from "vitest"
 import type { Polar } from "@polar-sh/sdk"
-import { SDKValidationError } from "@polar-sh/sdk/models/errors/sdkvalidationerror.js"
-import { WebhookVerificationError } from "@polar-sh/sdk/webhooks"
+import { Webhook } from "standardwebhooks"
 import { InvalidSignatureError } from "../../../src/features/billing/ports/BillingProvider.js"
 import { PolarBillingProvider } from "./PolarBillingProvider.js"
 
-const validateEventMock = vi.fn()
+// A real Standard Webhooks secret in the format Polar's dashboard now issues
+// (`whsec_<base64>`) — the whole point of this bugfix is that a prefixed
+// secret must verify correctly, unlike the old @polar-sh/sdk validateEvent
+// path which double-base64-encoded it and always failed.
+const WEBHOOK_SECRET = `whsec_${randomBytes(32).toString("base64")}`
 
-vi.mock("@polar-sh/sdk/webhooks", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@polar-sh/sdk/webhooks")>()
-  return { ...actual, validateEvent: (...args: unknown[]) => validateEventMock(...args) }
-})
+function signHeaders(body: string, opts: { id?: string; secret?: string; timestamp?: Date } = {}) {
+  const id = opts.id ?? "evt_1"
+  const secret = opts.secret ?? WEBHOOK_SECRET
+  const timestamp = opts.timestamp ?? new Date()
+  const signature = new Webhook(secret).sign(id, timestamp, body)
+  return {
+    "webhook-id": id,
+    "webhook-timestamp": String(Math.floor(timestamp.getTime() / 1000)),
+    "webhook-signature": signature,
+  }
+}
 
 const ENV = {
   accessToken: "token",
@@ -43,10 +54,6 @@ function baseSubscription(overrides: Record<string, unknown> = {}) {
     ...overrides,
   }
 }
-
-beforeEach(() => {
-  validateEventMock.mockReset()
-})
 
 describe("PolarBillingProvider.ensureCustomer", () => {
   it("reuses an existing customer found by external id", async () => {
@@ -134,41 +141,82 @@ describe("PolarBillingProvider.createPortalSession", () => {
 })
 
 describe("PolarBillingProvider.parseWebhook", () => {
-  it("throws InvalidSignatureError when the signature does not verify", () => {
-    validateEventMock.mockImplementation(() => {
-      throw new WebhookVerificationError("bad signature")
-    })
-    const provider = new PolarBillingProvider(fakeClient(), ENV, () => "whsec")
+  it("throws InvalidSignatureError when headers are missing entirely", () => {
+    const provider = new PolarBillingProvider(fakeClient(), ENV, () => WEBHOOK_SECRET)
 
     expect(() => provider.parseWebhook("{}", { "webhook-signature": "bad" })).toThrow(InvalidSignatureError)
   })
 
-  it("returns an ignored event for a non-subscription event type", () => {
-    validateEventMock.mockReturnValue({ type: "checkout.updated", timestamp: new Date(), data: {} })
-    const provider = new PolarBillingProvider(fakeClient(), ENV, () => "whsec")
+  it("throws InvalidSignatureError when the body was tampered with after signing", () => {
+    const signedBody = JSON.stringify({ type: "subscription.active", timestamp: new Date().toISOString(), data: baseSubscription() })
+    const headers = signHeaders(signedBody)
+    const provider = new PolarBillingProvider(fakeClient(), ENV, () => WEBHOOK_SECRET)
 
-    const result = provider.parseWebhook("{}", { "webhook-id": "evt_1" })
+    const tamperedBody = JSON.stringify({ type: "subscription.canceled", timestamp: new Date().toISOString(), data: baseSubscription() })
+    expect(() => provider.parseWebhook(tamperedBody, headers)).toThrow(InvalidSignatureError)
+  })
+
+  it("throws InvalidSignatureError when signed with the wrong secret", () => {
+    const body = JSON.stringify({ type: "subscription.active", timestamp: new Date().toISOString(), data: baseSubscription() })
+    const headers = signHeaders(body, { secret: `whsec_${randomBytes(32).toString("base64")}` })
+    const provider = new PolarBillingProvider(fakeClient(), ENV, () => WEBHOOK_SECRET)
+
+    expect(() => provider.parseWebhook(body, headers)).toThrow(InvalidSignatureError)
+  })
+
+  it("verifies correctly with a legacy plain (non-prefixed) base64 secret", () => {
+    const plainSecret = randomBytes(32).toString("base64")
+    const body = JSON.stringify({ type: "checkout.updated", timestamp: new Date().toISOString(), data: {} })
+    const headers = signHeaders(body, { secret: plainSecret, id: "evt_plain" })
+    const provider = new PolarBillingProvider(fakeClient(), ENV, () => plainSecret)
+
+    const result = provider.parseWebhook(body, headers)
+
+    expect(result).toEqual({ kind: "ignored", eventId: "evt_plain", type: "checkout.updated" })
+  })
+
+  it("verifies correctly regardless of header key casing", () => {
+    const body = JSON.stringify({ type: "checkout.updated", timestamp: new Date().toISOString(), data: {} })
+    const lowercase = signHeaders(body, { id: "evt_case" })
+    const mixedCase: Record<string, string> = {
+      "Webhook-Id": lowercase["webhook-id"],
+      "Webhook-Timestamp": lowercase["webhook-timestamp"],
+      "Webhook-Signature": lowercase["webhook-signature"],
+    }
+    const provider = new PolarBillingProvider(fakeClient(), ENV, () => WEBHOOK_SECRET)
+
+    const result = provider.parseWebhook(body, mixedCase)
+
+    expect(result).toEqual({ kind: "ignored", eventId: "evt_case", type: "checkout.updated" })
+  })
+
+  it("returns an ignored event for a non-subscription event type", () => {
+    const body = JSON.stringify({ type: "checkout.updated", timestamp: new Date().toISOString(), data: {} })
+    const headers = signHeaders(body, { id: "evt_1" })
+    const provider = new PolarBillingProvider(fakeClient(), ENV, () => WEBHOOK_SECRET)
+
+    const result = provider.parseWebhook(body, headers)
 
     expect(result).toEqual({ kind: "ignored", eventId: "evt_1", type: "checkout.updated" })
   })
 
-  it("returns an ignored event when the SDK can't parse an unrecognized event type", () => {
-    validateEventMock.mockImplementation(() => {
-      throw new SDKValidationError("Unknown event type: future.event", null, {})
-    })
-    const provider = new PolarBillingProvider(fakeClient(), ENV, () => "whsec")
+  it("returns an ignored 'unknown' event when the payload has no recognizable type field", () => {
+    const body = JSON.stringify({ foo: "bar" })
+    const headers = signHeaders(body, { id: "evt_2" })
+    const provider = new PolarBillingProvider(fakeClient(), ENV, () => WEBHOOK_SECRET)
 
-    const result = provider.parseWebhook("{}", { "webhook-id": "evt_2" })
+    const result = provider.parseWebhook(body, headers)
 
     expect(result).toEqual({ kind: "ignored", eventId: "evt_2", type: "unknown" })
   })
 
   it("normalizes a subscription.active event into a subscription BillingEvent", () => {
     const timestamp = new Date("2026-09-14T11:00:00.000Z")
-    validateEventMock.mockReturnValue({ type: "subscription.active", timestamp, data: baseSubscription() })
-    const provider = new PolarBillingProvider(fakeClient(), ENV, () => "whsec")
+    const body = JSON.stringify({ type: "subscription.active", timestamp: timestamp.toISOString(), data: baseSubscription() })
+    const headers = signHeaders(body, { id: "evt_3" }) // sign with "now"; occurredAt comes from the body's own timestamp field
+    const provider = new PolarBillingProvider(fakeClient(), ENV, () => WEBHOOK_SECRET)
 
-    const result = provider.parseWebhook("{}", { "webhook-id": "evt_3" })
+    const result = provider.parseWebhook(body, headers)
 
     expect(result).toEqual({
       kind: "subscription",
@@ -189,56 +237,60 @@ describe("PolarBillingProvider.parseWebhook", () => {
 
   it("falls back to product.metadata.plan when the product id doesn't match either configured env id", () => {
     const timestamp = new Date("2026-09-14T11:00:00.000Z")
-    validateEventMock.mockReturnValue({
+    const body = JSON.stringify({
       type: "subscription.active",
-      timestamp,
+      timestamp: timestamp.toISOString(),
       data: baseSubscription({ productId: "prod_rotated", product: { metadata: { plan: "pro_yearly" } } }),
     })
-    const provider = new PolarBillingProvider(fakeClient(), ENV, () => "whsec")
+    const headers = signHeaders(body, { id: "evt_4" }) // sign with "now"; occurredAt comes from the body's own timestamp field
+    const provider = new PolarBillingProvider(fakeClient(), ENV, () => WEBHOOK_SECRET)
 
-    const result = provider.parseWebhook("{}", { "webhook-id": "evt_4" })
+    const result = provider.parseWebhook(body, headers)
 
     expect(result).toMatchObject({ subscription: { plan: "pro_yearly" } })
   })
 
   it("resolves userId from checkout metadata when the customer has no external id", () => {
     const timestamp = new Date("2026-09-14T11:00:00.000Z")
-    validateEventMock.mockReturnValue({
+    const body = JSON.stringify({
       type: "subscription.active",
-      timestamp,
+      timestamp: timestamp.toISOString(),
       data: baseSubscription({ customer: { id: "cus_123", externalId: null, metadata: {} }, metadata: { user_id: "user-from-metadata" } }),
     })
-    const provider = new PolarBillingProvider(fakeClient(), ENV, () => "whsec")
+    const headers = signHeaders(body, { id: "evt_5" }) // sign with "now"; occurredAt comes from the body's own timestamp field
+    const provider = new PolarBillingProvider(fakeClient(), ENV, () => WEBHOOK_SECRET)
 
-    const result = provider.parseWebhook("{}", { "webhook-id": "evt_5" })
+    const result = provider.parseWebhook(body, headers)
 
     expect(result).toMatchObject({ subscription: { userId: "user-from-metadata" } })
   })
 
   it("maps past_due/unpaid provider status to our normalized past_due", () => {
     const timestamp = new Date("2026-09-14T11:00:00.000Z")
-    validateEventMock.mockReturnValue({
+    const body = JSON.stringify({
       type: "subscription.past_due",
-      timestamp,
+      timestamp: timestamp.toISOString(),
       data: baseSubscription({ status: "past_due" }),
     })
-    const provider = new PolarBillingProvider(fakeClient(), ENV, () => "whsec")
+    const headers = signHeaders(body, { id: "evt_6" }) // sign with "now"; occurredAt comes from the body's own timestamp field
+    const provider = new PolarBillingProvider(fakeClient(), ENV, () => WEBHOOK_SECRET)
 
-    const result = provider.parseWebhook("{}", { "webhook-id": "evt_6" })
+    const result = provider.parseWebhook(body, headers)
 
     expect(result).toMatchObject({ subscription: { status: "past_due" } })
   })
 
   it("maps a canceled provider status to our normalized canceled", () => {
     const timestamp = new Date("2026-09-14T11:00:00.000Z")
-    validateEventMock.mockReturnValue({
+    const body = JSON.stringify({
       type: "subscription.revoked",
-      timestamp,
+      timestamp: timestamp.toISOString(),
       data: baseSubscription({ status: "canceled" }),
     })
-    const provider = new PolarBillingProvider(fakeClient(), ENV, () => "whsec")
+    const headers = signHeaders(body, { id: "evt_7" }) // sign with "now"; occurredAt comes from the body's own timestamp field
+    const provider = new PolarBillingProvider(fakeClient(), ENV, () => WEBHOOK_SECRET)
 
-    const result = provider.parseWebhook("{}", { "webhook-id": "evt_7" })
+    const result = provider.parseWebhook(body, headers)
 
     expect(result).toMatchObject({ subscription: { status: "canceled" } })
   })

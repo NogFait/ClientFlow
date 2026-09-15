@@ -1,7 +1,5 @@
 import type { Polar } from "@polar-sh/sdk"
-import type { Subscription } from "@polar-sh/sdk/models/components/subscription.js"
-import { SDKValidationError } from "@polar-sh/sdk/models/errors/sdkvalidationerror.js"
-import { validateEvent } from "@polar-sh/sdk/webhooks"
+import { Webhook, WebhookVerificationError } from "standardwebhooks"
 import type { PolarEnv } from "../env.js"
 import type {
   BillingEvent,
@@ -18,11 +16,22 @@ import { InvalidSignatureError } from "../../../src/features/billing/ports/Billi
 //   - checkouts.create({products:[id], customerId, successUrl, metadata})
 //   - customerSessions.create({customerId, returnUrl}) -> {customerPortalUrl}
 //   - subscriptions.get({id}) -> Subscription
-//   - validateEvent(rawBody, headers, secret) from "@polar-sh/sdk/webhooks"
-//     (standard-webhooks signature check; headers "webhook-id"/"webhook-signature"/
-//     "webhook-timestamp", lowercase); throws WebhookVerificationError on a bad
-//     signature, SDKValidationError when the payload's `type` isn't one this
-//     SDK version recognizes.
+//
+// Webhook signature verification uses `standardwebhooks` DIRECTLY rather than
+// @polar-sh/sdk's `validateEvent` (see @polar-sh/sdk@0.49.0 src/webhooks.ts
+// L136-141): the SDK does `Buffer.from(secret,"utf-8").toString("base64")`
+// before handing the secret to `standardwebhooks`, which assumes a RAW
+// secret. Polar's dashboard now issues secrets already in Standard Webhooks
+// format (`whsec_<base64>`), and `standardwebhooks` strips that prefix and
+// base64-decodes natively — the SDK's extra encoding layer double-encodes it
+// and every signature check fails with a real secret (confirmed: 30+ live
+// sandbox deliveries all returned 401 invalid_signature). Verifying with
+// `new Webhook(secret).verify(...)` directly works for BOTH the new
+// `whsec_`-prefixed format and legacy plain base64 secrets. Headers required:
+// "webhook-id"/"webhook-signature"/"webhook-timestamp" — standardwebhooks
+// lowercases header keys internally, but we also normalize them ourselves to
+// read "webhook-id" for the event id (Vercel already lowercases, but tests
+// and other runtimes may not).
 //
 // The webhook secret is injected as a thunk (not resolved eagerly) so that
 // constructing this provider for checkout/portal requests never requires
@@ -76,19 +85,24 @@ export class PolarBillingProvider implements BillingProvider {
   }
 
   parseWebhook(rawBody: string, headers: Record<string, string | undefined>): BillingEvent {
-    const cleanHeaders = stripUndefined(headers)
+    const cleanHeaders = normalizeHeaders(headers)
     const eventId = cleanHeaders["webhook-id"] ?? ""
 
-    let event: { type: string; timestamp: Date; data: unknown }
+    let verified: unknown
     try {
-      event = validateEvent(rawBody, cleanHeaders, this.getWebhookSecret())
+      verified = new Webhook(this.getWebhookSecret()).verify(rawBody, cleanHeaders)
     } catch (err) {
-      if (err instanceof SDKValidationError) {
-        // A payload type this SDK version doesn't recognize — acknowledge,
-        // don't error (spec `billing-webhooks` "Unrecognized event type").
-        return { kind: "ignored", eventId, type: "unknown" }
+      if (err instanceof WebhookVerificationError) {
+        throw new InvalidSignatureError(err.message)
       }
-      throw new InvalidSignatureError(err instanceof Error ? err.message : "invalid webhook signature")
+      throw err
+    }
+
+    const event = toEventShape(verified)
+    if (!event) {
+      // Payload didn't carry a recognizable `type` field — acknowledge,
+      // don't error (spec `billing-webhooks` "Unrecognized event type").
+      return { kind: "ignored", eventId, type: "unknown" }
     }
 
     if (!event.type.startsWith("subscription.")) {
@@ -99,7 +113,7 @@ export class PolarBillingProvider implements BillingProvider {
       kind: "subscription",
       eventId,
       type: event.type,
-      subscription: this.normalize(event.data as Subscription, event.timestamp),
+      subscription: this.normalize(event.data as SubscriptionLike, event.timestamp),
     }
   }
 
@@ -110,14 +124,18 @@ export class PolarBillingProvider implements BillingProvider {
     return this.normalize(sub, new Date())
   }
 
-  private normalize(sub: Subscription, occurredAt: Date): NormalizedSubscription {
+  // Accepts a real SDK `Subscription` (from fetchSubscription, real Date
+  // fields) OR a raw-JSON webhook payload (from parseWebhook, date fields as
+  // ISO strings — standardwebhooks.verify() only JSON.parses, it doesn't run
+  // the SDK's model deserialization) — see SubscriptionLike below.
+  private normalize(sub: SubscriptionLike, occurredAt: Date): NormalizedSubscription {
     return {
       providerSubscriptionId: sub.id,
       providerCustomerId: sub.customerId,
       userId: resolveUserId(sub),
       plan: this.planCodeFromProduct(sub.productId, sub.product),
       status: mapStatus(sub.status),
-      currentPeriodEnd: sub.currentPeriodEnd ? sub.currentPeriodEnd.toISOString() : null,
+      currentPeriodEnd: toIsoOrNull(sub.currentPeriodEnd),
       cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
       occurredAt: occurredAt.toISOString(),
     }
@@ -141,10 +159,31 @@ export class PolarBillingProvider implements BillingProvider {
   }
 }
 
-function resolveUserId(sub: Subscription): string | null {
+// The subset of Subscription fields normalize() reads, widened so it works
+// for both a real SDK `Subscription` (fetchSubscription) and a raw-JSON
+// webhook payload cast at the parseWebhook call site (parseWebhook).
+type SubscriptionLike = {
+  id: string
+  customerId: string
+  productId: string
+  product?: { metadata?: Record<string, unknown> }
+  metadata: Record<string, unknown>
+  customer: { externalId?: string | null }
+  status: string
+  currentPeriodEnd: Date | string | null | undefined
+  cancelAtPeriodEnd: boolean
+}
+
+function resolveUserId(sub: SubscriptionLike): string | null {
   if (sub.customer.externalId) return sub.customer.externalId
   const fromMetadata = sub.metadata.user_id
   return typeof fromMetadata === "string" ? fromMetadata : null
+}
+
+function toIsoOrNull(value: Date | string | null | undefined): string | null {
+  if (value === null || value === undefined) return null
+  const date = value instanceof Date ? value : new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }
 
 // Polar's own SubscriptionStatus has no "revoked" value — a benefit
@@ -173,10 +212,30 @@ function isResourceNotFound(err: unknown): boolean {
   return typeof err === "object" && err !== null && (err as { error?: unknown }).error === "ResourceNotFound"
 }
 
-function stripUndefined(headers: Record<string, string | undefined>): Record<string, string> {
+// Lowercases keys (Vercel already does this, but standardwebhooks reads
+// headers case-sensitively for our own `webhook-id` lookup, and other
+// runtimes/tests may hand us mixed-case keys) and drops undefined values.
+function normalizeHeaders(headers: Record<string, string | undefined>): Record<string, string> {
   const result: Record<string, string> = {}
   for (const [key, value] of Object.entries(headers)) {
-    if (value !== undefined) result[key] = value
+    if (value !== undefined) result[key.toLowerCase()] = value
   }
   return result
+}
+
+// standardwebhooks' `verify()` JSON.parses the payload for us and returns it
+// as `unknown` — validate the shape ourselves since we no longer have the
+// SDK's own event-type switch to lean on. A `timestamp` field that isn't a
+// valid date-like value falls back to "now" rather than producing an
+// Invalid Date, matching the previous SDK-parsed behavior's Date type.
+function toEventShape(verified: unknown): { type: string; timestamp: Date; data: unknown } | null {
+  if (typeof verified !== "object" || verified === null) return null
+  const record = verified as Record<string, unknown>
+  if (typeof record.type !== "string") return null
+
+  const rawTimestamp = record.timestamp
+  const timestamp =
+    typeof rawTimestamp === "string" || typeof rawTimestamp === "number" ? new Date(rawTimestamp) : new Date()
+
+  return { type: record.type, timestamp, data: record.data }
 }
