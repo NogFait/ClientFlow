@@ -11,3 +11,8 @@ export interface IProject {
   end_date?: string
   created_at?: string
 }
+
+// Project joined with its client's name (select `*, clientes (name)`) — used
+// by the project hub and anywhere the client name is displayed alongside
+// project data.
+export type ProjectWithClient = IProject & { clientes?: { name: string } | null }

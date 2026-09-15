@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { getPaymentsInRange, getPaymentTotals } from "./services"
+import { getPaymentsInRange, getPaymentTotals, getPaymentsByProject } from "./services"
 
 // Mirrors the mocking style of projects/services.test.ts (mock the supabase
 // client one level below the service so the service's own query-building
@@ -103,5 +103,42 @@ describe("getPaymentTotals", () => {
     await expect(getPaymentTotals({ from: "2026-01-01", to: "2027-01-01" })).rejects.toThrow(
       "permission denied for table pagos",
     )
+  })
+})
+
+describe("getPaymentsByProject", () => {
+  function mockProjectChain(result: { data: unknown[] | null; error: { message: string } | null }) {
+    const orderMock = vi.fn().mockResolvedValue(result)
+    const eqMock = vi.fn().mockReturnValue({ order: orderMock })
+    const selectMock = vi.fn().mockReturnValue({ eq: eqMock })
+    fromMock.mockReturnValue({ select: selectMock })
+    return { selectMock, eqMock, orderMock }
+  }
+
+  it("queries pagos for the project ordered by payment_date descending", async () => {
+    const rows = [{ id: "pay1", amount: 100, payment_date: "2026-09-10", status: "pagado", method: "efectivo" }]
+    const { selectMock, eqMock, orderMock } = mockProjectChain({ data: rows, error: null })
+
+    const result = await getPaymentsByProject("p1")
+
+    expect(fromMock).toHaveBeenCalledWith("pagos")
+    expect(selectMock).toHaveBeenCalledWith("*")
+    expect(eqMock).toHaveBeenCalledWith("project_id", "p1")
+    expect(orderMock).toHaveBeenCalledWith("payment_date", { ascending: false })
+    expect(result).toEqual(rows)
+  })
+
+  it("returns an empty array when the project has no payments (triangulation)", async () => {
+    mockProjectChain({ data: [], error: null })
+
+    const result = await getPaymentsByProject("p2")
+
+    expect(result).toEqual([])
+  })
+
+  it("throws when supabase returns an error", async () => {
+    mockProjectChain({ data: null, error: { message: "permission denied for table pagos" } })
+
+    await expect(getPaymentsByProject("p3")).rejects.toThrow("permission denied for table pagos")
   })
 })

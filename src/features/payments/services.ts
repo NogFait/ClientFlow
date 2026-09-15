@@ -50,6 +50,17 @@ export async function getPaymentTotals({ from, to }: DateRange): Promise<{ paid:
   )
 }
 
+// Pagos de un proyecto (hub), más recientes primero.
+export async function getPaymentsByProject(projectId: string): Promise<IPayment[]> {
+  const { data, error } = await supabase
+    .from("pagos")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("payment_date", { ascending: false })
+  if (error) throw new Error(error.message)
+  return data as IPayment[]
+}
+
 export async function createPayment(payment: IPayment) {
   const { data: { user } } = await supabase.auth.getUser()
   const { error } = await supabase
