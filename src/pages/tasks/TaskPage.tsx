@@ -11,6 +11,9 @@ import ConfirmDialog from "../../components/shared/ConfirmDialog/ConfirmDialog"
 import { useConfirm } from "../../hooks/useConfirm"
 import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import Loader from "../../components/shared/Loader/Loader"
+import EmptyState from "../../components/shared/EmptyState/EmptyState"
+import { useToast } from "../../components/shared/Toast/useToast"
+import { ClipboardList } from "lucide-react"
 import styles from "./TaskPage.module.css"
 
 type ModalMode = "create" | "edit" | "view" | null
@@ -27,6 +30,7 @@ const TaskPage = () => {
   const [modalMode, setModalMode] = useState<ModalMode>(null)
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null)
   const [loading, setLoading] = useState(true)
+  const toast = useToast()
 
   const refreshTasks = async () => {
     const updated = await getTasks()
@@ -37,6 +41,7 @@ const TaskPage = () => {
     setModalMode(null)
     setSelectedTask(null)
     refreshTasks()
+    toast.success("Tarea guardada")
   }, selectedTask ?? undefined)
 
   const closeModal = () => {
@@ -71,9 +76,15 @@ const TaskPage = () => {
     try {
       await deleteTask(task.id!)
       refreshTasks()
+      toast.success("Tarea eliminada")
     } catch {
       setDeleteError("No se pudo eliminar la tarea. Intentalo de nuevo.")
     }
+  }
+
+  const handleNewTaskAction = () => {
+    setSelectedTask(null)
+    setModalMode("create")
   }
 
   const modalTitle = modalMode === "create" ? "Nueva Tarea"
@@ -90,7 +101,7 @@ const TaskPage = () => {
       <PageHeader
         title="Tablero de Tareas"
         actionLabel="Crear Tarea"
-        onAction={() => { setSelectedTask(null); setModalMode("create") }}
+        onAction={handleNewTaskAction}
       />
 
       {deleteError && (
@@ -102,6 +113,14 @@ const TaskPage = () => {
 
       {loading ? (
         <div className={styles.loaderSection}><Loader /></div>
+      ) : tasks.length === 0 ? (
+        <EmptyState
+          icon={ClipboardList}
+          title="Todavía no tenés tareas"
+          description="Organizá el trabajo de tus proyectos en Pendiente, En progreso y Hechas."
+          actionLabel="Crear primera tarea"
+          onAction={handleNewTaskAction}
+        />
       ) : (
         <div className={styles.columnsContainer}>
           {columns.map(col => (

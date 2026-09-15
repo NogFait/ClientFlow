@@ -5,6 +5,12 @@ import { MemoryRouter, Route, Routes } from "react-router-dom"
 import ProjectsPage from "./ProjectsPage"
 import { LimitExceededError } from "../../features/billing/domain/errors"
 import type { Entitlements } from "../../features/billing/types"
+import { ToastProvider } from "../../components/shared/Toast/ToastProvider"
+import { formatCurrency } from "../../utils/currency"
+
+// getByText's default normalizer collapses the NBSP formatCurrency puts
+// between "$" and the digits down to a regular space before comparing.
+const money = (amount: number) => formatCurrency(amount).replace(/\u00A0/g, " ")
 
 function renderProjectsPage() {
   return render(
@@ -86,7 +92,7 @@ describe("ProjectsPage — upgrade CTA navigation", () => {
 
     const { container } = renderProjectsPage()
 
-    await waitFor(() => expect(screen.getByText(/no hay proyectos registrados/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Todavía no tenés proyectos/i)).toBeInTheDocument())
     await user.click(screen.getByRole("button", { name: /nuevo proyecto/i }))
     await user.type(container.querySelector("form input")!, "Proyecto Nuevo")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
@@ -108,7 +114,7 @@ describe("ProjectsPage — upgrade CTA navigation", () => {
 
     const { container } = renderProjectsPage()
 
-    await waitFor(() => expect(screen.getByText(/no hay proyectos registrados/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Todavía no tenés proyectos/i)).toBeInTheDocument())
     await user.click(screen.getByRole("button", { name: /nuevo proyecto/i }))
     await user.type(container.querySelector("form input")!, "Proyecto Nuevo")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
@@ -117,6 +123,71 @@ describe("ProjectsPage — upgrade CTA navigation", () => {
     await user.click(screen.getByRole("button", { name: /anual/i }))
 
     expect(await screen.findByText("Billing Settings Mock")).toBeInTheDocument()
+  })
+})
+
+describe("ProjectsPage — empty state", () => {
+  it("shows the EmptyState explanation and CTA when there are no projects, and the CTA opens the same create modal as the header action", async () => {
+    const user = userEvent.setup()
+    getProjectsMock.mockResolvedValue([])
+    getClientsMock.mockResolvedValue([])
+    getPaymentsMock.mockResolvedValue([])
+
+    renderProjectsPage()
+
+    expect(await screen.findByText("Todavía no tenés proyectos")).toBeInTheDocument()
+    expect(
+      screen.getByText("Un proyecto agrupa tareas y pagos de un cliente."),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Crear primer proyecto" }))
+
+    expect(await screen.findByRole("heading", { name: "Nuevo Proyecto" })).toBeInTheDocument()
+  })
+})
+
+describe("ProjectsPage — toast feedback", () => {
+  it("shows a success toast after creating a project", async () => {
+    const user = userEvent.setup()
+    getProjectsMock.mockResolvedValue([])
+    getClientsMock.mockResolvedValue([])
+    getPaymentsMock.mockResolvedValue([])
+    createProjectMock.mockResolvedValue(undefined)
+
+    const { container } = render(
+      <MemoryRouter initialEntries={["/projects"]}>
+        <ToastProvider>
+          <Routes>
+            <Route path="/projects" element={<ProjectsPage />} />
+          </Routes>
+        </ToastProvider>
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => expect(screen.getByText("Todavía no tenés proyectos")).toBeInTheDocument())
+    await user.click(screen.getByRole("button", { name: /nuevo proyecto/i }))
+    await user.type(container.querySelector("form input")!, "Proyecto Nuevo")
+    await user.click(screen.getByRole("button", { name: /guardar/i }))
+
+    expect(await screen.findByText("Proyecto guardado")).toBeInTheDocument()
+  })
+})
+
+describe("ProjectsPage — currency formatting (es-AR)", () => {
+  it("renders 'Ingreso Mensual' and a project's budget through the shared es-AR formatter", async () => {
+    const projectWithBudget = { ...sampleProject, budget: 750000 }
+    const thisMonth = new Date()
+    getProjectsMock.mockResolvedValue([projectWithBudget])
+    getClientsMock.mockResolvedValue([])
+    getPaymentsMock.mockResolvedValue([
+      { id: "pay1", amount: 120000, status: "pagado", payment_date: thisMonth.toISOString().split("T")[0] },
+    ])
+
+    renderProjectsPage()
+
+    await waitFor(() => expect(screen.getByText("Ingreso Mensual")).toBeInTheDocument())
+    expect(screen.getByText(money(120000))).toBeInTheDocument()
+    expect(screen.getByText(money(750000))).toBeInTheDocument()
   })
 })
 

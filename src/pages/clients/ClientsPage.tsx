@@ -13,9 +13,11 @@ import ConfirmDialog from "../../components/shared/ConfirmDialog/ConfirmDialog"
 import { useConfirm } from "../../hooks/useConfirm"
 import { useMediaQuery } from "../../hooks/useMediaQuery"
 import PageHeader from "../../components/shared/PageHeader/PageHeader"
-import { UserCheck, Clock, UserX } from "lucide-react"
+import { UserCheck, Clock, UserX, Users } from "lucide-react"
 import StatCard from "../../components/shared/StatCard/StatCard"
 import Loader from "../../components/shared/Loader/Loader"
+import EmptyState from "../../components/shared/EmptyState/EmptyState"
+import { useToast } from "../../components/shared/Toast/useToast"
 import { useEntitlementsContext } from "../../features/billing/context/entitlementsContext"
 import { canCreate } from "../../features/billing/domain/entitlements"
 import type { LimitExceededError } from "../../features/billing/domain/errors"
@@ -37,6 +39,7 @@ const ClientsPage = () => {
   const [loading, setLoading] = useState(true)
   const [upgradePrompt, setUpgradePrompt] = useState<UpgradePromptState | null>(null)
   const { entitlements, refresh: refreshEntitlements } = useEntitlementsContext()
+  const toast = useToast()
 
   const refreshClients = async () => {
     const updated = await getClients()
@@ -54,6 +57,7 @@ const ClientsPage = () => {
     setSelectedClient(null)
     refreshClients()
     refreshEntitlements()
+    toast.success("Cliente guardado")
   }, selectedClient ?? undefined, handleLimitExceeded)
 
   const closeModal = () => {
@@ -103,6 +107,7 @@ const ClientsPage = () => {
       await deleteClient(client.id!)
       refreshClients()
       refreshEntitlements()
+      toast.success("Cliente eliminado")
     } catch (error) {
       setDeleteError(
         error instanceof ForeignKeyViolationError
@@ -158,7 +163,15 @@ const ClientsPage = () => {
             <StatCard label="Inactivos" value={clients.filter(c => c.status === "inactivo").length} icon={UserX} variant="error" />
           </div>
 
-          {clients.length === 0 && <p className={styles.emptyState}>No hay clientes registrados.</p>}
+          {clients.length === 0 && (
+            <EmptyState
+              icon={Users}
+              title="Todavía no tenés clientes"
+              description="Cargá a las personas o empresas para las que trabajás."
+              actionLabel="Agregar primer cliente"
+              onAction={handleNewClientAction}
+            />
+          )}
           {clients.length > 0 && (
             isMobile ? (
               <div className={styles.mobileList}>

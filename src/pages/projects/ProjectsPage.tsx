@@ -16,10 +16,13 @@ import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import { Briefcase, PauseCircle, CheckCircle, DollarSign } from "lucide-react"
 import StatCard from "../../components/shared/StatCard/StatCard"
 import Loader from "../../components/shared/Loader/Loader"
+import EmptyState from "../../components/shared/EmptyState/EmptyState"
+import { useToast } from "../../components/shared/Toast/useToast"
 import { useEntitlementsContext } from "../../features/billing/context/entitlementsContext"
 import { canCreate } from "../../features/billing/domain/entitlements"
 import type { LimitExceededError } from "../../features/billing/domain/errors"
 import UpgradePrompt from "../../features/billing/components/UpgradePrompt/UpgradePrompt"
+import { formatCurrency } from "../../utils/currency"
 import styles from "./ProjectsPage.module.css"
 
 type ModalMode = "create" | "edit" | "view" | null
@@ -39,6 +42,7 @@ const ProjectsPage = () => {
   const [loading, setLoading] = useState(true)
   const [upgradePrompt, setUpgradePrompt] = useState<UpgradePromptState | null>(null)
   const { entitlements, refresh: refreshEntitlements } = useEntitlementsContext()
+  const toast = useToast()
 
   const refreshProjects = async () => {
     const updated = await getProjects()
@@ -56,6 +60,7 @@ const ProjectsPage = () => {
     setSelectedProject(null)
     refreshProjects()
     refreshEntitlements()
+    toast.success("Proyecto guardado")
   }, selectedProject ?? undefined, handleLimitExceeded)
 
   const closeModal = () => {
@@ -92,6 +97,7 @@ const ProjectsPage = () => {
       await deleteProject(project.id!)
       refreshProjects()
       refreshEntitlements()
+      toast.success("Proyecto eliminado")
     } catch {
       setDeleteError("No se pudo eliminar el proyecto. Intentalo de nuevo.")
     }
@@ -155,11 +161,19 @@ const ProjectsPage = () => {
             <StatCard label="Activos" value={projects.filter(p => p.status === "activo").length} icon={Briefcase} variant="success" />
             <StatCard label="Pausados" value={projects.filter(p => p.status === "pausado").length} icon={PauseCircle} variant="warning" />
             <StatCard label="Completados" value={projects.filter(p => p.status === "completo").length} icon={CheckCircle} variant="success" />
-            <StatCard label="Ingreso Mensual" value={`$${monthlyIncome.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} icon={DollarSign} variant="primary" />
+            <StatCard label="Ingreso Mensual" value={formatCurrency(monthlyIncome)} icon={DollarSign} variant="primary" />
           </div>
 
+          {projects.length === 0 && (
+            <EmptyState
+              icon={Briefcase}
+              title="Todavía no tenés proyectos"
+              description="Un proyecto agrupa tareas y pagos de un cliente."
+              actionLabel="Crear primer proyecto"
+              onAction={handleNewProjectAction}
+            />
+          )}
           <div className={styles.projectsGrid}>
-          {projects.length === 0 && <p className={styles.emptyState}>No hay proyectos registrados.</p>}
           {projects.map(p => (
             <ProjectCard key={p.id} project={p} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} />
           ))}
@@ -187,7 +201,7 @@ const ProjectsPage = () => {
             <div className={styles.field}>
               <span className={styles.label}>Presupuesto</span>
               <span className={styles.valueAmount}>
-                {selectedWithClient.budget != null ? `$${selectedWithClient.budget.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—"}
+                {selectedWithClient.budget != null ? formatCurrency(selectedWithClient.budget) : "—"}
               </span>
             </div>
             <div className={styles.field}>

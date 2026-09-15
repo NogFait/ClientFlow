@@ -6,6 +6,7 @@ import ClientsPage from "./ClientsPage"
 import { LimitExceededError } from "../../features/billing/domain/errors"
 import { ForeignKeyViolationError } from "../../services/supabaseErrors"
 import type { Entitlements } from "../../features/billing/types"
+import { ToastProvider } from "../../components/shared/Toast/ToastProvider"
 
 function renderClientsPage() {
   return render(
@@ -112,7 +113,7 @@ describe("ClientsPage — limit exceeded flow", () => {
 
     const { container } = renderClientsPage()
 
-    await waitFor(() => expect(screen.getByText(/no hay clientes registrados/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Todavía no tenés clientes/i)).toBeInTheDocument())
 
     await user.click(screen.getByRole("button", { name: /nuevo cliente/i }))
     // ClientForm's "Nombre" <label> has no htmlFor/id pairing with its
@@ -136,7 +137,7 @@ describe("ClientsPage — limit exceeded flow", () => {
 
     const { container } = renderClientsPage()
 
-    await waitFor(() => expect(screen.getByText(/no hay clientes registrados/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Todavía no tenés clientes/i)).toBeInTheDocument())
 
     await user.click(screen.getByRole("button", { name: /nuevo cliente/i }))
     await user.type(container.querySelector("form input")!, "Cliente Nuevo")
@@ -157,7 +158,7 @@ describe("ClientsPage — upgrade CTA navigation", () => {
 
     const { container } = renderClientsPage()
 
-    await waitFor(() => expect(screen.getByText(/no hay clientes registrados/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Todavía no tenés clientes/i)).toBeInTheDocument())
     await user.click(screen.getByRole("button", { name: /nuevo cliente/i }))
     await user.type(container.querySelector("form input")!, "Cliente Nuevo")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
@@ -177,7 +178,7 @@ describe("ClientsPage — upgrade CTA navigation", () => {
 
     const { container } = renderClientsPage()
 
-    await waitFor(() => expect(screen.getByText(/no hay clientes registrados/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Todavía no tenés clientes/i)).toBeInTheDocument())
     await user.click(screen.getByRole("button", { name: /nuevo cliente/i }))
     await user.type(container.querySelector("form input")!, "Cliente Nuevo")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
@@ -322,6 +323,58 @@ describe("ClientsPage — delete failure messages", () => {
     expect(
       await screen.findByText("No se pudo eliminar el cliente. Intentalo de nuevo."),
     ).toBeInTheDocument()
+  })
+})
+
+describe("ClientsPage — empty state", () => {
+  it("shows the EmptyState explanation and CTA when there are no clients, and the CTA opens the same create modal as the header action", async () => {
+    const user = userEvent.setup()
+    getClientsMock.mockResolvedValue([])
+
+    renderClientsPage()
+
+    expect(await screen.findByText("Todavía no tenés clientes")).toBeInTheDocument()
+    expect(
+      screen.getByText("Cargá a las personas o empresas para las que trabajás."),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Agregar primer cliente" }))
+
+    expect(await screen.findByRole("heading", { name: "Nuevo Cliente" })).toBeInTheDocument()
+  })
+
+  it("does not show the EmptyState when there are clients (triangulation)", async () => {
+    getClientsMock.mockResolvedValue([sampleClient])
+
+    renderClientsPage()
+
+    await screen.findByText("Juan Pérez")
+    expect(screen.queryByText("Todavía no tenés clientes")).not.toBeInTheDocument()
+  })
+})
+
+describe("ClientsPage — toast feedback", () => {
+  it("shows a success toast after creating a client", async () => {
+    const user = userEvent.setup()
+    getClientsMock.mockResolvedValue([])
+    createClientMock.mockResolvedValue(undefined)
+
+    const { container } = render(
+      <MemoryRouter initialEntries={["/clients"]}>
+        <ToastProvider>
+          <Routes>
+            <Route path="/clients" element={<ClientsPage />} />
+          </Routes>
+        </ToastProvider>
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => expect(screen.getByText("Todavía no tenés clientes")).toBeInTheDocument())
+    await user.click(screen.getByRole("button", { name: /nuevo cliente/i }))
+    await user.type(container.querySelector("form input")!, "Cliente Nuevo")
+    await user.click(screen.getByRole("button", { name: /guardar/i }))
+
+    expect(await screen.findByText("Cliente guardado")).toBeInTheDocument()
   })
 })
 

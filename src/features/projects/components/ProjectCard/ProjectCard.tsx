@@ -1,5 +1,6 @@
 import { Play, Pause, CheckCircle } from "lucide-react"
 import type { IProject } from "../../types"
+import { formatCurrency } from "../../../../utils/currency"
 import styles from "./ProjectCard.module.css"
 
 const statusConfig: Record<string, { label: string; icon: typeof Play }> = {
@@ -36,7 +37,7 @@ const ProjectCard = ({ project, onView, onEdit, onDelete }: ProjectCardProps) =>
         <span>Inicio: {project.start_date ?? "—"}</span>
       </div>
       <p className={styles.budget}>
-        {project.budget != null ? `$${project.budget.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—"}
+        {project.budget != null ? formatCurrency(project.budget) : "—"}
       </p>
       <div className={styles.actions}>
         <button className={`${styles.actionBtn} ${styles.actionView}`} onClick={() => onView(project)}>Ver</button>
