@@ -94,6 +94,8 @@ Los gráficos en ClientFlow evitan el "chart junk".
 
     Adaptabilidad: Los contenedores de métricas pasan de una fila de 4 a un grid de 2x2 en tablets, manteniendo la legibilidad de los números.
 
+    Breakpoint móvil: `767px` (max-width) es el corte oficial mobile/desktop para este layout — coincide con el `md: 768px` listado en la sección de Colores/tokens (`src/styles/tokens.css`). Se usa tanto en CSS (`@media (max-width: 767px)`) como en JS vía `useMediaQuery("(max-width: 767px)")` (`src/hooks/useMediaQuery.ts`), que gobierna el colapso de la Sidebar a rail de ícono (`--sidebar-rail-width: 64px`) en desktop y el drawer off-canvas en mobile.
+
 11. Animaciones y Microinteracciones
 
     Transiciones: Cambios de pantalla mediante fades suaves (200ms).
