@@ -1,18 +1,40 @@
-.section {
+.wrapper {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-6);
+  width: 100%;
+}
+
+.panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-6);
+  align-items: start;
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   padding: var(--spacing-6);
-  max-width: 32rem;
+  width: 100%;
 }
 
-.headerRow {
+@media (max-width: 767px) {
+  .panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panelHeader {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+}
+
+.statusLine {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
 }
 
 .meters {
@@ -21,40 +43,15 @@
   gap: var(--spacing-4);
 }
 
-.notice {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  background-color: var(--color-info-bg);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-3) var(--spacing-4);
-}
-
-.noticeWarning {
-  font-size: var(--font-size-sm);
-  color: var(--color-warning-text);
-  background-color: var(--color-warning-bg);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-3) var(--spacing-4);
-}
-
-.upgradeSection {
+.actions {
+  grid-column: 1 / -1;
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: var(--spacing-3);
 }
 
-.upgradeCopy {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.ctaGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
-}
-
 .ctaButton {
+  min-height: 40px;
   background-color: var(--color-primary-600);
   color: var(--color-text-inverse);
   border: none;
@@ -70,7 +67,9 @@
   background-color: var(--color-primary-700);
 }
 
-.ctaButtonSecondary {
+.manageButton,
+.manageButtonSecondary {
+  min-height: 40px;
   background-color: transparent;
   color: var(--color-primary-600);
   border: 1px solid var(--color-primary-300);
@@ -82,32 +81,21 @@
   transition: var(--transition-base);
 }
 
-.ctaButtonSecondary:hover:not(:disabled) {
+.manageButtonSecondary {
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.manageButton:hover:not(:disabled),
+.manageButtonSecondary:hover:not(:disabled) {
   background-color: var(--color-primary-50);
 }
 
 .ctaButton:disabled,
-.ctaButtonSecondary:disabled,
-.manageButton:disabled {
+.manageButton:disabled,
+.manageButtonSecondary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.manageButton {
-  align-self: flex-start;
-  background-color: transparent;
-  color: var(--color-primary-600);
-  border: 1px solid var(--color-primary-300);
-  border-radius: var(--radius-lg);
-  padding: 0.625rem 1.25rem;
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: var(--transition-base);
-}
-
-.manageButton:hover:not(:disabled) {
-  background-color: var(--color-primary-50);
 }
 
 .error {

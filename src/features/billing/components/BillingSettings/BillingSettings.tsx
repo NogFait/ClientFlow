@@ -1,5 +1,6 @@
 import PlanBadge from "../PlanBadge/PlanBadge"
 import UsageMeter from "../UsageMeter/UsageMeter"
+import PlanCards from "../PlanCards/PlanCards"
 import type { Entitlements } from "../../types"
 import type { PaidPlanCode } from "../../ports/BillingProvider"
 import styles from "./BillingSettings.module.css"
@@ -24,69 +25,79 @@ function formatDateEsAr(iso: string): string {
   })
 }
 
-const BillingSettings = ({ entitlements, onUpgrade, onManage, loading, error }: BillingSettingsProps) => {
-  const { plan, status, limits, usage, current_period_end, cancel_at_period_end, grace_until } = entitlements
+// One status line per subscription state — the reactivation gap this
+// redesign fixes: a scheduled-cancel Pro user previously saw only the
+// termination date with no way back in, this line now says they still can.
+function statusMessage(entitlements: Entitlements): string {
+  const { status, cancel_at_period_end, current_period_end, grace_until } = entitlements
 
-  const showsUpgrade = status === "free" || status === "canceled"
-  const showsManage = status === "active" && !cancel_at_period_end
+  if (status === "active" && cancel_at_period_end && current_period_end) {
+    return `Termina el ${formatDateEsAr(current_period_end)} — podés reactivarlo cuando quieras`
+  }
+  if (status === "active" && current_period_end) {
+    return `Activo · se renueva el ${formatDateEsAr(current_period_end)}`
+  }
+  if (status === "active") {
+    return "Activo"
+  }
+  if (status === "past_due" && grace_until) {
+    return `Pago pendiente · acceso Pro hasta ${formatDateEsAr(grace_until)}`
+  }
+  if (status === "past_due") {
+    return "Pago pendiente"
+  }
+  if (status === "canceled") {
+    return "Sin suscripción activa"
+  }
+  return "Plan gratuito"
+}
+
+const BillingSettings = ({ entitlements, onUpgrade, onManage, loading, error }: BillingSettingsProps) => {
+  const { plan, status, limits, usage, cancel_at_period_end } = entitlements
+
+  const isPaying = status === "active" || status === "past_due"
+  const showsReactivate = isPaying && cancel_at_period_end
 
   return (
-    <section className={styles.section}>
-      <div className={styles.headerRow}>
-        <PlanBadge plan={plan} status={status} />
-      </div>
+    <div className={styles.wrapper}>
+      <section className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <PlanBadge plan={plan} status={status} />
+          <p className={styles.statusLine}>{statusMessage(entitlements)}</p>
+        </div>
 
-      <div className={styles.meters}>
-        <UsageMeter label="Clientes" used={usage.clientes} limit={limits.clientes} />
-        <UsageMeter label="Proyectos" used={usage.proyectos} limit={limits.proyectos} />
-      </div>
+        <div className={styles.meters}>
+          <UsageMeter label="Clientes" used={usage.clientes} limit={limits.clientes} />
+          <UsageMeter label="Proyectos" used={usage.proyectos} limit={limits.proyectos} />
+        </div>
 
-      {status === "active" && cancel_at_period_end && current_period_end && (
-        <p className={styles.notice}>Tu plan Pro termina el {formatDateEsAr(current_period_end)}.</p>
-      )}
-
-      {status === "past_due" && grace_until && (
-        <p className={styles.noticeWarning}>
-          Pago pendiente — acceso Pro hasta {formatDateEsAr(grace_until)}.
-        </p>
-      )}
-
-      {showsUpgrade && (
-        <div className={styles.upgradeSection}>
-          <p className={styles.upgradeCopy}>Actualizá a Pro para clientes y proyectos ilimitados.</p>
-          <div className={styles.ctaGroup}>
+        {isPaying && (
+          <div className={styles.actions}>
+            {showsReactivate && (
+              <button type="button" className={styles.ctaButton} disabled={loading} onClick={onManage}>
+                Reactivar suscripción
+              </button>
+            )}
             <button
               type="button"
-              className={styles.ctaButton}
+              className={showsReactivate ? styles.manageButtonSecondary : styles.manageButton}
               disabled={loading}
-              onClick={() => onUpgrade("pro_monthly")}
+              onClick={onManage}
             >
-              Pro mensual — USD 12/mes
-            </button>
-            <button
-              type="button"
-              className={styles.ctaButtonSecondary}
-              disabled={loading}
-              onClick={() => onUpgrade("pro_yearly")}
-            >
-              Pro anual — USD 120/año (2 meses gratis)
+              Gestionar suscripción
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </section>
 
-      {showsManage && (
-        <button type="button" className={styles.manageButton} disabled={loading} onClick={onManage}>
-          Gestionar suscripción
-        </button>
-      )}
+      <PlanCards entitlements={entitlements} onUpgrade={onUpgrade} loading={loading} />
 
       {error && (
         <p role="alert" className={styles.error}>
           {error}
         </p>
       )}
-    </section>
+    </div>
   )
 }
 

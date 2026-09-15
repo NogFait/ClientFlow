@@ -80,7 +80,7 @@ describe("BillingSettingsPage — enabled", () => {
   it("renders BillingSettings composed with the loaded entitlements", async () => {
     await renderAt("/settings/billing")
 
-    await waitFor(() => expect(screen.getByText("Free")).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText("Free", { selector: "span" })).toBeInTheDocument())
     expect(screen.getByText("1 / 3")).toBeInTheDocument()
   })
 
@@ -103,7 +103,7 @@ describe("BillingSettingsPage — enabled", () => {
   it("does NOT poll refresh when there is no checkout query param (triangulation)", async () => {
     await renderAt("/settings/billing")
 
-    await waitFor(() => expect(screen.getByText("Free")).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText("Free", { selector: "span" })).toBeInTheDocument())
     expect(refreshMock).not.toHaveBeenCalled()
     expect(screen.queryByText(/Actualizando tu plan/i)).not.toBeInTheDocument()
   })

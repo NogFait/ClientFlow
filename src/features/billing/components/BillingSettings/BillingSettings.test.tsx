@@ -45,69 +45,62 @@ const canceledEntitlements: Entitlements = {
   status: "canceled",
 }
 
-describe("BillingSettings", () => {
-  it("Free user sees usage vs limits and both upgrade CTAs", () => {
+describe("BillingSettings — current plan panel", () => {
+  it("Free user sees 'Plan gratuito', usage meters, and no manage/reactivate buttons", () => {
     render(<BillingSettings entitlements={freeEntitlements} onUpgrade={vi.fn()} onManage={vi.fn()} />)
 
-    expect(screen.getByText("Free")).toBeInTheDocument()
+    expect(screen.getByText("Free", { selector: "span" })).toBeInTheDocument()
+    expect(screen.getByText("Plan gratuito")).toBeInTheDocument()
     expect(screen.getByText("2 / 3")).toBeInTheDocument()
     expect(screen.getByText("5 / 5")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /Pro mensual.*USD 12\/mes/i })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /Pro anual.*USD 120\/año/i })).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: /Gestionar suscripción/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /Reactivar suscripción/i })).not.toBeInTheDocument()
   })
 
-  it("Active Pro user (no scheduled cancel) sees 'Gestionar suscripción' and no upgrade CTA (triangulation)", () => {
+  it("Active Pro user (no scheduled cancel) sees the renewal date and a single 'Gestionar suscripción' button (triangulation)", () => {
     render(<BillingSettings entitlements={activeProEntitlements} onUpgrade={vi.fn()} onManage={vi.fn()} />)
 
-    expect(screen.getByText("Pro mensual")).toBeInTheDocument()
-    expect(screen.getByText(/12 — ilimitado/)).toBeInTheDocument()
+    expect(screen.getByText(/Activo · se renueva el/)).toBeInTheDocument()
+    expect(screen.getByText(/1 de noviembre de 2026/i)).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /Gestionar suscripción/i })).toBeInTheDocument()
-    expect(screen.queryByRole("button", { name: /USD 12\/mes/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /Reactivar suscripción/i })).not.toBeInTheDocument()
   })
 
-  it("Active Pro with cancel_at_period_end shows the termination date message (triangulation)", () => {
+  it("Active Pro with cancel_at_period_end shows the reactivate CTA plus a secondary manage button (fixes the reactivation gap)", () => {
     render(<BillingSettings entitlements={scheduledCancelEntitlements} onUpgrade={vi.fn()} onManage={vi.fn()} />)
 
-    expect(screen.getByText(/Tu plan Pro termina el/)).toBeInTheDocument()
+    expect(screen.getByText(/Termina el .* podés reactivarlo cuando quieras/)).toBeInTheDocument()
     expect(screen.getByText(/1 de noviembre de 2026/i)).toBeInTheDocument()
-    expect(screen.queryByRole("button", { name: /Gestionar suscripción/i })).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /Reactivar suscripción/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /Gestionar suscripción/i })).toBeInTheDocument()
   })
 
-  it("past_due user sees the grace deadline message and still lists Pro (unlimited) limits (triangulation)", () => {
+  it("past_due user sees the grace deadline status line and a manage button (triangulation)", () => {
     render(<BillingSettings entitlements={pastDueEntitlements} onUpgrade={vi.fn()} onManage={vi.fn()} />)
 
-    expect(screen.getByText(/Pago pendiente — acceso Pro hasta/)).toBeInTheDocument()
+    expect(screen.getByText(/Pago pendiente · acceso Pro hasta/)).toBeInTheDocument()
     expect(screen.getByText(/21 de septiembre de 2026/i)).toBeInTheDocument()
     expect(screen.getByText(/10 — ilimitado/)).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /Gestionar suscripción/i })).toBeInTheDocument()
   })
 
-  it("canceled (terminal) user sees the upgrade CTAs like a Free user (triangulation)", () => {
+  it("canceled (terminal) user sees 'Sin suscripción activa' and no manage/reactivate button (triangulation)", () => {
     render(<BillingSettings entitlements={canceledEntitlements} onUpgrade={vi.fn()} onManage={vi.fn()} />)
 
-    expect(screen.getByRole("button", { name: /Pro mensual.*USD 12\/mes/i })).toBeInTheDocument()
+    expect(screen.getByText("Sin suscripción activa")).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /Gestionar suscripción/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /Reactivar suscripción/i })).not.toBeInTheDocument()
   })
 
-  it("clicking the monthly/yearly CTAs calls onUpgrade with the matching plan code", async () => {
-    const user = userEvent.setup()
-    const onUpgrade = vi.fn()
-    render(<BillingSettings entitlements={freeEntitlements} onUpgrade={onUpgrade} onManage={vi.fn()} />)
-
-    await user.click(screen.getByRole("button", { name: /USD 12\/mes/i }))
-    await user.click(screen.getByRole("button", { name: /USD 120\/año/i }))
-
-    expect(onUpgrade).toHaveBeenNthCalledWith(1, "pro_monthly")
-    expect(onUpgrade).toHaveBeenNthCalledWith(2, "pro_yearly")
-  })
-
-  it("clicking 'Gestionar suscripción' calls onManage", async () => {
+  it("clicking 'Gestionar suscripción' or 'Reactivar suscripción' calls onManage", async () => {
     const user = userEvent.setup()
     const onManage = vi.fn()
-    render(<BillingSettings entitlements={activeProEntitlements} onUpgrade={vi.fn()} onManage={onManage} />)
+    render(<BillingSettings entitlements={scheduledCancelEntitlements} onUpgrade={vi.fn()} onManage={onManage} />)
 
+    await user.click(screen.getByRole("button", { name: /Reactivar suscripción/i }))
     await user.click(screen.getByRole("button", { name: /Gestionar suscripción/i }))
 
-    expect(onManage).toHaveBeenCalledTimes(1)
+    expect(onManage).toHaveBeenCalledTimes(2)
   })
 
   it("shows the error message when provided (e.g. checkout failed)", () => {
@@ -121,5 +114,18 @@ describe("BillingSettings", () => {
     )
 
     expect(screen.getByRole("alert")).toHaveTextContent("Ya tenés una suscripción Pro activa.")
+  })
+})
+
+describe("BillingSettings — plan cards composition", () => {
+  it("renders the plan cards below the panel and forwards onUpgrade clicks", async () => {
+    const user = userEvent.setup()
+    const onUpgrade = vi.fn()
+    render(<BillingSettings entitlements={freeEntitlements} onUpgrade={onUpgrade} onManage={vi.fn()} />)
+
+    expect(screen.getByRole("button", { name: /Elegir Pro mensual/i })).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: /Elegir Pro anual/i }))
+
+    expect(onUpgrade).toHaveBeenCalledWith("pro_yearly")
   })
 })
