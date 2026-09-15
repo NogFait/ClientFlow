@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "clientflow-dev", "runtimeExecutable": "sh", "runtimeArgs": ["-c", "pnpm exec vite --port \"$PORT\" --strictPort"], "port": 5173, "autoPort": true }
+  ]
+}

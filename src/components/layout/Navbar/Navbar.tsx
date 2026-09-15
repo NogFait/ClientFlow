@@ -31,7 +31,7 @@ const Navbar = ({ mobileNavOpen = false, onOpenMobileNav = noop }: NavbarProps) 
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate("/");
+    navigate("/login");
   };
 
   const initial = userName.charAt(0).toUpperCase()

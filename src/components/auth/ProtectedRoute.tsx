@@ -10,5 +10,5 @@ export function ProtectedRoute() {
   }, [])
 
   if (authorized === null) return null
-  return authorized ? <Outlet /> : <Navigate to="/" replace />
+  return authorized ? <Outlet /> : <Navigate to="/login" replace />
 }

@@ -19,7 +19,7 @@ const NotFoundPage = () => {
         La página que buscas no existe.
       </p>
       <Link
-        to="/dashboard"
+        to="/"
         style={{
           padding: "0.625rem 1.5rem",
           background: "#7c3aed",
@@ -29,7 +29,7 @@ const NotFoundPage = () => {
           fontWeight: 500,
         }}
       >
-        Volver al Dashboard
+        Volver al inicio
       </Link>
     </div>
   )

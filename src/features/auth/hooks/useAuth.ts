@@ -15,7 +15,7 @@ export function useRegisterForm() {
   const onSubmit = async (data: IUser) => {
     try {
       await signUpUser(data);
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       setError("root.serverError", {
         type: "manual",
