@@ -6,6 +6,13 @@ import { BillingApiError } from "../services"
 const startCheckoutMock = vi.fn()
 const openPortalMock = vi.fn()
 
+// `../services` (loaded via importActual below) imports the real Supabase
+// client, which calls createClient() at module load and throws without
+// VITE_SUPABASE_URL. Mock the client so this test never depends on env.
+vi.mock("../../../services/supabaseClient", () => ({
+  supabase: { auth: { getSession: vi.fn() } },
+}))
+
 vi.mock("../services", async () => {
   const actual = await vi.importActual<typeof import("../services")>("../services")
   return {
