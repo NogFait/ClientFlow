@@ -8,6 +8,7 @@ import { ProtectedRoute } from "../components/auth/ProtectedRoute"
 import { PublicOnlyRoute } from "../components/auth/PublicOnlyRoute"
 import ClientsPage from "../pages/clients/ClientsPage"
 import ProjectsPage from "../pages/projects/ProjectsPage"
+import ProjectHubPage from "../pages/projects/ProjectHubPage/ProjectHubPage"
 import TaskPage from "../pages/tasks/TaskPage"
 import PaymentsPage from "../pages/payments/PaymentsPage"
 import BillingSettingsPage from "../pages/settings/billing/BillingSettingsPage"
@@ -23,6 +24,7 @@ const AppRouter = () => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/clients" element={<ClientsPage/>}/>
           <Route path="/projects" element={<ProjectsPage/>}/>
+          <Route path="/projects/:id" element={<ProjectHubPage/>}/>
           <Route path="/tasks" element={<TaskPage/>}/>
           <Route path="/payments" element={<PaymentsPage/>}/>
           <Route path="/settings/billing" element={<BillingSettingsPage/>}/>
