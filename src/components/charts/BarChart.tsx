@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react"
 import { scaleBand, scaleLinear, max } from "d3"
 import { ClientTooltip, TooltipContent, TooltipTrigger } from "./ClientTooltip"
+import { formatCurrency } from "../../utils/currency"
 import styles from "./BarChart.module.css"
 
 interface BarChartProps {
@@ -20,9 +21,6 @@ export const BarChart = ({ data }: BarChartProps) => {
   const yScale = scaleLinear()
     .domain([0, maxValue])
     .range([100, 0])
-
-  const fmt = (n: number) =>
-    n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
   return (
     <div
@@ -88,7 +86,7 @@ export const BarChart = ({ data }: BarChartProps) => {
               </TooltipTrigger>
               <TooltipContent>
                 <div style={{ fontWeight: 500 }}>{d.key}</div>
-                <div>${fmt(d.value)}</div>
+                <div>{formatCurrency(d.value)}</div>
               </TooltipContent>
             </ClientTooltip>
           )

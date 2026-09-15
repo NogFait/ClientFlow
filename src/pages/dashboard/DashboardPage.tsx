@@ -5,12 +5,15 @@ import { getClients } from "../../features/clients/services"
 import { getProjects } from "../../features/projects/services"
 import { getPayments } from "../../features/payments/services"
 import { getTasks } from "../../features/tasks/services"
-import { Users, Briefcase, DollarSign, Clock, Calendar } from "lucide-react"
+import { Users, Briefcase, DollarSign, Clock, Calendar, ClipboardList } from "lucide-react"
 import type { ITask } from "../../features/tasks/types"
 import StatCard from "../../components/shared/StatCard/StatCard"
 import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import Loader from "../../components/shared/Loader/Loader"
+import EmptyState from "../../components/shared/EmptyState/EmptyState"
 import { BarChart } from "../../components/charts/BarChart"
+import { formatCurrency } from "../../utils/currency"
+import { getWelcomeMessage } from "./welcomeMessage"
 import styles from "./DashboardPage.module.css"
 
 const MONTHS = [
@@ -19,7 +22,7 @@ const MONTHS = [
 ]
 
 const DashboardPage = () => {
-  const [user, setUser] = useState<{ name: string } | null>(null)
+  const [user, setUser] = useState<{ name?: string | null; email?: string | null } | null>(null)
   const [totalClients, setTotalClients] = useState(0)
   const [activeProjects, setActiveProjects] = useState(0)
   const [monthlyIncome, setMonthlyIncome] = useState(0)
@@ -39,7 +42,7 @@ const DashboardPage = () => {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setUser({ name: data.user.user_metadata?.name ?? "Usuario" })
+      if (data.user) setUser({ name: data.user.user_metadata?.name, email: data.user.email })
     })
 
     Promise.all([
@@ -92,8 +95,6 @@ const DashboardPage = () => {
     .finally(() => setLoading(false))
   }, [])
 
-  const fmt = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-
   const chartData = monthlyEarnings
     .slice()
     .reverse()
@@ -105,7 +106,7 @@ const DashboardPage = () => {
 
   return (
     <div>
-      <PageHeader title="Dashboard" description={`Bienvenido ${user?.name ?? "Usuario"}`} />
+      <PageHeader title="Dashboard" description={getWelcomeMessage(user)} />
 
       {loading ? (
         <div className={styles.loaderSection}><Loader /></div>
@@ -113,7 +114,7 @@ const DashboardPage = () => {
         <div className={styles.kpiGrid}>
           <StatCard label="Total clientes" value={totalClients} icon={Users} variant="primary" />
           <StatCard label="Proyectos Activos" value={activeProjects} icon={Briefcase} variant="success" />
-          <StatCard label="Ingreso Mensual" value={`$${fmt(monthlyIncome)}`} icon={DollarSign} variant="primary" />
+          <StatCard label="Ingreso Mensual" value={formatCurrency(monthlyIncome)} icon={DollarSign} variant="primary" />
           <StatCard label="Tareas" value={pendingTasks} primaryLabel="Pendiente" secondaryValue={progressTasks} secondaryLabel="En Progreso" icon={Clock} variant="warning" />
         </div>
       )}
@@ -123,7 +124,13 @@ const DashboardPage = () => {
           <section>
             <h2 className={styles.sectionTitle}>Estadísticas Mensuales</h2>
             {chartData.length === 0 ? (
-              <p className={styles.emptyState}>Aún no hay cobros registrados.</p>
+              <EmptyState
+                icon={DollarSign}
+                title="Aún no hay cobros registrados"
+                description="Registrá tus cobros para ver la evolución de tus ingresos mes a mes."
+                actionLabel="Registrar pago"
+                onAction={() => navigate("/payments")}
+              />
             ) : (
               <div className={styles.card}>
                 <BarChart data={chartData} />
@@ -134,7 +141,13 @@ const DashboardPage = () => {
           <section>
             <h2 className={styles.sectionTitle}>Próximas Tareas</h2>
             {upcomingTasks.length === 0 ? (
-              <p className={styles.emptyState}>No hay tareas pendientes con fecha.</p>
+              <EmptyState
+                icon={ClipboardList}
+                title="No hay tareas pendientes con fecha"
+                description="Asignale una fecha de vencimiento a tus tareas para verlas acá antes de que venzan."
+                actionLabel="Ver tareas"
+                onAction={() => navigate("/tasks")}
+              />
             ) : (
               <div className={styles.card}>
                 <ul className={styles.taskList}>
