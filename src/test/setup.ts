@@ -1,6 +1,7 @@
 import { afterEach } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
+import { _reset as resetToasts } from '../components/shared/Toast/toastStore'
 
 // @testing-library/react only auto-registers its afterEach(cleanup) when it
 // detects a global `afterEach` (i.e. `test.globals: true` in vitest config).
@@ -9,6 +10,10 @@ import '@testing-library/jest-dom/vitest'
 // within the same file (multiple renders accumulate in document.body).
 afterEach(() => {
   cleanup()
+  // The toast store is module-level state: a "Cliente guardado" toast pushed
+  // by one test would otherwise still be rendered in the next test's tree
+  // (surfaced in CI as "Found multiple elements with the text ...").
+  resetToasts()
 })
 
 // jsdom does not implement window.matchMedia — provide a default stub so any
