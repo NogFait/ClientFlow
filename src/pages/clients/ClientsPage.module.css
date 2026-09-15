@@ -24,6 +24,12 @@
   border: 1px solid var(--color-border);
 }
 
+.mobileList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
 .clientsTable {
   background-color: var(--color-bg-primary);
   width: 100%;
@@ -76,6 +82,12 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-5);
+}
+
+@media (max-width: 767px) {
+  .viewMode {
+    grid-template-columns: 1fr;
+  }
 }
 
 .field {

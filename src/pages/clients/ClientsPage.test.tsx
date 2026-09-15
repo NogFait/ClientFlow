@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import ClientsPage from "./ClientsPage"
@@ -25,12 +25,13 @@ function renderClientsPage() {
 
 const getClientsMock = vi.fn()
 const createClientMock = vi.fn()
+const deleteClientMock = vi.fn()
 
 vi.mock("../../features/clients/services", () => ({
   getClients: () => getClientsMock(),
   createClient: (client: unknown) => createClientMock(client),
   updateClient: vi.fn(),
-  deleteClient: vi.fn(),
+  deleteClient: (id: string) => deleteClientMock(id),
 }))
 
 // Entitlements permissive enough that the soft pre-check in
@@ -60,8 +61,32 @@ vi.mock("../../features/billing/context/entitlementsContext", () => ({
 afterEach(() => {
   getClientsMock.mockReset()
   createClientMock.mockReset()
+  deleteClientMock.mockReset()
   refreshEntitlementsMock.mockReset()
+  // Restore the desktop-default matchMedia stub (src/test/setup.ts) rather
+  // than deleting it — some tests below override it to simulate mobile.
+  installMatchMedia(false)
 })
+
+const sampleClient = {
+  id: "c1",
+  name: "Juan Pérez",
+  email: "juan@example.com",
+  celular: "123456789",
+  company: "Acme",
+  status: "activo" as const,
+  created_at: "2026-01-01T00:00:00.000Z",
+}
+
+function installMatchMedia(matches: boolean) {
+  window.matchMedia = ((query: string) =>
+    ({
+      matches,
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }) as unknown as MediaQueryList) as typeof window.matchMedia
+}
 
 describe("ClientsPage — limit exceeded flow", () => {
   it("shows the UpgradePrompt when creating a client hits the plan limit", async () => {
@@ -147,5 +172,72 @@ describe("ClientsPage — upgrade CTA navigation", () => {
     await user.click(screen.getByRole("button", { name: /anual/i }))
 
     expect(await screen.findByText("Billing Settings Mock")).toBeInTheDocument()
+  })
+})
+
+describe("ClientsPage — delete confirmation", () => {
+  it("opens a confirm dialog (not window.confirm) when Eliminar is clicked, and does not delete until confirmed", async () => {
+    const user = userEvent.setup()
+    getClientsMock.mockResolvedValue([sampleClient])
+
+    renderClientsPage()
+
+    await user.click(await screen.findByRole("button", { name: /eliminar/i }))
+
+    expect(await screen.findByRole("dialog")).toBeInTheDocument()
+    expect(screen.getByText("¿Eliminar a Juan Pérez?")).toBeInTheDocument()
+    expect(deleteClientMock).not.toHaveBeenCalled()
+  })
+
+  it("calls deleteClient and refreshes the list when the dialog is confirmed", async () => {
+    const user = userEvent.setup()
+    getClientsMock.mockResolvedValue([sampleClient])
+    deleteClientMock.mockResolvedValue(undefined)
+
+    renderClientsPage()
+
+    await user.click(await screen.findByRole("button", { name: /eliminar/i }))
+    const dialog = await screen.findByRole("dialog")
+    await user.click(within(dialog).getByRole("button", { name: "Eliminar" }))
+
+    await waitFor(() => expect(deleteClientMock).toHaveBeenCalledWith("c1"))
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  })
+
+  it("does NOT call deleteClient when the dialog is cancelled (triangulation)", async () => {
+    const user = userEvent.setup()
+    getClientsMock.mockResolvedValue([sampleClient])
+
+    renderClientsPage()
+
+    await user.click(await screen.findByRole("button", { name: /eliminar/i }))
+    const dialog = await screen.findByRole("dialog")
+    await user.click(within(dialog).getByRole("button", { name: "Cancelar" }))
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    expect(deleteClientMock).not.toHaveBeenCalled()
+  })
+})
+
+describe("ClientsPage — responsive table/card layout", () => {
+  it("renders the table on desktop viewports", async () => {
+    installMatchMedia(false)
+    getClientsMock.mockResolvedValue([sampleClient])
+
+    renderClientsPage()
+
+    expect(await screen.findByRole("table")).toBeInTheDocument()
+  })
+
+  it("renders a mobile card list with reachable action buttons on narrow viewports (triangulation)", async () => {
+    installMatchMedia(true)
+    getClientsMock.mockResolvedValue([sampleClient])
+
+    renderClientsPage()
+
+    expect(await screen.findByRole("button", { name: /ver a juan pérez/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /editar a juan pérez/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /eliminar a juan pérez/i })).toBeInTheDocument()
+    expect(screen.queryByRole("table")).not.toBeInTheDocument()
   })
 })

@@ -4,8 +4,12 @@ import type { IClient } from "../../features/clients/types"
 import { getClients, deleteClient } from "../../features/clients/services"
 import { useClientForm } from "../../features/clients/hooks/useClientForm"
 import ClientCard from "../../features/clients/components/ClientCard/ClientCard"
+import ClientMobileCard from "../../features/clients/components/ClientCard/ClientMobileCard"
 import ClientForm from "../../features/clients/components/ClientForm/ClientForm"
 import Modal from "../../components/shared/Modal/Modal"
+import ConfirmDialog from "../../components/shared/ConfirmDialog/ConfirmDialog"
+import { useConfirm } from "../../hooks/useConfirm"
+import { useMediaQuery } from "../../hooks/useMediaQuery"
 import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import { UserCheck, Clock, UserX } from "lucide-react"
 import StatCard from "../../components/shared/StatCard/StatCard"
@@ -71,16 +75,18 @@ const ClientsPage = () => {
   }
 
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const { confirm, dialogProps } = useConfirm()
+  const isMobile = useMediaQuery("(max-width: 767px)")
 
   const handleDelete = async (client: IClient) => {
-    if (window.confirm(`¿Eliminar a ${client.name}?`)) {
-      try {
-        await deleteClient(client.id!)
-        refreshClients()
-        refreshEntitlements()
-      } catch {
-        setDeleteError("No se pudo eliminar el cliente. Intentalo de nuevo.")
-      }
+    const confirmed = await confirm({ title: `¿Eliminar a ${client.name}?` })
+    if (!confirmed) return
+    try {
+      await deleteClient(client.id!)
+      refreshClients()
+      refreshEntitlements()
+    } catch {
+      setDeleteError("No se pudo eliminar el cliente. Intentalo de nuevo.")
     }
   }
 
@@ -132,7 +138,14 @@ const ClientsPage = () => {
 
           {clients.length === 0 && <p className={styles.emptyState}>No hay clientes registrados.</p>}
           {clients.length > 0 && (
-            <div className={styles.tableWrapper}><table className={styles.clientsTable}>
+            isMobile ? (
+              <div className={styles.mobileList}>
+                {clients.map(c => (
+                  <ClientMobileCard key={c.id} client={c} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} />
+                ))}
+              </div>
+            ) : (
+              <div className={styles.tableWrapper}><table className={styles.clientsTable}>
           <thead>
             <tr>
               <th>Nombre</th>
@@ -149,6 +162,7 @@ const ClientsPage = () => {
             ))}
           </tbody>
                       </table></div>
+            )
           )}
         </>
       )}
@@ -208,6 +222,11 @@ const ClientsPage = () => {
           onUpgrade={() => navigate("/settings/billing")}
         />
       )}
+
+      <ConfirmDialog
+        {...dialogProps}
+        description={dialogProps.description ?? "Esta acción no se puede deshacer."}
+      />
     </div>
   )
 }

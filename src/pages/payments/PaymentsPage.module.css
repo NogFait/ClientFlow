@@ -26,6 +26,12 @@
   border: 1px solid var(--color-border);
 }
 
+.mobileList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
 .paymentsTable {
   background-color: var(--color-bg-primary);
   width: 100%;

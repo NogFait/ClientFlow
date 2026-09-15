@@ -5,9 +5,13 @@ import { getPayments, deletePayment } from "../../features/payments/services"
 import { getProjects } from "../../features/projects/services"
 import { usePaymentForm } from "../../features/payments/hooks/usePaymentForm"
 import PaymentTableRow from "../../features/payments/components/PaymentTableRow/PaymentTableRow"
+import PaymentMobileCard from "../../features/payments/components/PaymentTableRow/PaymentMobileCard"
 import PaymentForm from "../../features/payments/components/PaymentForm/PaymentForm"
 import PaymentView from "../../features/payments/components/PaymentView/PaymentView"
 import Modal from "../../components/shared/Modal/Modal"
+import ConfirmDialog from "../../components/shared/ConfirmDialog/ConfirmDialog"
+import { useConfirm } from "../../hooks/useConfirm"
+import { useMediaQuery } from "../../hooks/useMediaQuery"
 import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import { DollarSign, Clock, Calendar } from "lucide-react"
 import StatCard from "../../components/shared/StatCard/StatCard"
@@ -58,15 +62,18 @@ const PaymentsPage = () => {
   }
 
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const { confirm, dialogProps } = useConfirm()
+  const isMobile = useMediaQuery("(max-width: 767px)")
 
   const handleDelete = async (payment: IPayment) => {
-    if (window.confirm(`¿Eliminar pago de $${Number(payment.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}?`)) {
-      try {
-        await deletePayment(payment.id!)
-        refreshPayments()
-      } catch {
-        setDeleteError("No se pudo eliminar el pago. Intentalo de nuevo.")
-      }
+    const amount = Number(payment.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    const confirmed = await confirm({ title: `¿Eliminar pago de $${amount}?` })
+    if (!confirmed) return
+    try {
+      await deletePayment(payment.id!)
+      refreshPayments()
+    } catch {
+      setDeleteError("No se pudo eliminar el pago. Intentalo de nuevo.")
     }
   }
 
@@ -121,7 +128,14 @@ const PaymentsPage = () => {
 
       {currentMonthPayments.length === 0 && <p className={styles.emptyState}>No hay pagos registrados este mes.</p>}
       {currentMonthPayments.length > 0 && (
-        <div className={styles.tableWrapper}><table className={styles.paymentsTable}>
+        isMobile ? (
+          <div className={styles.mobileList}>
+            {currentMonthPayments.map(p => (
+              <PaymentMobileCard key={p.id} payment={p} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} />
+            ))}
+          </div>
+        ) : (
+          <div className={styles.tableWrapper}><table className={styles.paymentsTable}>
           <thead>
             <tr>
               <th>Fecha</th>
@@ -139,6 +153,7 @@ const PaymentsPage = () => {
             ))}
           </tbody>
         </table></div>
+        )
       )}
 
       <Modal isOpen={modalOpen} onClose={closeModal} title={editingPayment ? "Editar Factura" : "Nueva Factura"}>
@@ -156,6 +171,11 @@ const PaymentsPage = () => {
       <Modal isOpen={viewModalOpen} onClose={() => setViewModalOpen(false)} title="Detalle del Pago">
         {viewingPayment && <PaymentView payment={viewingPayment} />}
       </Modal>
+
+      <ConfirmDialog
+        {...dialogProps}
+        description={dialogProps.description ?? "Esta acción no se puede deshacer."}
+      />
     </div>
   )
 }
