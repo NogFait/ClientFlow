@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom"
-import { LayoutDashboard, Users, Briefcase, CheckSquare, CreditCard } from "lucide-react"
+import { LayoutDashboard, Users, Briefcase, CheckSquare, CreditCard, Receipt } from "lucide-react"
+import { BILLING_ENABLED } from "../../../config/features"
 import styles from "./Sidebar.module.css"
 
 const navItems = [
@@ -8,6 +9,8 @@ const navItems = [
   { path: "/projects", label: "Proyectos", icon: Briefcase },
   { path: "/tasks", label: "Tareas", icon: CheckSquare },
   { path: "/payments", label: "Pagos", icon: CreditCard },
+  // Hidden entirely when billing is off (spec account-billing-ui: flag-gated route).
+  ...(BILLING_ENABLED ? [{ path: "/settings/billing", label: "Plan y facturación", icon: Receipt }] : []),
 ]
 
 const Sidebar = () => {

@@ -10,6 +10,7 @@ import ClientsPage from "../pages/clients/ClientsPage"
 import ProjectsPage from "../pages/projects/ProjectsPage"
 import TaskPage from "../pages/tasks/TaskPage"
 import PaymentsPage from "../pages/payments/PaymentsPage"
+import BillingSettingsPage from "../pages/settings/billing/BillingSettingsPage"
 
 const AppRouter = () => {
   return (
@@ -24,6 +25,7 @@ const AppRouter = () => {
           <Route path="/projects" element={<ProjectsPage/>}/>
           <Route path="/tasks" element={<TaskPage/>}/>
           <Route path="/payments" element={<PaymentsPage/>}/>
+          <Route path="/settings/billing" element={<BillingSettingsPage/>}/>
         </Route>
       </Route>
 
