@@ -85,10 +85,10 @@ const Sidebar = ({ mobileOpen = false, onCloseMobile = noop }: SidebarProps) => 
       >
         <div className={styles.logo}>
           {!isRail && (
-            <>
+            <div className={styles.logoText}>
               <h1 className={styles.logoTitle}>ClientFlow</h1>
               <p className={styles.logoSub}>Freelancer CRM</p>
-            </>
+            </div>
           )}
           {!isMobile && (
             <button
