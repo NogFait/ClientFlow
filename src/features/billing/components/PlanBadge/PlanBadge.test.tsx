@@ -24,4 +24,10 @@ describe("PlanBadge", () => {
     expect(screen.getByText(/Pro mensual/)).toBeInTheDocument()
     expect(screen.getByText(/Cancelado/)).toBeInTheDocument()
   })
+
+  it("compact mode hides the status suffix, keeping only the plan name (navbar usage)", () => {
+    render(<PlanBadge plan="pro_yearly" status="past_due" compact />)
+    expect(screen.getByText("Pro anual")).toBeInTheDocument()
+    expect(screen.queryByText(/Pago pendiente/)).not.toBeInTheDocument()
+  })
 })

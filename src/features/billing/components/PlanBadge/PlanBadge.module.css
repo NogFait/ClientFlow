@@ -31,3 +31,8 @@
 .suffix {
   font-weight: var(--font-weight-medium);
 }
+
+.compact {
+  padding: 0.25rem 0.625rem;
+  font-size: var(--font-size-xs);
+}

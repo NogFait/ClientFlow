@@ -4,9 +4,39 @@
   border-bottom: 1px solid var(--color-border);
   padding: 0 var(--spacing-6);
   display: flex;
-  justify-content: flex-end;
   align-items: center;
   gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .hamburger {
+    display: inline-flex;
+  }
+}
+
+.planBadgeLink {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
 }
 
 .userInfo {

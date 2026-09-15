@@ -4,6 +4,9 @@ import styles from "./PlanBadge.module.css"
 interface PlanBadgeProps {
   plan: PlanCode
   status: SubscriptionStatus
+  // Compact: plan name only, no status suffix — used in tight spaces like
+  // the navbar where "Pro anual · Pago pendiente" would wrap awkwardly.
+  compact?: boolean
 }
 
 const PLAN_LABEL: Record<PlanCode, string> = {
@@ -24,12 +27,12 @@ const STATUS_VARIANT: Partial<Record<SubscriptionStatus, string>> = {
   canceled: styles.muted,
 }
 
-const PlanBadge = ({ plan, status }: PlanBadgeProps) => {
-  const suffix = STATUS_SUFFIX[status]
+const PlanBadge = ({ plan, status, compact }: PlanBadgeProps) => {
+  const suffix = compact ? undefined : STATUS_SUFFIX[status]
   const variant = STATUS_VARIANT[status] ?? (plan === "free" ? styles.default : styles.success)
 
   return (
-    <span className={`${styles.badge} ${variant}`}>
+    <span className={`${styles.badge} ${variant} ${compact ? styles.compact : ""}`}>
       {PLAN_LABEL[plan]}
       {suffix && <span className={styles.suffix}> · {suffix}</span>}
     </span>
