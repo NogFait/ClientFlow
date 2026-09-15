@@ -7,7 +7,10 @@ interface ConfirmDialogProps {
   title: string
   description?: string
   confirmLabel?: string
-  cancelLabel?: string
+  // Explicit null hides the Cancel button entirely — used for informational
+  // dialogs (e.g. "no podés eliminar esto") that only have an acknowledgement
+  // action. Leaving it undefined keeps the default "Cancelar" behavior.
+  cancelLabel?: string | null
   danger?: boolean
   loading?: boolean
   onConfirm: () => void
@@ -37,14 +40,16 @@ const ConfirmDialog = ({
       <div className={styles.content}>
         {description && <p className={styles.description}>{description}</p>}
         <div className={styles.actions}>
-          <button
-            type="button"
-            className={styles.cancelButton}
-            onClick={onCancel}
-            disabled={loading}
-          >
-            {cancelLabel}
-          </button>
+          {cancelLabel !== null && (
+            <button
+              type="button"
+              className={styles.cancelButton}
+              onClick={onCancel}
+              disabled={loading}
+            >
+              {cancelLabel}
+            </button>
+          )}
           <button
             ref={confirmButtonRef}
             type="button"

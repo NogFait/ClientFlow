@@ -2,6 +2,8 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import type { IClient } from "../../features/clients/types"
 import { getClients, deleteClient } from "../../features/clients/services"
+import { countProjectsByClient } from "../../features/projects/services"
+import { ForeignKeyViolationError } from "../../services/supabaseErrors"
 import { useClientForm } from "../../features/clients/hooks/useClientForm"
 import ClientCard from "../../features/clients/components/ClientCard/ClientCard"
 import ClientMobileCard from "../../features/clients/components/ClientCard/ClientMobileCard"
@@ -79,14 +81,34 @@ const ClientsPage = () => {
   const isMobile = useMediaQuery("(max-width: 767px)")
 
   const handleDelete = async (client: IClient) => {
+    // Block & explain (decision: no cascade, no schema change) — proyectos.client_id
+    // has no ON DELETE action, so a client with proyectos would otherwise hit
+    // Postgres' 23503 and surface a confusing failure. Check first and, if
+    // blocked, show an acknowledge-only dialog instead of the delete confirm.
+    const projectCount = await countProjectsByClient(client.id!)
+    if (projectCount > 0) {
+      await confirm({
+        title: `No se puede eliminar a ${client.name}`,
+        description: `Tiene ${projectCount} proyecto(s) asociado(s). Eliminá o reasigná esos proyectos primero.`,
+        confirmLabel: "Entendido",
+        cancelLabel: null,
+        danger: false,
+      })
+      return
+    }
+
     const confirmed = await confirm({ title: `¿Eliminar a ${client.name}?` })
     if (!confirmed) return
     try {
       await deleteClient(client.id!)
       refreshClients()
       refreshEntitlements()
-    } catch {
-      setDeleteError("No se pudo eliminar el cliente. Intentalo de nuevo.")
+    } catch (error) {
+      setDeleteError(
+        error instanceof ForeignKeyViolationError
+          ? "No se puede eliminar: el cliente tiene proyectos asociados."
+          : "No se pudo eliminar el cliente. Intentalo de nuevo.",
+      )
     }
   }
 

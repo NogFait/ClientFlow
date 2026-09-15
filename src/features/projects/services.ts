@@ -45,3 +45,14 @@ export async function deleteProject(id: string) {
     .from("proyectos").delete().eq("id", id)
   if (error) throw new Error(error.message)
 }
+
+// contar proyectos de un cliente (usado para bloquear el borrado de clientes
+// con proyectos asociados en lugar de dejar que la FK lo rechace en silencio)
+export async function countProjectsByClient(clientId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("proyectos")
+    .select("id", { count: "exact", head: true })
+    .eq("client_id", clientId)
+  if (error) throw new Error(error.message)
+  return count ?? 0
+}

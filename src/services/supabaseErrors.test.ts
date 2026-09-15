@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { mapSupabaseError } from "./supabaseErrors"
+import { mapSupabaseError, ForeignKeyViolationError } from "./supabaseErrors"
 import { LimitExceededError } from "../features/billing/domain/errors"
 
 describe("mapSupabaseError", () => {
@@ -25,5 +25,34 @@ describe("mapSupabaseError", () => {
   it("falls back to a generic message when the error has none", () => {
     const error = mapSupabaseError({})
     expect(error.message).toBe("Ocurrió un error inesperado.")
+  })
+
+  it("maps a 23503 PostgrestError into a ForeignKeyViolationError, parsing the constraint from the message", () => {
+    const error = mapSupabaseError({
+      code: "23503",
+      message: 'update or delete on table "clientes" violates foreign key constraint "proyectos_client_id_fkey" on table "proyectos"',
+      details: "Key (id)=(abc-123) is still referenced from table \"proyectos\".",
+    })
+
+    expect(error).toBeInstanceOf(ForeignKeyViolationError)
+    expect((error as ForeignKeyViolationError).constraint).toBe("proyectos_client_id_fkey")
+  })
+
+  it("parses a different constraint name from a 23503 error (triangulation: different constraint)", () => {
+    const error = mapSupabaseError({
+      code: "23503",
+      message: 'update or delete on table "clientes" violates foreign key constraint "facturas_client_id_fkey" on table "facturas"',
+      details: null,
+    })
+
+    expect(error).toBeInstanceOf(ForeignKeyViolationError)
+    expect((error as ForeignKeyViolationError).constraint).toBe("facturas_client_id_fkey")
+  })
+
+  it("still maps to ForeignKeyViolationError when no constraint name can be parsed (triangulation: missing detail)", () => {
+    const error = mapSupabaseError({ code: "23503", message: "foreign key violation", details: null })
+
+    expect(error).toBeInstanceOf(ForeignKeyViolationError)
+    expect((error as ForeignKeyViolationError).constraint).toBeUndefined()
   })
 })

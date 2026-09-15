@@ -97,4 +97,24 @@ describe("ConfirmDialog", () => {
 
     expect(screen.getByRole("button", { name: /eliminando/i })).toBeDisabled()
   })
+
+  it("hides the Cancel button when cancelLabel is explicitly null (informational dialogs)", () => {
+    render(
+      <ConfirmDialog
+        open
+        title="No se puede eliminar a Juan"
+        cancelLabel={null}
+        confirmLabel="Entendido"
+        onConfirm={() => {}}
+        onCancel={() => {}}
+      />,
+    )
+
+    expect(screen.getByRole("button", { name: "Entendido" })).toBeInTheDocument()
+    // Modal renders its own close (×) button alongside the dialog's action
+    // buttons, so with Cancel hidden there are 2 buttons total (× + Entendido)
+    // — asserting the count (not just an absent "Cancelar" name) proves the
+    // Cancel button itself is gone, not just relabeled to something unnamed.
+    expect(screen.getAllByRole("button")).toHaveLength(2)
+  })
 })

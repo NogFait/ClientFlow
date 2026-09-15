@@ -4,7 +4,9 @@ export interface ConfirmOptions {
   title: string
   description?: string
   confirmLabel?: string
-  cancelLabel?: string
+  // Explicit null hides the Cancel button (informational, acknowledge-only
+  // dialogs). Undefined keeps ConfirmDialog's default "Cancelar" label.
+  cancelLabel?: string | null
   danger?: boolean
 }
 
@@ -18,7 +20,7 @@ export interface ConfirmDialogProps {
   title: string
   description?: string
   confirmLabel?: string
-  cancelLabel?: string
+  cancelLabel?: string | null
   danger?: boolean
   onConfirm: () => void
   onCancel: () => void

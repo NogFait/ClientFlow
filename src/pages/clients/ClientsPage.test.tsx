@@ -1,9 +1,10 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import ClientsPage from "./ClientsPage"
 import { LimitExceededError } from "../../features/billing/domain/errors"
+import { ForeignKeyViolationError } from "../../services/supabaseErrors"
 import type { Entitlements } from "../../features/billing/types"
 
 function renderClientsPage() {
@@ -26,12 +27,17 @@ function renderClientsPage() {
 const getClientsMock = vi.fn()
 const createClientMock = vi.fn()
 const deleteClientMock = vi.fn()
+const countProjectsByClientMock = vi.fn()
 
 vi.mock("../../features/clients/services", () => ({
   getClients: () => getClientsMock(),
   createClient: (client: unknown) => createClientMock(client),
   updateClient: vi.fn(),
   deleteClient: (id: string) => deleteClientMock(id),
+}))
+
+vi.mock("../../features/projects/services", () => ({
+  countProjectsByClient: (id: string) => countProjectsByClientMock(id),
 }))
 
 // Entitlements permissive enough that the soft pre-check in
@@ -58,10 +64,18 @@ vi.mock("../../features/billing/context/entitlementsContext", () => ({
   }),
 }))
 
+beforeEach(() => {
+  // Default: client has no proyectos, so existing delete-confirmation tests
+  // (written before the block-and-explain check existed) keep exercising
+  // the normal confirm+delete flow unless a test overrides this.
+  countProjectsByClientMock.mockResolvedValue(0)
+})
+
 afterEach(() => {
   getClientsMock.mockReset()
   createClientMock.mockReset()
   deleteClientMock.mockReset()
+  countProjectsByClientMock.mockReset()
   refreshEntitlementsMock.mockReset()
   // Restore the desktop-default matchMedia stub (src/test/setup.ts) rather
   // than deleting it — some tests below override it to simulate mobile.
@@ -216,6 +230,98 @@ describe("ClientsPage — delete confirmation", () => {
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     expect(deleteClientMock).not.toHaveBeenCalled()
+  })
+})
+
+describe("ClientsPage — blocked delete when the client has proyectos asociados", () => {
+  it("shows an informational dialog with the project count and does NOT call deleteClient", async () => {
+    const user = userEvent.setup()
+    getClientsMock.mockResolvedValue([sampleClient])
+    countProjectsByClientMock.mockResolvedValue(2)
+
+    renderClientsPage()
+
+    await user.click(await screen.findByRole("button", { name: /eliminar/i }))
+
+    const dialog = await screen.findByRole("dialog")
+    expect(within(dialog).getByText("No se puede eliminar a Juan Pérez")).toBeInTheDocument()
+    expect(
+      within(dialog).getByText("Tiene 2 proyecto(s) asociado(s). Eliminá o reasigná esos proyectos primero."),
+    ).toBeInTheDocument()
+    expect(deleteClientMock).not.toHaveBeenCalled()
+
+    // Informational dialog: no Cancelar, only the acknowledgement button.
+    expect(within(dialog).queryByRole("button", { name: "Cancelar" })).not.toBeInTheDocument()
+
+    await user.click(within(dialog).getByRole("button", { name: "Entendido" }))
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  })
+
+  it("reflects a different project count (triangulation: different count, not hardcoded)", async () => {
+    const user = userEvent.setup()
+    getClientsMock.mockResolvedValue([sampleClient])
+    countProjectsByClientMock.mockResolvedValue(5)
+
+    renderClientsPage()
+
+    await user.click(await screen.findByRole("button", { name: /eliminar/i }))
+
+    expect(
+      await screen.findByText("Tiene 5 proyecto(s) asociado(s). Eliminá o reasigná esos proyectos primero."),
+    ).toBeInTheDocument()
+    expect(deleteClientMock).not.toHaveBeenCalled()
+  })
+
+  it("proceeds with the normal confirm dialog when the client has no proyectos (triangulation: zero count)", async () => {
+    const user = userEvent.setup()
+    getClientsMock.mockResolvedValue([sampleClient])
+    countProjectsByClientMock.mockResolvedValue(0)
+    deleteClientMock.mockResolvedValue(undefined)
+
+    renderClientsPage()
+
+    await user.click(await screen.findByRole("button", { name: /eliminar/i }))
+    const dialog = await screen.findByRole("dialog")
+    expect(within(dialog).getByText("¿Eliminar a Juan Pérez?")).toBeInTheDocument()
+
+    await user.click(within(dialog).getByRole("button", { name: "Eliminar" }))
+    await waitFor(() => expect(deleteClientMock).toHaveBeenCalledWith("c1"))
+  })
+})
+
+describe("ClientsPage — delete failure messages", () => {
+  it("shows the FK-specific message when deleteClient rejects with ForeignKeyViolationError", async () => {
+    const user = userEvent.setup()
+    getClientsMock.mockResolvedValue([sampleClient])
+    countProjectsByClientMock.mockResolvedValue(0)
+    deleteClientMock.mockRejectedValue(new ForeignKeyViolationError("proyectos_client_id_fkey"))
+
+    renderClientsPage()
+
+    await user.click(await screen.findByRole("button", { name: /eliminar/i }))
+    const dialog = await screen.findByRole("dialog")
+    await user.click(within(dialog).getByRole("button", { name: "Eliminar" }))
+
+    expect(
+      await screen.findByText("No se puede eliminar: el cliente tiene proyectos asociados."),
+    ).toBeInTheDocument()
+  })
+
+  it("keeps the generic message for unrelated delete failures (triangulation: non-FK error)", async () => {
+    const user = userEvent.setup()
+    getClientsMock.mockResolvedValue([sampleClient])
+    countProjectsByClientMock.mockResolvedValue(0)
+    deleteClientMock.mockRejectedValue(new Error("network down"))
+
+    renderClientsPage()
+
+    await user.click(await screen.findByRole("button", { name: /eliminar/i }))
+    const dialog = await screen.findByRole("dialog")
+    await user.click(within(dialog).getByRole("button", { name: "Eliminar" }))
+
+    expect(
+      await screen.findByText("No se pudo eliminar el cliente. Intentalo de nuevo."),
+    ).toBeInTheDocument()
   })
 })
 

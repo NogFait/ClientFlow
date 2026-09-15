@@ -33,5 +33,5 @@ export async function updateClient (id: string, client:Partial<IClient>){
 export async function deleteClient (id: string){
     const {error} = await supabase
         .from("clientes").delete().eq("id", id)
-    if (error) throw new Error(error.message)
+    if (error) throw mapSupabaseError(error)
 }

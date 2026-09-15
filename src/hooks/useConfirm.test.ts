@@ -89,4 +89,19 @@ describe("useConfirm", () => {
     expect(result.current.dialogProps.cancelLabel).toBe("No")
     expect(result.current.dialogProps.danger).toBe(false)
   })
+
+  it("passes through cancelLabel: null for informational dialogs with no cancel option (triangulation: hidden cancel)", () => {
+    const { result } = renderHook(() => useConfirm())
+
+    act(() => {
+      result.current.confirm({
+        title: "No se puede eliminar a Juan",
+        cancelLabel: null,
+        confirmLabel: "Entendido",
+      })
+    })
+
+    expect(result.current.dialogProps.cancelLabel).toBeNull()
+    expect(result.current.dialogProps.confirmLabel).toBe("Entendido")
+  })
 })

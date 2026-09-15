@@ -31,6 +31,7 @@ export class LimitExceededError extends Error {
 export interface PostgrestErrorLike {
   message?: string | null
   details?: string | null
+  code?: string | null
 }
 
 function isLimitExceededDetails(value: unknown): value is LimitExceededDetails {
