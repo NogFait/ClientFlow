@@ -1,4 +1,5 @@
 import Modal from "../../../../components/shared/Modal/Modal"
+import { getPlanCatalogEntry } from "../../domain/planCatalog"
 import type { EntitlementResource, PlanCode } from "../../types"
 import styles from "./UpgradePrompt.module.css"
 
@@ -22,6 +23,11 @@ const RESOURCE_LABEL: Record<EntitlementResource, string> = {
 // is a placeholder callback until then.
 const UpgradePrompt = ({ isOpen, resource, limit, current, onClose, onUpgrade }: UpgradePromptProps) => {
   const label = RESOURCE_LABEL[resource]
+  // Prices come from planCatalog (single source of truth shared with
+  // PlanCards/PlanBadge) instead of being hardcoded here — keeps this CTA in
+  // sync automatically if pricing ever changes.
+  const monthly = getPlanCatalogEntry("pro_monthly")
+  const yearly = getPlanCatalogEntry("pro_yearly")
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Alcanzaste el límite de tu plan">
@@ -36,14 +42,14 @@ const UpgradePrompt = ({ isOpen, resource, limit, current, onClose, onUpgrade }:
             className={styles.ctaButton}
             onClick={() => onUpgrade?.("pro_monthly")}
           >
-            Mensual — $12/mes
+            Mensual — {monthly.price}{monthly.priceSuffix}
           </button>
           <button
             type="button"
             className={styles.ctaButtonSecondary}
             onClick={() => onUpgrade?.("pro_yearly")}
           >
-            Anual — $120/año
+            Anual — {yearly.price}{yearly.priceSuffix}
           </button>
         </div>
       </div>

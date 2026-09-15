@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import UpgradePrompt from "./UpgradePrompt"
+import { getPlanCatalogEntry } from "../../domain/planCatalog"
 
 describe("UpgradePrompt", () => {
   it("renders the resource name and the limit/current numbers for clientes", () => {
@@ -52,5 +53,21 @@ describe("UpgradePrompt", () => {
     await user.click(screen.getByRole("button", { name: /anual/i }))
 
     expect(onUpgrade).toHaveBeenCalledWith("pro_yearly")
+  })
+
+  it("renders the monthly and yearly prices straight from planCatalog, not hardcoded", () => {
+    render(
+      <UpgradePrompt isOpen resource="clientes" limit={3} current={3} onClose={() => {}} />,
+    )
+
+    const monthly = getPlanCatalogEntry("pro_monthly")
+    const yearly = getPlanCatalogEntry("pro_yearly")
+
+    expect(screen.getByRole("button", { name: /mensual/i })).toHaveTextContent(
+      `${monthly.price}${monthly.priceSuffix}`,
+    )
+    expect(screen.getByRole("button", { name: /anual/i })).toHaveTextContent(
+      `${yearly.price}${yearly.priceSuffix}`,
+    )
   })
 })
