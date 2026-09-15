@@ -1,3 +1,4 @@
+import { useId } from "react"
 import type { UseFormRegister, FieldErrors, UseFormHandleSubmit } from "react-hook-form"
 import type { IProject, ProjectStatus } from "../../types"
 import type { IClient } from "../../../clients/types"
@@ -16,22 +17,41 @@ interface ProjectFormProps {
 }
 
 const ProjectForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCancel, clients }: ProjectFormProps) => {
+  // Prefixes every field id with a per-mount unique id — this form can be
+  // rendered more than once on the same page in principle (create/edit
+  // modals), so plain string ids like "project-name" would collide.
+  const uid = useId()
+  const nameId = `${uid}-name`
+  const nameErrorId = `${uid}-name-error`
+  const descriptionId = `${uid}-description`
+  const clientId = `${uid}-client_id`
+  const statusId = `${uid}-status`
+  const budgetId = `${uid}-budget`
+  const startDateId = `${uid}-start_date`
+  const endDateId = `${uid}-end_date`
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <div>
-        <label className={styles.label}>Nombre</label>
-        <input className={styles.input} {...register("name", { required: true })} />
-        {errors.name && <span className={styles.error}>Requerido</span>}
+        <label htmlFor={nameId} className={styles.label}>Nombre</label>
+        <input
+          id={nameId}
+          className={styles.input}
+          aria-invalid={errors.name ? true : undefined}
+          aria-describedby={errors.name ? nameErrorId : undefined}
+          {...register("name", { required: true })}
+        />
+        {errors.name && <span id={nameErrorId} className={styles.error}>Requerido</span>}
       </div>
 
       <div>
-        <label className={styles.label}>Descripción</label>
-        <textarea className={styles.textarea} {...register("description")} />
+        <label htmlFor={descriptionId} className={styles.label}>Descripción</label>
+        <textarea id={descriptionId} className={styles.textarea} {...register("description")} />
       </div>
 
       <div>
-        <label className={styles.label}>Cliente</label>
-        <select className={styles.select} {...register("client_id")}>
+        <label htmlFor={clientId} className={styles.label}>Cliente</label>
+        <select id={clientId} className={styles.select} {...register("client_id")}>
           <option value="">Sin cliente</option>
           {clients.map(c => (
             <option key={c.id} value={c.id}>{c.name}</option>
@@ -40,8 +60,8 @@ const ProjectForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, o
       </div>
 
       <div>
-        <label className={styles.label}>Estado</label>
-        <select className={styles.select} {...register("status")}>
+        <label htmlFor={statusId} className={styles.label}>Estado</label>
+        <select id={statusId} className={styles.select} {...register("status")}>
           {statuses.map(s => (
             <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
           ))}
@@ -49,18 +69,18 @@ const ProjectForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, o
       </div>
 
       <div>
-        <label className={styles.label}>Presupuesto</label>
-        <input className={styles.input} type="number" step="0.01" {...register("budget")} />
+        <label htmlFor={budgetId} className={styles.label}>Presupuesto</label>
+        <input id={budgetId} className={styles.input} type="number" step="0.01" {...register("budget")} />
       </div>
 
       <div>
-        <label className={styles.label}>Fecha inicio</label>
-        <input className={styles.input} type="date" {...register("start_date")} />
+        <label htmlFor={startDateId} className={styles.label}>Fecha inicio</label>
+        <input id={startDateId} className={styles.input} type="date" {...register("start_date")} />
       </div>
 
       <div>
-        <label className={styles.label}>Fecha fin</label>
-        <input className={styles.input} type="date" {...register("end_date")} />
+        <label htmlFor={endDateId} className={styles.label}>Fecha fin</label>
+        <input id={endDateId} className={styles.input} type="date" {...register("end_date")} />
       </div>
 
       {errors.root?.serverError && (

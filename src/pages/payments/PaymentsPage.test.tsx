@@ -140,13 +140,13 @@ describe("PaymentsPage — toast feedback", () => {
     getProjectsMock.mockResolvedValue([])
     createPaymentMock.mockResolvedValue(undefined)
 
-    const { container } = renderAtWithToast()
+    renderAtWithToast()
 
     await waitFor(() =>
       expect(screen.getByText(`No registraste pagos en ${formatMonthEsAr(currentMonthKey())}`)).toBeInTheDocument(),
     )
     await user.click(screen.getAllByRole("button", { name: "Registrar pago" })[0])
-    await user.type(container.querySelector("form input")!, "200")
+    await user.type(screen.getByLabelText("Monto"), "200")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
 
     expect(await screen.findByText("Pago registrado")).toBeInTheDocument()
@@ -371,16 +371,15 @@ describe("PaymentsPage — create while viewing another month", () => {
     const pastMonth = shiftMonth(currentMonthKey(), -2)
     const pastDate = `${pastMonth}-10`
 
-    const { container } = renderAtWithToast("/payments")
+    renderAtWithToast("/payments")
 
     await waitFor(() =>
       expect(screen.getByText(`No registraste pagos en ${formatMonthEsAr(currentMonthKey())}`)).toBeInTheDocument(),
     )
     await user.click(screen.getAllByRole("button", { name: "Registrar pago" })[0])
 
-    const amountInput = container.querySelector("form input")!
-    await user.type(amountInput, "300")
-    const dateInput = container.querySelector('input[type="date"]') as HTMLInputElement
+    await user.type(screen.getByLabelText("Monto"), "300")
+    const dateInput = screen.getByLabelText("Fecha de pago") as HTMLInputElement
     await user.clear(dateInput)
     await user.type(dateInput, pastDate)
 

@@ -111,16 +111,12 @@ describe("ClientsPage — limit exceeded flow", () => {
       new LimitExceededError({ resource: "clientes", limit: 3, current: 3, plan: "free" }),
     )
 
-    const { container } = renderClientsPage()
+    renderClientsPage()
 
     await waitFor(() => expect(screen.getByText(/Todavía no tenés clientes/i)).toBeInTheDocument())
 
     await user.click(screen.getByRole("button", { name: /nuevo cliente/i }))
-    // ClientForm's "Nombre" <label> has no htmlFor/id pairing with its
-    // <input> (a pre-existing gap in that component, out of scope here), so
-    // getByLabelText can't resolve it — the Nombre field is the form's first
-    // text input, queried positionally instead.
-    await user.type(container.querySelector("form input")!, "Cliente Nuevo")
+    await user.type(screen.getByLabelText("Nombre"), "Cliente Nuevo")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
 
     expect(await screen.findByText(/alcanzaste el límite de tu plan/i)).toBeInTheDocument()
@@ -135,12 +131,12 @@ describe("ClientsPage — limit exceeded flow", () => {
     getClientsMock.mockResolvedValue([])
     createClientMock.mockResolvedValue(undefined)
 
-    const { container } = renderClientsPage()
+    renderClientsPage()
 
     await waitFor(() => expect(screen.getByText(/Todavía no tenés clientes/i)).toBeInTheDocument())
 
     await user.click(screen.getByRole("button", { name: /nuevo cliente/i }))
-    await user.type(container.querySelector("form input")!, "Cliente Nuevo")
+    await user.type(screen.getByLabelText("Nombre"), "Cliente Nuevo")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
 
     await waitFor(() => expect(createClientMock).toHaveBeenCalledTimes(1))
@@ -156,11 +152,11 @@ describe("ClientsPage — upgrade CTA navigation", () => {
       new LimitExceededError({ resource: "clientes", limit: 3, current: 3, plan: "free" }),
     )
 
-    const { container } = renderClientsPage()
+    renderClientsPage()
 
     await waitFor(() => expect(screen.getByText(/Todavía no tenés clientes/i)).toBeInTheDocument())
     await user.click(screen.getByRole("button", { name: /nuevo cliente/i }))
-    await user.type(container.querySelector("form input")!, "Cliente Nuevo")
+    await user.type(screen.getByLabelText("Nombre"), "Cliente Nuevo")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
     await screen.findByText(/alcanzaste el límite de tu plan/i)
 
@@ -176,11 +172,11 @@ describe("ClientsPage — upgrade CTA navigation", () => {
       new LimitExceededError({ resource: "clientes", limit: 3, current: 3, plan: "free" }),
     )
 
-    const { container } = renderClientsPage()
+    renderClientsPage()
 
     await waitFor(() => expect(screen.getByText(/Todavía no tenés clientes/i)).toBeInTheDocument())
     await user.click(screen.getByRole("button", { name: /nuevo cliente/i }))
-    await user.type(container.querySelector("form input")!, "Cliente Nuevo")
+    await user.type(screen.getByLabelText("Nombre"), "Cliente Nuevo")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
     await screen.findByText(/alcanzaste el límite de tu plan/i)
 
@@ -359,7 +355,7 @@ describe("ClientsPage — toast feedback", () => {
     getClientsMock.mockResolvedValue([])
     createClientMock.mockResolvedValue(undefined)
 
-    const { container } = render(
+    render(
       <MemoryRouter initialEntries={["/clients"]}>
         <ToastProvider>
           <Routes>
@@ -371,7 +367,7 @@ describe("ClientsPage — toast feedback", () => {
 
     await waitFor(() => expect(screen.getByText("Todavía no tenés clientes")).toBeInTheDocument())
     await user.click(screen.getByRole("button", { name: /nuevo cliente/i }))
-    await user.type(container.querySelector("form input")!, "Cliente Nuevo")
+    await user.type(screen.getByLabelText("Nombre"), "Cliente Nuevo")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
 
     expect(await screen.findByText("Cliente guardado")).toBeInTheDocument()

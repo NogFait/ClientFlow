@@ -75,7 +75,7 @@ describe("TaskPage — toast feedback", () => {
     const { createTask } = await import("../../features/tasks/services")
     vi.mocked(createTask).mockResolvedValue(undefined)
 
-    const { container } = render(
+    render(
       <ToastProvider>
         <TaskPage />
       </ToastProvider>,
@@ -83,7 +83,7 @@ describe("TaskPage — toast feedback", () => {
 
     await waitFor(() => expect(screen.getByText("Todavía no tenés tareas")).toBeInTheDocument())
     await user.click(screen.getByRole("button", { name: /crear tarea/i }))
-    await user.type(container.querySelector("form input")!, "Tarea Nueva")
+    await user.type(screen.getByLabelText("Título"), "Tarea Nueva")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
 
     expect(await screen.findByText("Tarea guardada")).toBeInTheDocument()

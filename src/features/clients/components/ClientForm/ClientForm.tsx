@@ -1,3 +1,4 @@
+import { useId } from "react"
 import type { UseFormRegister, FieldErrors, UseFormHandleSubmit } from "react-hook-form"
 import type { IClient, ClientStatus } from "../../types"
 import styles from "./ClientForm.module.css"
@@ -14,32 +15,49 @@ interface ClientFormProps {
 }
 
 const ClientForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCancel }: ClientFormProps) => {
+  // Prefixes every field id with a per-mount unique id — this form can be
+  // rendered more than once on the same page in principle (create/edit
+  // modals), so plain string ids like "client-name" would collide.
+  const uid = useId()
+  const nameId = `${uid}-name`
+  const nameErrorId = `${uid}-name-error`
+  const emailId = `${uid}-email`
+  const celularId = `${uid}-celular`
+  const companyId = `${uid}-company`
+  const statusId = `${uid}-status`
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <div className={styles.field}>
-        <label className={styles.label}>Nombre</label>
-        <input className={styles.input} {...register("name", { required: true })} />
-        {errors.name && <span className={styles.error}>Requerido</span>}
+        <label htmlFor={nameId} className={styles.label}>Nombre</label>
+        <input
+          id={nameId}
+          className={styles.input}
+          aria-invalid={errors.name ? true : undefined}
+          aria-describedby={errors.name ? nameErrorId : undefined}
+          {...register("name", { required: true })}
+        />
+        {errors.name && <span id={nameErrorId} className={styles.error}>Requerido</span>}
       </div>
 
       <div className={styles.field}>
-        <label className={styles.label}>Email</label>
-        <input className={styles.input} type="email" {...register("email")} />
+        <label htmlFor={emailId} className={styles.label}>Email</label>
+        <input id={emailId} className={styles.input} type="email" {...register("email")} />
       </div>
 
       <div className={styles.field}>
-        <label className={styles.label}>Celular</label>
-        <input className={styles.input} {...register("celular")} />
+        <label htmlFor={celularId} className={styles.label}>Celular</label>
+        <input id={celularId} className={styles.input} {...register("celular")} />
       </div>
 
       <div className={styles.field}>
-        <label className={styles.label}>Empresa</label>
-        <input className={styles.input} {...register("company")} />
+        <label htmlFor={companyId} className={styles.label}>Empresa</label>
+        <input id={companyId} className={styles.input} {...register("company")} />
       </div>
 
       <div className={styles.field}>
-        <label className={styles.label}>Estado</label>
-        <select className={styles.select} {...register("status")}>
+        <label htmlFor={statusId} className={styles.label}>Estado</label>
+        <select id={statusId} className={styles.select} {...register("status")}>
           {statuses.map(s => (
             <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
           ))}
