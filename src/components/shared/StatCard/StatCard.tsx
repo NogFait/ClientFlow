@@ -9,6 +9,9 @@ interface StatCardProps {
   secondaryLabel?: string
   icon?: LucideIcon
   variant?: "default" | "primary" | "success" | "warning" | "error"
+  // 0-100; renders a slim progress bar under the value when provided (e.g.
+  // the project hub's Cobrado/Tareas cards). Omitted entirely otherwise.
+  progressPct?: number
 }
 
 const variantClassMap: Record<string, string> = {
@@ -27,7 +30,7 @@ const valueVariantMap: Record<string, string> = {
   error: "valueError",
 }
 
-const StatCard = ({ label, value, primaryLabel, secondaryValue, secondaryLabel, icon: Icon, variant = "default" }: StatCardProps) => {
+const StatCard = ({ label, value, primaryLabel, secondaryValue, secondaryLabel, icon: Icon, variant = "default", progressPct }: StatCardProps) => {
   const iconVariant = variantClassMap[variant]
   const valueVariant = valueVariantMap[variant]
 
@@ -54,6 +57,15 @@ const StatCard = ({ label, value, primaryLabel, secondaryValue, secondaryLabel, 
         </div>
       ) : (
         <p className={`${styles.value} ${valueVariant ? styles[valueVariant] : ""}`}>{value}</p>
+      )}
+      {progressPct !== undefined && (
+        <div className={styles.progressTrack}>
+          <div
+            className={styles.progressFill}
+            style={{ width: `${progressPct}%` }}
+            data-testid="stat-card-progress"
+          />
+        </div>
       )}
     </article>
   )

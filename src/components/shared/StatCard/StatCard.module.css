@@ -102,3 +102,18 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-text-tertiary);
 }
+
+.progressTrack {
+  margin-top: var(--spacing-3);
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-neutral-100);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-500);
+  transition: width var(--transition-base);
+}

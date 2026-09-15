@@ -25,4 +25,16 @@ describe('StatCard', () => {
     expect(screen.getByText('$300')).toBeInTheDocument()
     expect(screen.getByText('pendiente')).toBeInTheDocument()
   })
+
+  it('renders a progress bar sized to progressPct when provided', () => {
+    render(<StatCard label="Cobrado" value="$500" progressPct={40} />)
+
+    expect(screen.getByTestId('stat-card-progress')).toHaveStyle({ width: '40%' })
+  })
+
+  it('does not render a progress bar when progressPct is omitted (triangulation)', () => {
+    render(<StatCard label="Presupuesto" value="Sin presupuesto" />)
+
+    expect(screen.queryByTestId('stat-card-progress')).not.toBeInTheDocument()
+  })
 })
