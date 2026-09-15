@@ -1,9 +1,21 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { MemoryRouter, Route, Routes } from "react-router-dom"
 import ClientsPage from "./ClientsPage"
 import { LimitExceededError } from "../../features/billing/domain/errors"
 import type { Entitlements } from "../../features/billing/types"
+
+function renderClientsPage() {
+  return render(
+    <MemoryRouter initialEntries={["/clients"]}>
+      <Routes>
+        <Route path="/clients" element={<ClientsPage />} />
+        <Route path="/settings/billing" element={<div>Billing Settings Mock</div>} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
 
 // WARNING from sdd/saas-conversion/verify-report-m1 (#1132): the spec scenario
 // "Limit hit on Clients page triggers modal" had no integration-level test —
@@ -59,7 +71,7 @@ describe("ClientsPage — limit exceeded flow", () => {
       new LimitExceededError({ resource: "clientes", limit: 3, current: 3, plan: "free" }),
     )
 
-    const { container } = render(<ClientsPage />)
+    const { container } = renderClientsPage()
 
     await waitFor(() => expect(screen.getByText(/no hay clientes registrados/i)).toBeInTheDocument())
 
@@ -83,7 +95,7 @@ describe("ClientsPage — limit exceeded flow", () => {
     getClientsMock.mockResolvedValue([])
     createClientMock.mockResolvedValue(undefined)
 
-    const { container } = render(<ClientsPage />)
+    const { container } = renderClientsPage()
 
     await waitFor(() => expect(screen.getByText(/no hay clientes registrados/i)).toBeInTheDocument())
 
@@ -93,5 +105,47 @@ describe("ClientsPage — limit exceeded flow", () => {
 
     await waitFor(() => expect(createClientMock).toHaveBeenCalledTimes(1))
     expect(screen.queryByText(/alcanzaste el límite de tu plan/i)).not.toBeInTheDocument()
+  })
+})
+
+describe("ClientsPage — upgrade CTA navigation", () => {
+  it("navigates to /settings/billing when the monthly CTA in UpgradePrompt is clicked", async () => {
+    const user = userEvent.setup()
+    getClientsMock.mockResolvedValue([])
+    createClientMock.mockRejectedValue(
+      new LimitExceededError({ resource: "clientes", limit: 3, current: 3, plan: "free" }),
+    )
+
+    const { container } = renderClientsPage()
+
+    await waitFor(() => expect(screen.getByText(/no hay clientes registrados/i)).toBeInTheDocument())
+    await user.click(screen.getByRole("button", { name: /nuevo cliente/i }))
+    await user.type(container.querySelector("form input")!, "Cliente Nuevo")
+    await user.click(screen.getByRole("button", { name: /guardar/i }))
+    await screen.findByText(/alcanzaste el límite de tu plan/i)
+
+    await user.click(screen.getByRole("button", { name: /mensual/i }))
+
+    expect(await screen.findByText("Billing Settings Mock")).toBeInTheDocument()
+  })
+
+  it("navigates to /settings/billing when the yearly CTA is clicked (triangulation: different button)", async () => {
+    const user = userEvent.setup()
+    getClientsMock.mockResolvedValue([])
+    createClientMock.mockRejectedValue(
+      new LimitExceededError({ resource: "clientes", limit: 3, current: 3, plan: "free" }),
+    )
+
+    const { container } = renderClientsPage()
+
+    await waitFor(() => expect(screen.getByText(/no hay clientes registrados/i)).toBeInTheDocument())
+    await user.click(screen.getByRole("button", { name: /nuevo cliente/i }))
+    await user.type(container.querySelector("form input")!, "Cliente Nuevo")
+    await user.click(screen.getByRole("button", { name: /guardar/i }))
+    await screen.findByText(/alcanzaste el límite de tu plan/i)
+
+    await user.click(screen.getByRole("button", { name: /anual/i }))
+
+    expect(await screen.findByText("Billing Settings Mock")).toBeInTheDocument()
   })
 })

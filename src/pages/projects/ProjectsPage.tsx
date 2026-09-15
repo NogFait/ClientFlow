@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import type { IProject } from "../../features/projects/types"
 import type { IClient } from "../../features/clients/types"
 import type { IPayment } from "../../features/payments/types"
@@ -27,6 +28,7 @@ interface UpgradePromptState {
 }
 
 const ProjectsPage = () => {
+  const navigate = useNavigate()
   const [projects, setProjects] = useState<(IProject & { clientes?: { name: string } | null })[]>([])
   const [clients, setClients] = useState<IClient[]>([])
   const [modalMode, setModalMode] = useState<ModalMode>(null)
@@ -225,6 +227,7 @@ const ProjectsPage = () => {
           limit={upgradePrompt.limit}
           current={upgradePrompt.current}
           onClose={() => setUpgradePrompt(null)}
+          onUpgrade={() => navigate("/settings/billing")}
         />
       )}
     </div>
