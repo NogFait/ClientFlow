@@ -244,12 +244,18 @@ const ProjectHubPage = () => {
                 const isDone = task.status === "hechas"
                 return (
                   <li key={task.id} className={styles.taskRow}>
-                    <input
-                      type="checkbox"
-                      checked={isDone}
-                      onChange={() => toggleTaskDone(task)}
-                      aria-label={isDone ? "Marcar como pendiente" : "Marcar como hecha"}
-                    />
+                    {/* Wrapping the checkbox in a <label> grows its tap target
+                        to 40px on mobile (via CSS) without changing its
+                        visual size or its accessible name (still the
+                        checkbox's own aria-label). */}
+                    <label className={styles.checkboxWrap}>
+                      <input
+                        type="checkbox"
+                        checked={isDone}
+                        onChange={() => toggleTaskDone(task)}
+                        aria-label={isDone ? "Marcar como pendiente" : "Marcar como hecha"}
+                      />
+                    </label>
                     <span className={`${styles.taskTitle} ${isDone ? styles.taskTitleDone : ""}`}>{task.title}</span>
                     <span className={styles.priorityBadge}>{priorityLabels[task.priority]}</span>
                     <span className={styles.dueDate}>{formatDate(task.due_date)}</span>

@@ -38,6 +38,7 @@
 .breadcrumb {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--spacing-1);
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
@@ -53,6 +54,12 @@
   text-decoration: underline;
 }
 
+/* The current project's name (plain <span>, last breadcrumb crumb) — long
+   names must wrap instead of overflowing the page horizontally. */
+.breadcrumb span {
+  overflow-wrap: anywhere;
+}
+
 .header {
   display: flex;
   align-items: flex-start;
@@ -62,11 +69,16 @@
   margin-bottom: var(--spacing-6);
 }
 
+.headerInfo {
+  min-width: 0;
+}
+
 .title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0 0 var(--spacing-1);
+  overflow-wrap: anywhere;
 }
 
 .clientName {
@@ -128,14 +140,14 @@
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--spacing-4);
   margin-bottom: var(--spacing-8);
 }
 
 @media (max-width: 1023px) {
   .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -147,7 +159,7 @@
 
 @media (max-width: 767px) {
   .sections {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -156,12 +168,15 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-5);
+  min-width: 0;
 }
 
 .sectionHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
   margin-bottom: var(--spacing-4);
 }
 
@@ -206,8 +221,17 @@
   font-size: var(--font-size-sm);
 }
 
+.checkboxWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .taskTitle {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: var(--color-text-primary);
 }
 
@@ -269,4 +293,84 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-medium);
+}
+
+/* ----------------------------------------------------------
+   Mobile (<=767px) — see docs/DESING.md's breakpoint note and the
+   Clients/Payments mobile card-list patterns this mirrors.
+   ---------------------------------------------------------- */
+@media (max-width: 767px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .headerActions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .statusSelect {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  .editBtn,
+  .deleteBtn {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  .sectionAction {
+    min-height: 40px;
+  }
+
+  /* Checkbox stays visually small — only its tap target grows, via the
+     wrapping <label> (see ProjectHubPage.tsx). */
+  .checkboxWrap {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  /* Title shares the first line with the checkbox; priority/due date don't
+     fit on that line at this width and naturally wrap to a second line
+     together — no extra wrapper markup needed. */
+  .taskRow {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .taskTitle {
+    flex-basis: calc(100% - 56px);
+  }
+
+  .priorityBadge,
+  .dueDate {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  /* Stacked card layout instead of a cramped 4-column row: date+amount
+     share the first line (amount pushed to the right), status+method wrap
+     to a second line — same idea as PaymentMobileCard elsewhere in the app. */
+  .paymentRow {
+    flex-wrap: wrap;
+    align-items: center;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-3);
+  }
+
+  .paymentAmount {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: right;
+  }
+
+  .badge,
+  .paymentMethod {
+    flex: 0 0 auto;
+  }
 }
