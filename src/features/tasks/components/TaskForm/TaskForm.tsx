@@ -14,9 +14,13 @@ interface TaskFormProps {
   isSubmitting: boolean
   onCancel: () => void
   projects: IProject[]
+  // Set from the project hub's "+ Nueva tarea": the project is already known,
+  // so the select is hidden entirely rather than shown disabled — useTaskForm
+  // forces project_id to this value on submit (see its own lockedProjectId doc).
+  lockedProjectId?: string
 }
 
-const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCancel, projects }: TaskFormProps) => {
+const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCancel, projects, lockedProjectId }: TaskFormProps) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <div className={styles.field}>
@@ -37,19 +41,22 @@ const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCa
         {errors.description && <span className={styles.error}>{errors.description?.message}</span>}
       </div>
 
-      <div className={styles.field}>
-        <label className={styles.label}>Proyecto</label>
-        <select 
-          className={`${styles.select} ${errors.project_id ? styles.inputError : ''}`} 
-          {...register("project_id")} 
-        >
-          <option value="">Sin proyecto</option>
-          {projects.map(p => (
-            <option key={p.id} value={p.id}>{p.name}</option>
-          ))}
-        </select>
-        {errors.project_id && <span className={styles.error}>{errors.project_id?.message}</span>}
-      </div>
+      {!lockedProjectId && (
+        <div className={styles.field}>
+          <label htmlFor="task-project_id" className={styles.label}>Proyecto</label>
+          <select
+            id="task-project_id"
+            className={`${styles.select} ${errors.project_id ? styles.inputError : ''}`}
+            {...register("project_id")}
+          >
+            <option value="">Sin proyecto</option>
+            {projects.map(p => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+          {errors.project_id && <span className={styles.error}>{errors.project_id?.message}</span>}
+        </div>
+      )}
 
       <div className={styles.field}>
         <label className={styles.label}>Estado</label>

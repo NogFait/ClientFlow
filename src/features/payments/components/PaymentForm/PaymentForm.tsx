@@ -14,20 +14,27 @@ interface PaymentFormProps {
   isSubmitting: boolean
   onCancel: () => void
   projects: IProject[]
+  // Set from the project hub's "+ Registrar pago": the project is already
+  // known, so the select is hidden entirely rather than shown disabled —
+  // usePaymentForm forces project_id to this value on submit (see its own
+  // lockedProjectId doc).
+  lockedProjectId?: string
 }
 
-const PaymentForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCancel, projects }: PaymentFormProps) => {
+const PaymentForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCancel, projects, lockedProjectId }: PaymentFormProps) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-      <div>
-        <label className={styles.label}>Proyecto</label>
-        <select className={styles.select} {...register("project_id")}>
-          <option value="">Sin proyecto</option>
-          {projects.map(p => (
-            <option key={p.id} value={p.id}>{p.name}</option>
-          ))}
-        </select>
-      </div>
+      {!lockedProjectId && (
+        <div>
+          <label htmlFor="payment-project_id" className={styles.label}>Proyecto</label>
+          <select id="payment-project_id" className={styles.select} {...register("project_id")}>
+            <option value="">Sin proyecto</option>
+            {projects.map(p => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <label className={styles.label}>Monto</label>
