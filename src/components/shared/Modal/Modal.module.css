@@ -77,7 +77,9 @@
 
 .body {
   overflow-y: auto;
+  overflow-x: hidden; /* content must adapt, never scroll sideways */
   min-height: 0;
+  min-width: 0;
 }
 
 /* Mobile: full-height bottom sheet instead of a centered dialog. Uses dvh

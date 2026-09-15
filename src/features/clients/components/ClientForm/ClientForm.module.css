@@ -2,7 +2,7 @@
 
 .form {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spacing-4);
 }
 
@@ -97,4 +97,20 @@
 .submitBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Mobile: one column; inputs must never impose their intrinsic width
+   (that is what caused horizontal scroll inside the edit modals). */
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .form {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
