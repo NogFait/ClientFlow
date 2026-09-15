@@ -93,11 +93,11 @@ describe("ProjectsPage — upgrade CTA navigation", () => {
       new LimitExceededError({ resource: "proyectos", limit: 5, current: 5, plan: "free" }),
     )
 
-    const { container } = renderProjectsPage()
+    renderProjectsPage()
 
     await waitFor(() => expect(screen.getByText(/Todavía no tenés proyectos/i)).toBeInTheDocument())
     await user.click(screen.getByRole("button", { name: /nuevo proyecto/i }))
-    await user.type(container.querySelector("form input")!, "Proyecto Nuevo")
+    await user.type(screen.getByLabelText("Nombre"), "Proyecto Nuevo")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
     await screen.findByText(/alcanzaste el límite de tu plan/i)
 
@@ -115,11 +115,11 @@ describe("ProjectsPage — upgrade CTA navigation", () => {
       new LimitExceededError({ resource: "proyectos", limit: 5, current: 5, plan: "free" }),
     )
 
-    const { container } = renderProjectsPage()
+    renderProjectsPage()
 
     await waitFor(() => expect(screen.getByText(/Todavía no tenés proyectos/i)).toBeInTheDocument())
     await user.click(screen.getByRole("button", { name: /nuevo proyecto/i }))
-    await user.type(container.querySelector("form input")!, "Proyecto Nuevo")
+    await user.type(screen.getByLabelText("Nombre"), "Proyecto Nuevo")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
     await screen.findByText(/alcanzaste el límite de tu plan/i)
 
@@ -157,7 +157,7 @@ describe("ProjectsPage — toast feedback", () => {
     getPaymentsMock.mockResolvedValue([])
     createProjectMock.mockResolvedValue(undefined)
 
-    const { container } = render(
+    render(
       <MemoryRouter initialEntries={["/projects"]}>
         <ToastProvider>
           <Routes>
@@ -169,7 +169,7 @@ describe("ProjectsPage — toast feedback", () => {
 
     await waitFor(() => expect(screen.getByText("Todavía no tenés proyectos")).toBeInTheDocument())
     await user.click(screen.getByRole("button", { name: /nuevo proyecto/i }))
-    await user.type(container.querySelector("form input")!, "Proyecto Nuevo")
+    await user.type(screen.getByLabelText("Nombre"), "Proyecto Nuevo")
     await user.click(screen.getByRole("button", { name: /guardar/i }))
 
     expect(await screen.findByText("Proyecto guardado")).toBeInTheDocument()
