@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import type { ComponentProps } from "react"
 import type SidebarComponent from "./Sidebar"
+import styles from "./Sidebar.module.css"
 
 const STORAGE_KEY = "clientflow.sidebar.collapsed"
 
@@ -53,6 +54,26 @@ describe("Sidebar — billing nav entry", () => {
     expect(screen.queryByRole("link", { name: /Plan y facturación/i })).not.toBeInTheDocument()
     // Pre-existing nav items are unaffected by the flag.
     expect(screen.getByRole("link", { name: /Dashboard/i })).toBeInTheDocument()
+  })
+})
+
+describe("Sidebar — nested route active state", () => {
+  beforeEach(() => {
+    vi.doMock("../../../config/features", () => ({ BILLING_ENABLED: false }))
+  })
+
+  it("keeps 'Proyectos' highlighted when on the project hub route (/projects/:id)", async () => {
+    const { default: Sidebar } = await import("./Sidebar")
+    render(
+      <MemoryRouter initialEntries={["/projects/p1"]}>
+        <Routes>
+          <Route path="*" element={<Sidebar />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    const link = screen.getByRole("link", { name: /Proyectos/i })
+    expect(link.className).toContain(styles.navItemActive)
   })
 })
 

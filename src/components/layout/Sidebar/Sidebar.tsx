@@ -104,11 +104,14 @@ const Sidebar = ({ mobileOpen = false, onCloseMobile = noop }: SidebarProps) => 
         <nav className={styles.nav}>
           {navItems.map((item) => {
             const Icon = item.icon
+            // Nested detail routes (e.g. the project hub at /projects/:id)
+            // should keep their parent's nav item highlighted too.
+            const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`${styles.navItem} ${location.pathname === item.path ? styles.navItemActive : ""}`}
+                className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
                 title={isRail ? item.label : undefined}
                 aria-label={isRail ? item.label : undefined}
               >
