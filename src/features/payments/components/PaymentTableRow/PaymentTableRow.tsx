@@ -1,5 +1,6 @@
 import { CheckCircle, Clock, Eye } from "lucide-react"
 import type { IPayment } from "../../types"
+import { formatCurrency } from "../../../../utils/currency"
 import styles from "./PaymentTableRow.module.css"
 
 interface PaymentTableRowProps {
@@ -18,7 +19,7 @@ const PaymentTableRow = ({ payment, onView, onEdit, onDelete }: PaymentTableRowP
       <td className={styles.cell}>{payment.proyectos?.clientes?.name ?? "—"}</td>
       <td className={styles.cell}>{payment.proyectos?.name ?? "—"}</td>
       <td className={styles.cellAmount}>
-        ${Number(payment.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        {formatCurrency(Number(payment.amount))}
       </td>
       <td className={styles.cell}>
         <span className={`${styles.badge} ${isPagado ? styles.badgePagado : styles.badgePendiente}`}>

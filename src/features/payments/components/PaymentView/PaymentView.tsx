@@ -1,4 +1,5 @@
 import type { IPayment } from "../../types"
+import { formatCurrency } from "../../../../utils/currency"
 import styles from "./PaymentView.module.css"
 
 interface PaymentViewProps {
@@ -25,7 +26,7 @@ const PaymentView = ({ payment }: PaymentViewProps) => (
     <div className={styles.field}>
       <span className={styles.label}>Monto</span>
       <span className={styles.value}>
-        ${Number(payment.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        {formatCurrency(Number(payment.amount))}
       </span>
     </div>
     <div className={styles.field}>

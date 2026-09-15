@@ -1,5 +1,6 @@
 import { CheckCircle, Clock, Eye, Pencil, Trash2 } from "lucide-react"
 import type { IPayment } from "../../types"
+import { formatCurrency } from "../../../../utils/currency"
 import styles from "./PaymentMobileCard.module.css"
 
 type PaymentWithRelations = IPayment & { proyectos?: { name: string; clientes?: { name: string } | null } | null }
@@ -23,14 +24,14 @@ const methodLabels: Record<string, string> = {
 // unreachable without horizontal scrolling. Mirrors PaymentTableRow's data.
 const PaymentMobileCard = ({ payment, onView, onEdit, onDelete }: PaymentMobileCardProps) => {
   const isPagado = payment.status === "pagado"
-  const amount = Number(payment.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const amount = formatCurrency(Number(payment.amount))
   const clientName = payment.proyectos?.clientes?.name ?? "—"
   const projectName = payment.proyectos?.name ?? "—"
 
   return (
     <div className={styles.card}>
       <div className={styles.cardHeader}>
-        <span className={styles.amount}>${amount}</span>
+        <span className={styles.amount}>{amount}</span>
         <span className={`${styles.badge} ${isPagado ? styles.badgePagado : styles.badgePendiente}`}>
           {isPagado ? <CheckCircle size={12} /> : <Clock size={12} />}
           {isPagado ? "Pagado" : "Pendiente"}
@@ -47,7 +48,7 @@ const PaymentMobileCard = ({ payment, onView, onEdit, onDelete }: PaymentMobileC
           type="button"
           className={`${styles.actionBtn} ${styles.actionView}`}
           onClick={() => onView(payment)}
-          aria-label={`Ver pago de $${amount}`}
+          aria-label={`Ver pago de ${amount}`}
         >
           <Eye size={16} /> Ver
         </button>
@@ -55,7 +56,7 @@ const PaymentMobileCard = ({ payment, onView, onEdit, onDelete }: PaymentMobileC
           type="button"
           className={`${styles.actionBtn} ${styles.actionEdit}`}
           onClick={() => onEdit(payment)}
-          aria-label={`Editar pago de $${amount}`}
+          aria-label={`Editar pago de ${amount}`}
         >
           <Pencil size={16} /> Editar
         </button>
@@ -63,7 +64,7 @@ const PaymentMobileCard = ({ payment, onView, onEdit, onDelete }: PaymentMobileC
           type="button"
           className={`${styles.actionBtn} ${styles.actionDelete}`}
           onClick={() => onDelete(payment)}
-          aria-label={`Eliminar pago de $${amount}`}
+          aria-label={`Eliminar pago de ${amount}`}
         >
           <Trash2 size={16} /> Eliminar
         </button>

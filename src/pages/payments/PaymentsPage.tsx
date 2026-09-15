@@ -16,6 +16,9 @@ import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import { DollarSign, Clock, Calendar } from "lucide-react"
 import StatCard from "../../components/shared/StatCard/StatCard"
 import Loader from "../../components/shared/Loader/Loader"
+import EmptyState from "../../components/shared/EmptyState/EmptyState"
+import { useToast } from "../../components/shared/Toast/useToast"
+import { formatCurrency } from "../../utils/currency"
 import styles from "./PaymentsPage.module.css"
 
 const PaymentsPage = () => {
@@ -26,6 +29,7 @@ const PaymentsPage = () => {
   const [viewModalOpen, setViewModalOpen] = useState(false)
   const [viewingPayment, setViewingPayment] = useState<IPayment & { proyectos?: { name: string; clientes?: { name: string } | null } | null } | null>(null)
   const [loading, setLoading] = useState(true)
+  const toast = useToast()
 
   const refreshPayments = async () => {
     const updated = await getPayments()
@@ -33,9 +37,11 @@ const PaymentsPage = () => {
   }
 
   const { register, handleSubmit, onSubmit, reset, errors, isSubmitting } = usePaymentForm(() => {
+    const wasEdit = editingPayment !== null
     setModalOpen(false)
     setEditingPayment(null)
     refreshPayments()
+    toast.success(wasEdit ? "Pago actualizado" : "Pago registrado")
   }, editingPayment ?? undefined)
 
   const closeModal = () => {
@@ -66,12 +72,12 @@ const PaymentsPage = () => {
   const isMobile = useMediaQuery("(max-width: 767px)")
 
   const handleDelete = async (payment: IPayment) => {
-    const amount = Number(payment.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-    const confirmed = await confirm({ title: `¿Eliminar pago de $${amount}?` })
+    const confirmed = await confirm({ title: `¿Eliminar pago de ${formatCurrency(Number(payment.amount))}?` })
     if (!confirmed) return
     try {
       await deletePayment(payment.id!)
       refreshPayments()
+      toast.success("Pago eliminado")
     } catch {
       setDeleteError("No se pudo eliminar el pago. Intentalo de nuevo.")
     }
@@ -91,7 +97,7 @@ const PaymentsPage = () => {
     .sort((a, b) => new Date(a.payment_date!).getTime() - new Date(b.payment_date!).getTime())[0]
 
   const proximoPagoValue = proximoPago
-    ? `${new Date(proximoPago.payment_date!).toLocaleDateString()} — $${Number(proximoPago.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    ? `${new Date(proximoPago.payment_date!).toLocaleDateString()} — ${formatCurrency(Number(proximoPago.amount))}`
     : "—"
 
   const totalGanado = currentMonthPayments
@@ -109,7 +115,7 @@ const PaymentsPage = () => {
       <PageHeader
         title="Pagos e Ingresos"
         description="Administra tus finanzas y realiza un seguimiento de los ingresos de tus proyectos"
-        actionLabel="Nueva Factura"
+        actionLabel="Registrar pago"
         onAction={() => { setEditingPayment(null); setModalOpen(true) }}
       />
 
@@ -121,12 +127,20 @@ const PaymentsPage = () => {
       )}
 
       <div className={styles.kpiGrid}>
-        <StatCard label="Total Ganados" value={`$${totalGanado.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} icon={DollarSign} variant="success" />
-        <StatCard label="Total Pendiente" value={`$${totalPendiente.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} icon={Clock} variant="warning" />
+        <StatCard label="Total Ganados" value={formatCurrency(totalGanado)} icon={DollarSign} variant="success" />
+        <StatCard label="Total Pendiente" value={formatCurrency(totalPendiente)} icon={Clock} variant="warning" />
         <StatCard label="Próximo pago proyectado" value={proximoPagoValue} icon={Calendar} variant="primary" />
       </div>
 
-      {currentMonthPayments.length === 0 && <p className={styles.emptyState}>No hay pagos registrados este mes.</p>}
+      {currentMonthPayments.length === 0 && (
+        <EmptyState
+          icon={DollarSign}
+          title="No registraste pagos este mes"
+          description="Anotá cada cobro para ver tus ingresos y lo que falta cobrar."
+          actionLabel="Registrar pago"
+          onAction={() => { setEditingPayment(null); setModalOpen(true) }}
+        />
+      )}
       {currentMonthPayments.length > 0 && (
         isMobile ? (
           <div className={styles.mobileList}>
@@ -156,7 +170,7 @@ const PaymentsPage = () => {
         )
       )}
 
-      <Modal isOpen={modalOpen} onClose={closeModal} title={editingPayment ? "Editar Factura" : "Nueva Factura"}>
+      <Modal isOpen={modalOpen} onClose={closeModal} title={editingPayment ? "Editar pago" : "Registrar pago"}>
         <PaymentForm
           register={register}
           handleSubmit={handleSubmit}
