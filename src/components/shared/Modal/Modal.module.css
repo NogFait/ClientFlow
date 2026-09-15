@@ -18,8 +18,10 @@
   min-width: 440px;
   max-width: 520px;
   width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
+  max-height: calc(100dvh - var(--spacing-12));
+  display: flex;
+  flex-direction: column;
+  outline: none;
 }
 
 @keyframes fadeIn {
@@ -38,9 +40,15 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  gap: var(--spacing-3);
   margin-bottom: var(--spacing-4);
   padding-bottom: var(--spacing-4);
   border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  background-color: var(--color-bg-primary);
+  z-index: 1;
+  flex-shrink: 0;
 }
 
 .title {
@@ -49,15 +57,18 @@
 }
 
 .closeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background-color: transparent;
   border: none;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md);
-  font-size: var(--font-size-xl);
   color: var(--color-text-tertiary);
   cursor: pointer;
   transition: var(--transition-base);
+  flex-shrink: 0;
 }
 
 .closeButton:hover {
@@ -65,5 +76,44 @@
 }
 
 .body {
-  /* Content will be placed here */
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* Mobile: full-height bottom sheet instead of a centered dialog. Uses dvh
+   (not vh) so mobile browser chrome collapsing/expanding doesn't clip the
+   sheet, and env(safe-area-inset-bottom) keeps content clear of home
+   indicators on notched phones. Inputs rendered inside (forms) are bumped
+   to 16px to stop iOS Safari's auto-zoom on focus. */
+@media (max-width: 767px) {
+  .overlay {
+    align-items: flex-end;
+  }
+
+  .modal {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    padding: var(--spacing-4);
+    padding-bottom: calc(var(--spacing-4) + env(safe-area-inset-bottom));
+    animation: slideUp 200ms;
+  }
+
+  .body :global(input),
+  .body :global(select),
+  .body :global(textarea) {
+    font-size: 16px;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }

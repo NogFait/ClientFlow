@@ -1,4 +1,5 @@
-import { useEffect, type ReactNode } from "react"
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react"
+import { X } from "lucide-react"
 import styles from "./Modal.module.css"
 
 interface ModalProps {
@@ -6,27 +7,72 @@ interface ModalProps {
   onClose: () => void
   title: string
   children: ReactNode
+  // Element to focus when the dialog opens instead of the dialog surface
+  // itself — e.g. ConfirmDialog focuses its confirm button.
+  initialFocusRef?: RefObject<HTMLElement | null>
 }
 
-const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
+const Modal = ({ isOpen, onClose, title, children, initialFocusRef }: ModalProps) => {
+  const titleId = useId()
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const previouslyFocused = useRef<HTMLElement | null>(null)
+
+  // Keep the latest onClose reachable from the effect below without making
+  // it a dependency — pages pass a fresh arrow function on every render, and
+  // re-running the open/focus/scroll-lock setup on every render (rather than
+  // just on the isOpen transition) would fight the user's own focus moves
+  // inside the dialog. Updated in its own effect (runs after render) rather
+  // than during render, so the React Compiler's ref-mutation lint is happy.
+  const onCloseRef = useRef(onClose)
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = ""
+    onCloseRef.current = onClose
+  })
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    document.body.style.overflow = "hidden"
+    previouslyFocused.current = document.activeElement as HTMLElement | null
+
+    const target = initialFocusRef?.current ?? dialogRef.current
+    target?.focus()
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onCloseRef.current()
+      }
     }
-    return () => { document.body.style.overflow = "" }
-  }, [isOpen])
+    document.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = ""
+      document.removeEventListener("keydown", handleKeyDown)
+      previouslyFocused.current?.focus()
+    }
+  }, [isOpen, initialFocusRef])
 
   if (!isOpen) return null
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={dialogRef}
+        className={styles.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className={styles.header}>
-          <h2 className={styles.title}>{title}</h2>
-          <button className={styles.closeButton} onClick={onClose}>
-            &times;
+          <h2 id={titleId} className={styles.title}>{title}</h2>
+          <button
+            type="button"
+            className={styles.closeButton}
+            onClick={onClose}
+            aria-label="Cerrar"
+          >
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
         <div className={styles.body}>
