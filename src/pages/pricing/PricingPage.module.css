@@ -1,0 +1,94 @@
+.page {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.hero {
+  background: radial-gradient(1000px 500px at 80% -10%, var(--color-primary-100) 0%, rgba(237, 233, 254, 0) 60%),
+    var(--color-bg-primary);
+}
+
+.heroInner {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: var(--spacing-16) var(--spacing-5) var(--spacing-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-3);
+}
+
+.eyebrow {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-primary-600);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-4xl);
+  line-height: 1.1;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.03em;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.cardsSection {
+  padding: 0 var(--spacing-5) var(--spacing-16);
+}
+
+.cardsInner {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-6);
+}
+
+.note {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.faqSection {
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.faqInner {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: var(--spacing-16) var(--spacing-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.faqTitle {
+  margin: 0;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.03em;
+}
+
+@media (min-width: 768px) {
+  .cardsSection {
+    padding: 0 var(--spacing-6) var(--spacing-16);
+  }
+
+  .faqInner {
+    padding-left: var(--spacing-6);
+    padding-right: var(--spacing-6);
+  }
+}
