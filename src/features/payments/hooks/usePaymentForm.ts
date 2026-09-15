@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form"
 import type { IPayment } from "../types"
 import { createPayment, updatePayment } from "../services"
 
-export function usePaymentForm(onSuccess: () => void, defaultValues?: IPayment) {
+export function usePaymentForm(onSuccess: (saved: IPayment) => void, defaultValues?: IPayment) {
   const { register, handleSubmit, reset, setError, formState: { errors, isSubmitting } } = useForm<IPayment>({ values: defaultValues })
 
   const onSubmit = async (data: IPayment) => {
@@ -15,7 +15,7 @@ export function usePaymentForm(onSuccess: () => void, defaultValues?: IPayment) 
         await createPayment(createData as IPayment)
       }
       reset()
-      onSuccess()
+      onSuccess(cleanData as IPayment)
     } catch {
       setError("root.serverError", {
         type: "manual",
