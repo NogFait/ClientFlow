@@ -7,6 +7,8 @@ import { useTaskForm } from "../../features/tasks/hooks/useTaskForm"
 import TaskColumn from "../../features/tasks/components/TaskColumn/TaskColumn"
 import TaskForm from "../../features/tasks/components/TaskForm/TaskForm"
 import Modal from "../../components/shared/Modal/Modal"
+import ConfirmDialog from "../../components/shared/ConfirmDialog/ConfirmDialog"
+import { useConfirm } from "../../hooks/useConfirm"
 import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import Loader from "../../components/shared/Loader/Loader"
 import styles from "./TaskPage.module.css"
@@ -61,15 +63,16 @@ const TaskPage = () => {
   }
 
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const { confirm, dialogProps } = useConfirm()
 
   const handleDelete = async (task: ITask) => {
-    if (window.confirm(`¿Eliminar "${task.title}"?`)) {
-      try {
-        await deleteTask(task.id!)
-        refreshTasks()
-      } catch {
-        setDeleteError("No se pudo eliminar la tarea. Intentalo de nuevo.")
-      }
+    const confirmed = await confirm({ title: `¿Eliminar "${task.title}"?` })
+    if (!confirmed) return
+    try {
+      await deleteTask(task.id!)
+      refreshTasks()
+    } catch {
+      setDeleteError("No se pudo eliminar la tarea. Intentalo de nuevo.")
     }
   }
 
@@ -167,6 +170,11 @@ const TaskPage = () => {
           />
         )}
       </Modal>
+
+      <ConfirmDialog
+        {...dialogProps}
+        description={dialogProps.description ?? "Esta acción no se puede deshacer."}
+      />
     </div>
   )
 }

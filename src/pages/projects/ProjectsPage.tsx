@@ -10,6 +10,8 @@ import { useProjectForm } from "../../features/projects/hooks/useProjectForm"
 import ProjectCard from "../../features/projects/components/ProjectCard/ProjectCard"
 import ProjectForm from "../../features/projects/components/ProjectForm/ProjectForm"
 import Modal from "../../components/shared/Modal/Modal"
+import ConfirmDialog from "../../components/shared/ConfirmDialog/ConfirmDialog"
+import { useConfirm } from "../../hooks/useConfirm"
 import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import { Briefcase, PauseCircle, CheckCircle, DollarSign } from "lucide-react"
 import StatCard from "../../components/shared/StatCard/StatCard"
@@ -81,16 +83,17 @@ const ProjectsPage = () => {
   }
 
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const { confirm, dialogProps } = useConfirm()
 
   const handleDelete = async (project: IProject) => {
-    if (window.confirm(`¿Eliminar el proyecto "${project.name}"?`)) {
-      try {
-        await deleteProject(project.id!)
-        refreshProjects()
-        refreshEntitlements()
-      } catch {
-        setDeleteError("No se pudo eliminar el proyecto. Intentalo de nuevo.")
-      }
+    const confirmed = await confirm({ title: `¿Eliminar el proyecto "${project.name}"?` })
+    if (!confirmed) return
+    try {
+      await deleteProject(project.id!)
+      refreshProjects()
+      refreshEntitlements()
+    } catch {
+      setDeleteError("No se pudo eliminar el proyecto. Intentalo de nuevo.")
     }
   }
 
@@ -230,6 +233,11 @@ const ProjectsPage = () => {
           onUpgrade={() => navigate("/settings/billing")}
         />
       )}
+
+      <ConfirmDialog
+        {...dialogProps}
+        description={dialogProps.description ?? "Esta acción no se puede deshacer."}
+      />
     </div>
   )
 }

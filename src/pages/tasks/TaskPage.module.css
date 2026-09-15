@@ -28,6 +28,12 @@
   gap: var(--spacing-5);
 }
 
+@media (max-width: 767px) {
+  .viewMode {
+    grid-template-columns: 1fr;
+  }
+}
+
 .field {
   display: flex;
   flex-direction: column;
