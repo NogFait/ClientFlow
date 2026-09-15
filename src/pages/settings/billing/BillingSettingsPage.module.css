@@ -1,0 +1,17 @@
+.banner {
+  margin-bottom: var(--spacing-4);
+  background-color: var(--color-info-bg);
+  color: var(--color-info-text);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  max-width: 32rem;
+}
+
+.loaderSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
