@@ -7,7 +7,7 @@ const PublicFooter = () => {
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <div className={styles.brand}>
-          <img src="/icon.png" alt="ClientFlow" className={styles.logo} />
+          <img src="/icon-192.png" alt="ClientFlow" className={styles.logo} />
           <span className={styles.brandName}>ClientFlow</span>
           <span className={styles.tagline}>· CRM para freelancers</span>
         </div>

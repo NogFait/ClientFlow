@@ -1,27 +1,32 @@
 import { lazy, Suspense } from "react"
 import { Routes, Route } from "react-router-dom"
-import DashboardPage from "../pages/dashboard/DashboardPage"
-import Login from "../pages/auth/Login/Login"
-import Register from "../pages/auth/Register/Register"
+import LandingPage from "../pages/landing/LandingPage"
 import NotFoundPage from "../pages/not-found/NotFoundPage"
 import Layout from "../components/layout/Layout/Layout"
 import { ProtectedRoute } from "../components/auth/ProtectedRoute"
 import { PublicOnlyRoute } from "../components/auth/PublicOnlyRoute"
-import ClientsPage from "../pages/clients/ClientsPage"
-import ProjectsPage from "../pages/projects/ProjectsPage"
-import ProjectHubPage from "../pages/projects/ProjectHubPage/ProjectHubPage"
-import TaskPage from "../pages/tasks/TaskPage"
-import PaymentsPage from "../pages/payments/PaymentsPage"
-import BillingSettingsPage from "../pages/settings/billing/BillingSettingsPage"
 
-// Public marketing/legal pages are lazy — they're reachable by anyone
-// (including crawlers hitting "/" first) but never needed by an
-// already-authenticated user navigating the app shell, so they shouldn't
-// bloat the initial bundle for the common logged-in case.
-const LandingPage = lazy(() => import("../pages/landing/LandingPage"))
+// Landing is eager: it's the entry point for most visitors (including
+// crawlers hitting "/" first), so lazy-loading it would force an extra
+// request waterfall (HTML -> main bundle -> route chunk) before anything
+// renders. Everything else is lazy — /pricing, /terms, /privacy are only
+// ever a click away from the landing, and every authenticated app page
+// (plus login/register) is never needed by an anonymous visitor just
+// browsing the public site, so none of it should bloat the initial bundle.
 const PricingPage = lazy(() => import("../pages/pricing/PricingPage"))
 const TermsPage = lazy(() => import("../pages/legal/TermsPage"))
 const PrivacyPage = lazy(() => import("../pages/legal/PrivacyPage"))
+
+const Login = lazy(() => import("../pages/auth/Login/Login"))
+const Register = lazy(() => import("../pages/auth/Register/Register"))
+
+const DashboardPage = lazy(() => import("../pages/dashboard/DashboardPage"))
+const ClientsPage = lazy(() => import("../pages/clients/ClientsPage"))
+const ProjectsPage = lazy(() => import("../pages/projects/ProjectsPage"))
+const ProjectHubPage = lazy(() => import("../pages/projects/ProjectHubPage/ProjectHubPage"))
+const TaskPage = lazy(() => import("../pages/tasks/TaskPage"))
+const PaymentsPage = lazy(() => import("../pages/payments/PaymentsPage"))
+const BillingSettingsPage = lazy(() => import("../pages/settings/billing/BillingSettingsPage"))
 
 const AppRouter = () => {
   return (

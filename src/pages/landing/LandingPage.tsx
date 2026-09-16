@@ -3,7 +3,9 @@ import { useLocation } from "react-router-dom"
 import PublicNav from "../../components/marketing/PublicNav/PublicNav"
 import PublicFooter from "../../components/marketing/PublicFooter/PublicFooter"
 import ScrollReveal from "../../components/marketing/ScrollReveal/ScrollReveal"
-import { useDocumentTitle } from "../../hooks/useDocumentTitle"
+import { usePageMeta } from "../../hooks/usePageMeta"
+import JsonLd from "../../components/seo/JsonLd"
+import { buildFaqJsonLd } from "../../seo/faqJsonLd"
 import Hero from "./sections/Hero"
 import ComoFunciona from "./sections/ComoFunciona"
 import Features from "./sections/Features"
@@ -13,21 +15,25 @@ import CtaBlock from "./sections/CtaBlock"
 import { FAQ_ITEMS } from "../../content/faq"
 import styles from "./LandingPage.module.css"
 
+const FAQ_JSON_LD = buildFaqJsonLd(FAQ_ITEMS)
+
 const LandingPage = () => {
-  useDocumentTitle(
-    "ClientFlow — CRM para freelancers",
-    "Tus clientes, proyectos y cobros en un solo lugar. Gratis hasta 3 clientes, sin tarjeta.",
-  )
+  usePageMeta({
+    title: "ClientFlow — CRM para freelancers",
+    description: "Tus clientes, proyectos y cobros en un solo lugar. Gratis hasta 3 clientes, sin tarjeta.",
+    path: "/",
+  })
 
   const { hash } = useLocation()
 
-  // Cold-load deep link (e.g. shared "/#precios" URL): this route is
-  // React.lazy (AppRouter), so the target section doesn't exist in the DOM
-  // yet when the browser makes its own one-shot attempt to scroll to the
-  // hash on navigation — that attempt finds nothing and silently no-ops. Do
-  // it ourselves once the section has actually mounted. In-page anchor
-  // clicks (nav links to #precios/#faq) are untouched — native browser
-  // behavior already handles those correctly since the target already exists.
+  // Cold-load deep link (e.g. shared "/#precios" URL): the SPA shell mounts
+  // asynchronously after the initial HTML load (React root render happens
+  // after the browser's own one-shot scroll-to-hash attempt), so that
+  // attempt finds nothing in the DOM yet and silently no-ops — true whether
+  // this route is eager or React.lazy. Do it ourselves once the section has
+  // actually mounted. In-page anchor clicks (nav links to #precios/#faq) are
+  // untouched — native browser behavior already handles those correctly
+  // since the target already exists.
   useEffect(() => {
     if (!hash) return
     const target = document.querySelector(hash)
@@ -39,6 +45,7 @@ const LandingPage = () => {
 
   return (
     <div className={styles.page}>
+      <JsonLd data={FAQ_JSON_LD} />
       <PublicNav />
       <main>
         <Hero />

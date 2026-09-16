@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /clients
+Disallow: /projects
+Disallow: /tasks
+Disallow: /payments
+Disallow: /settings
+Disallow: /api
+
+Sitemap: https://clientflow.lat/sitemap.xml

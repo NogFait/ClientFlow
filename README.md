@@ -214,6 +214,14 @@ Plan Free (3 clientes / 5 proyectos) y Pro (mensual o anual, sin límites). Arqu
 |------|-------------|
 | `*` | Página 404, con link de vuelta a `/` |
 
+## 🔍 SEO
+
+- **`src/content/site.ts`**: fuente única de `SITE_URL`, descripción y og:image por defecto.
+- **`src/hooks/usePageMeta.ts`**: title, canonical, OG/Twitter y `noindex` por ruta (restaura al desmontar).
+- **`public/robots.txt` / `public/sitemap.xml`**: servidos como archivos estáticos (Vercel los prioriza sobre el rewrite del SPA); cubiertos por `src/seo/publicFiles.test.ts`.
+- **JSON-LD**: `Organization`/`SoftwareApplication` estáticos en `index.html`; `FAQPage` inyectado en la landing vía `src/components/seo/JsonLd.tsx` + `src/seo/faqJsonLd.ts`.
+- **Assets**: favicons, `apple-touch-icon`, `og-image.png` y `site.webmanifest` en `public/`, generados desde `public/icon.png`.
+
 ## 🔑 Variables de entorno
 
 Ver `.env.example` para la plantilla completa. Las que empiezan con `VITE_` se bundlean en el cliente (nunca poner secretos ahí); el resto son server-only, leídas por `api/**` en runtime de Vercel.

@@ -23,7 +23,7 @@ const PublicNav = () => {
     <header className={styles.header}>
       <nav className={styles.nav}>
         <Link to="/" className={styles.brand}>
-          <img src="/icon.png" alt="ClientFlow" className={styles.logo} />
+          <img src="/icon-192.png" alt="ClientFlow" className={styles.logo} />
           <span className={styles.brandName}>ClientFlow</span>
         </Link>
 

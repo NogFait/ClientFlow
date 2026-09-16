@@ -2,9 +2,12 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react"
 import { useRegisterForm } from "../../../features/auth/hooks/useAuth"
+import { usePageMeta } from "../../../hooks/usePageMeta"
 import styles from "./Register.module.css"
 
 const Register = () => {
+  usePageMeta({ title: "Creá tu cuenta — ClientFlow", noindex: true })
+
   const { register, handleSubmit, onSubmit, errors, isSubmitting } = useRegisterForm()
   const [showPassword, setShowPassword] = useState(false)
 
@@ -12,7 +15,7 @@ const Register = () => {
     <div className={styles.page}>
       <section className={styles.brandPanel}>
         <Link to="/" className={styles.brand}>
-          <img src="/icon.png" alt="ClientFlow" className={styles.brandLogo} />
+          <img src="/icon-192.png" alt="ClientFlow" className={styles.brandLogo} />
           <span className={styles.brandName}>ClientFlow</span>
         </Link>
 

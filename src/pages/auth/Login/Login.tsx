@@ -2,9 +2,12 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 import { useLoginForm } from "../../../features/auth/hooks/useAuth"
+import { usePageMeta } from "../../../hooks/usePageMeta"
 import styles from "./Login.module.css"
 
 const Login = () => {
+  usePageMeta({ title: "Iniciar sesión — ClientFlow", noindex: true })
+
   const { register, handleSubmit, onSubmit, errors, isSubmitting } = useLoginForm()
   const [showPassword, setShowPassword] = useState(false)
 
@@ -12,7 +15,7 @@ const Login = () => {
     <div className={styles.page}>
       <section className={styles.brandPanel}>
         <Link to="/" className={styles.brand}>
-          <img src="/icon.png" alt="ClientFlow" className={styles.brandLogo} />
+          <img src="/icon-192.png" alt="ClientFlow" className={styles.brandLogo} />
           <span className={styles.brandName}>ClientFlow</span>
         </Link>
 

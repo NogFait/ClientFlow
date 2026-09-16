@@ -1,11 +1,12 @@
 import PublicNav from "../../components/marketing/PublicNav/PublicNav"
 import PublicFooter from "../../components/marketing/PublicFooter/PublicFooter"
-import { useDocumentTitle } from "../../hooks/useDocumentTitle"
+import { usePageMeta } from "../../hooks/usePageMeta"
 import type { LegalDocument } from "../../content/legal/types"
 import styles from "./LegalPage.module.css"
 
 interface LegalPageProps {
   document: LegalDocument
+  path: "/terms" | "/privacy"
 }
 
 // Shared layout for /terms and /privacy — public nav/footer + a readable
@@ -13,8 +14,11 @@ interface LegalPageProps {
 // below) pending a lawyer's review; content itself lives in
 // src/content/legal/{terms,privacy}.ts so it can be edited without touching
 // this component.
-const LegalPage = ({ document }: LegalPageProps) => {
-  useDocumentTitle(`${document.title} — ClientFlow`)
+const LegalPage = ({ document, path }: LegalPageProps) => {
+  // Description is derived straight from the document's own first
+  // paragraph rather than hardcoded per page — stays in sync automatically
+  // if terms.ts/privacy.ts change.
+  usePageMeta({ title: `${document.title} — ClientFlow`, description: document.sections[0]?.paragraphs[0], path })
 
   return (
     <div className={styles.page}>
