@@ -1,16 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import AppRouter from "./AppRouter"
 
-const getUserMock = vi.fn()
-
-vi.mock("../services/supabaseClient", () => ({
-  supabase: {
-    auth: {
-      getUser: () => getUserMock(),
-    },
-  },
+// AppRouter itself renders below AuthProvider in the real app (App.tsx) —
+// here every route is exercised as an anonymous visitor, so the context is
+// mocked directly rather than requiring a real AuthProvider + supabase mock.
+vi.mock("../features/auth/context/authContext", () => ({
+  useAuthState: () => ({ session: null, user: null, status: "anonymous" }),
 }))
 
 function renderAt(path: string) {
@@ -20,10 +17,6 @@ function renderAt(path: string) {
     </MemoryRouter>,
   )
 }
-
-beforeEach(() => {
-  getUserMock.mockResolvedValue({ data: { user: null } })
-})
 
 describe("AppRouter — public surface (M3)", () => {
   it("renders the landing page at /", async () => {

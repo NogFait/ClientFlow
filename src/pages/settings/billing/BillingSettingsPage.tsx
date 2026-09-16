@@ -6,6 +6,7 @@ import BillingSettings from "../../../features/billing/components/BillingSetting
 import { useEntitlementsContext } from "../../../features/billing/context/entitlementsContext"
 import { useCheckout } from "../../../features/billing/hooks/useCheckout"
 import { BILLING_ENABLED } from "../../../config/features"
+import type { PaidPlanCode } from "../../../features/billing/ports/BillingProvider"
 import styles from "./BillingSettingsPage.module.css"
 
 // Polar's webhook can lag a few seconds behind the checkout redirect — poll
@@ -14,13 +15,19 @@ import styles from "./BillingSettingsPage.module.css"
 const MAX_REFRESH_ATTEMPTS = 3
 const REFRESH_DELAY_MS = 2000
 
+function isPaidPlanCode(value: string): value is PaidPlanCode {
+  return value === "pro_monthly" || value === "pro_yearly"
+}
+
 const BillingSettingsPage = () => {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const checkoutStatus = searchParams.get("checkout")
+  const planParam = searchParams.get("plan")
   const { entitlements, loading, refresh } = useEntitlementsContext()
   const { upgrade, manage, loading: checkoutLoading, error: checkoutError } = useCheckout()
   const [updating, setUpdating] = useState(checkoutStatus === "success")
   const startedRef = useRef(false)
+  const planStartedRef = useRef(false)
 
   useEffect(() => {
     if (checkoutStatus !== "success" || startedRef.current) return
@@ -46,6 +53,26 @@ const BillingSettingsPage = () => {
       cancelled = true
     }
   }, [checkoutStatus, refresh])
+
+  // Consumes the plan preselected on /pricing and carried here by
+  // ProtectedRoute's pendingPlan redirect (M3b task 3.2): auto-opens
+  // checkout for that plan exactly once, then drops the param from the URL
+  // so a refresh/back-navigation never re-triggers it.
+  useEffect(() => {
+    if (!BILLING_ENABLED || planStartedRef.current) return
+    if (!planParam || !isPaidPlanCode(planParam)) return
+    planStartedRef.current = true
+
+    void upgrade(planParam)
+    setSearchParams(
+      (previous) => {
+        const next = new URLSearchParams(previous)
+        next.delete("plan")
+        return next
+      },
+      { replace: true },
+    )
+  }, [planParam, upgrade, setSearchParams])
 
   if (!BILLING_ENABLED) {
     return <Navigate to="/dashboard" replace />

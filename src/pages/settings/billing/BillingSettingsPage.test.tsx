@@ -107,4 +107,32 @@ describe("BillingSettingsPage — enabled", () => {
     expect(refreshMock).not.toHaveBeenCalled()
     expect(screen.queryByText(/Actualizando tu plan/i)).not.toBeInTheDocument()
   })
+
+  it("auto-starts checkout ONCE for a ?plan=pro_monthly param (M3b: consume /register?plan=)", async () => {
+    await renderAt("/settings/billing?plan=pro_monthly")
+
+    await waitFor(() => expect(upgradeMock).toHaveBeenCalledTimes(1))
+    expect(upgradeMock).toHaveBeenCalledWith("pro_monthly")
+  })
+
+  it("auto-starts checkout for ?plan=pro_yearly (triangulation: different plan)", async () => {
+    await renderAt("/settings/billing?plan=pro_yearly")
+
+    await waitFor(() => expect(upgradeMock).toHaveBeenCalledTimes(1))
+    expect(upgradeMock).toHaveBeenCalledWith("pro_yearly")
+  })
+
+  it("ignores an invalid ?plan= value and never calls upgrade", async () => {
+    await renderAt("/settings/billing?plan=not-a-real-plan")
+
+    await waitFor(() => expect(screen.getByText("Free", { selector: "span" })).toBeInTheDocument())
+    expect(upgradeMock).not.toHaveBeenCalled()
+  })
+
+  it("does not call upgrade when there is no ?plan= param (triangulation)", async () => {
+    await renderAt("/settings/billing")
+
+    await waitFor(() => expect(screen.getByText("Free", { selector: "span" })).toBeInTheDocument())
+    expect(upgradeMock).not.toHaveBeenCalled()
+  })
 })
