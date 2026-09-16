@@ -4,24 +4,22 @@ import userEvent from "@testing-library/user-event"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import DashboardPage from "./DashboardPage"
 import { formatCurrency } from "../../utils/currency"
+import type { AuthState } from "../../features/auth/context/authContext"
 
 // getByText's default normalizer collapses the NBSP formatCurrency puts
 // between "$" and the digits down to a regular space before comparing (see
 // the same note in PaymentsPage.test.tsx) — match against that form.
 const money = (amount: number) => formatCurrency(amount).replace(/\u00A0/g, " ")
 
-const getUserMock = vi.fn()
 const getClientsMock = vi.fn()
 const getProjectsMock = vi.fn()
 const getPaymentsMock = vi.fn()
 const getTasksMock = vi.fn()
 
-vi.mock("../../services/supabaseClient", () => ({
-  supabase: {
-    auth: {
-      getUser: () => getUserMock(),
-    },
-  },
+let authState: AuthState
+
+vi.mock("../../features/auth/context/authContext", () => ({
+  useAuthState: () => authState,
 }))
 
 vi.mock("../../features/clients/services", () => ({
@@ -45,6 +43,8 @@ function renderDashboard() {
     <MemoryRouter initialEntries={["/dashboard"]}>
       <Routes>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/clients" element={<div>Clients Page Mock</div>} />
+        <Route path="/projects" element={<div>Projects Page Mock</div>} />
         <Route path="/payments" element={<div>Payments Page Mock</div>} />
         <Route path="/tasks" element={<div>Tasks Page Mock</div>} />
       </Routes>
@@ -53,12 +53,14 @@ function renderDashboard() {
 }
 
 afterEach(() => {
-  getUserMock.mockReset()
   getClientsMock.mockReset()
   getProjectsMock.mockReset()
   getPaymentsMock.mockReset()
   getTasksMock.mockReset()
+  localStorage.clear()
 })
+
+const anonymousAuthState: AuthState = { session: null, user: null, status: "anonymous" }
 
 const noSessionResolvers = () => {
   getClientsMock.mockResolvedValue([])
@@ -69,7 +71,11 @@ const noSessionResolvers = () => {
 
 describe("DashboardPage — welcome message", () => {
   it("greets the user by their Supabase user_metadata name", async () => {
-    getUserMock.mockResolvedValue({ data: { user: { email: "fausto@example.com", user_metadata: { name: "Fausto" } } } })
+    authState = {
+      session: null,
+      user: { email: "fausto@example.com", user_metadata: { name: "Fausto" } } as never,
+      status: "authenticated",
+    }
     noSessionResolvers()
 
     renderDashboard()
@@ -78,7 +84,11 @@ describe("DashboardPage — welcome message", () => {
   })
 
   it("falls back to the email local-part when there is no name (triangulation)", async () => {
-    getUserMock.mockResolvedValue({ data: { user: { email: "maria.lopez@example.com", user_metadata: {} } } })
+    authState = {
+      session: null,
+      user: { email: "maria.lopez@example.com", user_metadata: {} } as never,
+      status: "authenticated",
+    }
     noSessionResolvers()
 
     renderDashboard()
@@ -90,7 +100,7 @@ describe("DashboardPage — welcome message", () => {
 describe("DashboardPage — Estadísticas Mensuales empty state", () => {
   it("shows an EmptyState with a CTA that navigates to /payments when there are no paid payments", async () => {
     const user = userEvent.setup()
-    getUserMock.mockResolvedValue({ data: { user: null } })
+    authState = anonymousAuthState
     noSessionResolvers()
 
     renderDashboard()
@@ -105,7 +115,7 @@ describe("DashboardPage — Estadísticas Mensuales empty state", () => {
 describe("DashboardPage — Próximas Tareas empty state", () => {
   it("shows an EmptyState with a CTA that navigates to /tasks when there are no tasks with a due date", async () => {
     const user = userEvent.setup()
-    getUserMock.mockResolvedValue({ data: { user: null } })
+    authState = anonymousAuthState
     noSessionResolvers()
 
     renderDashboard()
@@ -119,7 +129,7 @@ describe("DashboardPage — Próximas Tareas empty state", () => {
 
 describe("DashboardPage — currency formatting (es-AR)", () => {
   it("renders 'Ingreso Mensual' through the shared es-AR formatter", async () => {
-    getUserMock.mockResolvedValue({ data: { user: null } })
+    authState = anonymousAuthState
     getClientsMock.mockResolvedValue([])
     getProjectsMock.mockResolvedValue([])
     getTasksMock.mockResolvedValue([])
@@ -137,5 +147,29 @@ describe("DashboardPage — currency formatting (es-AR)", () => {
 
     await waitFor(() => expect(screen.getByText("Ingreso Mensual")).toBeInTheDocument())
     expect(screen.getByText(money(2500))).toBeInTheDocument()
+  })
+})
+
+describe("DashboardPage — onboarding checklist (task 3.11)", () => {
+  it("shows the onboarding card when the user has 0 clients and 0 projects", async () => {
+    authState = anonymousAuthState
+    noSessionResolvers()
+
+    renderDashboard()
+
+    expect(await screen.findByText("Empezá en 3 pasos")).toBeInTheDocument()
+  })
+
+  it("does not show the onboarding card once the user has at least one client (triangulation)", async () => {
+    authState = anonymousAuthState
+    getClientsMock.mockResolvedValue([{ id: "c1" }])
+    getProjectsMock.mockResolvedValue([])
+    getPaymentsMock.mockResolvedValue([])
+    getTasksMock.mockResolvedValue([])
+
+    renderDashboard()
+
+    await waitFor(() => expect(screen.getByText("Total clientes")).toBeInTheDocument())
+    expect(screen.queryByText("Empezá en 3 pasos")).not.toBeInTheDocument()
   })
 })

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { supabase } from "../../services/supabaseClient"
+import { useAuthState } from "../../features/auth/context/authContext"
 import { getClients } from "../../features/clients/services"
 import { getProjects } from "../../features/projects/services"
 import { getPayments } from "../../features/payments/services"
@@ -11,6 +11,7 @@ import StatCard from "../../components/shared/StatCard/StatCard"
 import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import Loader from "../../components/shared/Loader/Loader"
 import EmptyState from "../../components/shared/EmptyState/EmptyState"
+import OnboardingChecklist from "../../components/shared/OnboardingChecklist/OnboardingChecklist"
 import { BarChart } from "../../components/charts/BarChart"
 import { formatCurrency } from "../../utils/currency"
 import { getWelcomeMessage } from "./welcomeMessage"
@@ -22,8 +23,13 @@ const MONTHS = [
 ]
 
 const DashboardPage = () => {
-  const [user, setUser] = useState<{ name?: string | null; email?: string | null } | null>(null)
+  const { user: authUser } = useAuthState()
+  const user = authUser
+    ? { name: authUser.user_metadata?.name as string | undefined, email: authUser.email }
+    : null
   const [totalClients, setTotalClients] = useState(0)
+  const [totalProjects, setTotalProjects] = useState(0)
+  const [totalPayments, setTotalPayments] = useState(0)
   const [activeProjects, setActiveProjects] = useState(0)
   const [monthlyIncome, setMonthlyIncome] = useState(0)
   const [pendingTasks, setPendingTasks] = useState(0)
@@ -41,10 +47,6 @@ const DashboardPage = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setUser({ name: data.user.user_metadata?.name, email: data.user.email })
-    })
-
     Promise.all([
       getClients(),
       getProjects(),
@@ -52,6 +54,8 @@ const DashboardPage = () => {
       getTasks(),
     ]).then(([clients, projects, payments, tasks]) => {
       setTotalClients(clients.length)
+      setTotalProjects(projects.length)
+      setTotalPayments(payments.length)
       setActiveProjects(projects.filter(p => p.status === "activo").length)
       setPendingTasks(tasks.filter(t => t.status === "pendiente").length)
       setProgressTasks(tasks.filter(t => t.status === "en_progreso").length)
@@ -107,6 +111,14 @@ const DashboardPage = () => {
   return (
     <div>
       <PageHeader title="Dashboard" description={getWelcomeMessage(user)} />
+
+      {!loading && (
+        <OnboardingChecklist
+          hasClients={totalClients > 0}
+          hasProjects={totalProjects > 0}
+          hasPayments={totalPayments > 0}
+        />
+      )}
 
       {loading ? (
         <div className={styles.loaderSection}><Loader /></div>
