@@ -1,10 +1,6 @@
----
-title: Bitácora de promoción (notas, no publicar)
-description: Registro crudo de cada acción de promoción y sus números, materia prima para un futuro artículo.
-date: 2026-09-17
-draft: true
-tags: [notas]
----
+# Bitácora de promoción
+
+Notas internas, no se publican. Materia prima para un futuro artículo del blog.
 
 ## Cómo usar esto
 
