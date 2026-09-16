@@ -2,6 +2,7 @@ import PublicNav from "../../components/marketing/PublicNav/PublicNav"
 import PublicFooter from "../../components/marketing/PublicFooter/PublicFooter"
 import { usePageMeta } from "../../hooks/usePageMeta"
 import type { LegalDocument } from "../../content/legal/types"
+import { PUBLIC_PAGE_META } from "../../content/pageMeta"
 import styles from "./LegalPage.module.css"
 
 interface LegalPageProps {
@@ -15,10 +16,11 @@ interface LegalPageProps {
 // src/content/legal/{terms,privacy}.ts so it can be edited without touching
 // this component.
 const LegalPage = ({ document, path }: LegalPageProps) => {
-  // Description is derived straight from the document's own first
-  // paragraph rather than hardcoded per page — stays in sync automatically
-  // if terms.ts/privacy.ts change.
-  usePageMeta({ title: `${document.title} — ClientFlow`, description: document.sections[0]?.paragraphs[0], path })
+  // Title/description come from PUBLIC_PAGE_META (shared with the build-time
+  // prerender) rather than from the document's first paragraph: the legal
+  // drafts open with "[RAZÓN SOCIAL]" placeholders that would look broken
+  // as a search snippet.
+  usePageMeta(PUBLIC_PAGE_META[path])
 
   return (
     <div className={styles.page}>

@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'dist-ssr']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -27,6 +27,15 @@ export default defineConfig([
     languageOptions: {
       globals: globals.node,
     },
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
+    // Build-time SSR entry consumed by scripts/prerender.mjs — it exports a
+    // render function plus re-exports, never components, and is never
+    // hot-reloaded, so the Fast Refresh constraint doesn't apply.
+    files: ['src/entry-server.tsx'],
     rules: {
       'react-refresh/only-export-components': 'off',
     },

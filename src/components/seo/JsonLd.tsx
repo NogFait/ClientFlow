@@ -1,26 +1,20 @@
-import { useEffect } from "react"
-
 interface JsonLdProps {
   data: object
 }
 
-// Injects a <script type="application/ld+json"> into <head> for the
-// lifetime of the mount and removes it on unmount — same pattern as
-// usePageMeta, kept separate because structured data isn't page-meta (no
-// attribute to restore, just a script tag to add/remove).
+// "<" is escaped as < so a value containing "</script>" can never close
+// the tag early (JSON.parse reads < back as "<", so the payload is
+// unchanged for consumers).
+function serializeJsonLd(data: object): string {
+  return JSON.stringify(data).replaceAll("<", "\\u003c")
+}
+
+// Declarative <script type="application/ld+json"> rendered in place (inside
+// the React tree, not appended to <head> from an effect) so structured data
+// is part of the prerendered HTML crawlers receive and hydrates cleanly.
+// Google reads JSON-LD from <body> just as well as from <head>.
 const JsonLd = ({ data }: JsonLdProps) => {
-  useEffect(() => {
-    const script = document.createElement("script")
-    script.type = "application/ld+json"
-    script.textContent = JSON.stringify(data)
-    document.head.appendChild(script)
-
-    return () => {
-      script.remove()
-    }
-  }, [data])
-
-  return null
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(data) }} />
 }
 
 export default JsonLd

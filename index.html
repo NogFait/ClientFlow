@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Marks "JS is running" before first paint. ScrollReveal only hides
+         sections under :root.js, so the prerendered HTML is fully visible for
+         crawlers and no-JS visitors, and a deferred module script (which runs
+         after first paint) can't cause a visible-then-hidden flash. -->
+    <script>document.documentElement.classList.add("js")</script>
 
     <title>ClientFlow — CRM para freelancers</title>
     <meta
@@ -86,6 +91,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/entry-client.tsx"></script>
   </body>
 </html>

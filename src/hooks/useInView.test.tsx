@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen, act } from "@testing-library/react"
+import { hydrateRoot } from "react-dom/client"
 import { useInView } from "./useInView"
 
 type ObserverCallback = (entries: Array<{ isIntersecting: boolean; boundingClientRect?: { bottom: number } }>) => void
@@ -121,5 +122,37 @@ describe("useInView", () => {
     })
     expect(screen.getByTestId("target")).toHaveTextContent("hidden")
     expect(observerInstance.unobserve).not.toHaveBeenCalled()
+  })
+})
+
+describe("useInView — hydration safety", () => {
+  it("starts hidden during hydration even when IntersectionObserver is unavailable, then reveals after commit", () => {
+    // Prerendered HTML is generated under Node (no IntersectionObserver), so
+    // the server snapshot must be "hidden" — if the client computed "visible"
+    // synchronously on its first render, React would report a hydration
+    // mismatch on the reveal class. Simulate a browser without IO: the
+    // hydrating render must equal the server one, and the reveal happens in
+    // a post-hydration re-render instead.
+    const originalObserver = window.IntersectionObserver
+    // @ts-expect-error — simulating an older browser without IntersectionObserver
+    delete window.IntersectionObserver
+
+    const container = document.createElement("div")
+    container.innerHTML = '<div data-testid="target">hidden</div>'
+    document.body.appendChild(container)
+
+    const errors: unknown[] = []
+    const errorSpy = vi.spyOn(console, "error").mockImplementation((...args) => errors.push(args))
+
+    act(() => {
+      hydrateRoot(container, <TestTarget />)
+    })
+
+    expect(container.querySelector('[data-testid="target"]')).toHaveTextContent("visible")
+    expect(errors.filter((args) => JSON.stringify(args).includes("hydrat"))).toHaveLength(0)
+
+    errorSpy.mockRestore()
+    container.remove()
+    window.IntersectionObserver = originalObserver
   })
 })

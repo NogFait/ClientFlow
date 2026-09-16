@@ -4,6 +4,7 @@ import PublicFooter from "../../components/marketing/PublicFooter/PublicFooter"
 import Faq from "../landing/sections/Faq"
 import CtaBlock from "../landing/sections/CtaBlock"
 import { FAQ_ITEMS } from "../../content/faq"
+import { PUBLIC_PAGE_META } from "../../content/pageMeta"
 import { usePageMeta } from "../../hooks/usePageMeta"
 import { useHasSession } from "../../hooks/useHasSession"
 import { useCheckout } from "../../features/billing/hooks/useCheckout"
@@ -21,11 +22,7 @@ import styles from "./PricingPage.module.css"
 // Free while already signed in has nothing to check out, so it just returns
 // them to the dashboard instead of back through signup.
 const PricingPage = () => {
-  usePageMeta({
-    title: "Precios — ClientFlow",
-    description: "Un solo plan pago, sin letra chica. Empezá gratis y pagá cuando crezcas.",
-    path: "/pricing",
-  })
+  usePageMeta(PUBLIC_PAGE_META["/pricing"])
 
   const navigate = useNavigate()
   const { hasSession } = useHasSession()

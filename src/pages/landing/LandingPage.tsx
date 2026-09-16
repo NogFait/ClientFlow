@@ -13,16 +13,13 @@ import PricingSection from "./sections/PricingSection"
 import Faq from "./sections/Faq"
 import CtaBlock from "./sections/CtaBlock"
 import { FAQ_ITEMS } from "../../content/faq"
+import { PUBLIC_PAGE_META } from "../../content/pageMeta"
 import styles from "./LandingPage.module.css"
 
 const FAQ_JSON_LD = buildFaqJsonLd(FAQ_ITEMS)
 
 const LandingPage = () => {
-  usePageMeta({
-    title: "ClientFlow — CRM para freelancers",
-    description: "Tus clientes, proyectos y cobros en un solo lugar. Gratis hasta 3 clientes, sin tarjeta.",
-    path: "/",
-  })
+  usePageMeta(PUBLIC_PAGE_META["/"])
 
   const { hash } = useLocation()
 
