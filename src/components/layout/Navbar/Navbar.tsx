@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut, Menu } from "lucide-react";
 import { supabase } from "../../../services/supabaseClient";
 import { BILLING_ENABLED } from "../../../config/features";
+import { useAuthState } from "../../../features/auth/context/authContext";
 import { useEntitlementsContext } from "../../../features/billing/context/entitlementsContext";
 import PlanBadge from "../../../features/billing/components/PlanBadge/PlanBadge";
 import styles from "./Navbar.module.css";
@@ -18,16 +18,9 @@ const noop = () => {}
 
 const Navbar = ({ mobileNavOpen = false, onOpenMobileNav = noop }: NavbarProps) => {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState("Usuario");
+  const { user } = useAuthState();
   const { entitlements, loading: entitlementsLoading } = useEntitlementsContext();
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUserName(data.user.user_metadata?.name ?? "Usuario");
-      }
-    });
-  }, []);
+  const userName: string = (user?.user_metadata?.name as string | undefined) ?? "Usuario";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

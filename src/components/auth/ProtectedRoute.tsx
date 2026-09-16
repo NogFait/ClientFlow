@@ -1,14 +1,31 @@
-import { useEffect, useState } from "react"
-import { Navigate, Outlet } from "react-router-dom"
-import { supabase } from "../../services/supabaseClient"
+import { useEffect } from "react"
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom"
+import { useAuthState } from "../../features/auth/context/authContext"
+import { clearPendingPlan, readPendingPlan } from "../../features/auth/pendingPlan"
+import { BILLING_ENABLED } from "../../config/features"
+
+const BILLING_SETTINGS_PATH = "/settings/billing"
 
 export function ProtectedRoute() {
-  const [authorized, setAuthorized] = useState<boolean | null>(null)
+  const { status } = useAuthState()
+  const location = useLocation()
+  const navigate = useNavigate()
 
+  // Single funnel every authenticated visit passes through: consumes the
+  // plan chosen on /pricing (persisted across the register -> login hop by
+  // pendingPlan.ts) exactly once, on the first authenticated landing.
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setAuthorized(!!data.user))
-  }, [])
+    if (!BILLING_ENABLED) return
+    if (status !== "authenticated") return
+    if (location.pathname === BILLING_SETTINGS_PATH) return
 
-  if (authorized === null) return null
-  return authorized ? <Outlet /> : <Navigate to="/login" replace />
+    const plan = readPendingPlan()
+    if (!plan) return
+
+    clearPendingPlan()
+    navigate(`${BILLING_SETTINGS_PATH}?plan=${plan}`, { replace: true })
+  }, [status, location.pathname, navigate])
+
+  if (status === "loading") return null
+  return status === "authenticated" ? <Outlet /> : <Navigate to="/login" replace />
 }

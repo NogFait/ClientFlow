@@ -2,16 +2,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import type { Entitlements } from "../../../features/billing/types"
+import type { AuthState } from "../../../features/auth/context/authContext"
 
-const getUserMock = vi.fn().mockResolvedValue({ data: { user: null } })
+const signOutMock = vi.fn()
 
 vi.mock("../../../services/supabaseClient", () => ({
   supabase: {
     auth: {
-      getUser: () => getUserMock(),
-      signOut: vi.fn(),
+      signOut: () => signOutMock(),
     },
   },
+}))
+
+let authState: AuthState
+
+vi.mock("../../../features/auth/context/authContext", () => ({
+  useAuthState: () => authState,
 }))
 
 let entitlementsContextValue: { entitlements: Entitlements | null; loading: boolean; refresh: () => Promise<void> }
@@ -42,6 +48,7 @@ async function renderNavbar(props: { onOpenMobileNav?: () => void; mobileNavOpen
 }
 
 beforeEach(() => {
+  authState = { session: null, user: null, status: "anonymous" }
   entitlementsContextValue = { entitlements: freeEntitlements, loading: false, refresh: vi.fn() }
 })
 
@@ -84,6 +91,44 @@ describe("Navbar — plan badge", () => {
     await renderNavbar()
 
     expect(screen.queryByRole("link", { name: /Free/i })).not.toBeInTheDocument()
+  })
+})
+
+describe("Navbar — user info from AuthProvider context", () => {
+  beforeEach(() => {
+    vi.doMock("../../../config/features", () => ({ BILLING_ENABLED: false }))
+  })
+
+  it("shows the user's name from context and its initial as the avatar (M3b: no more per-guard getUser())", async () => {
+    authState = {
+      session: null,
+      user: { id: "user-1", user_metadata: { name: "Fausto" } } as never,
+      status: "authenticated",
+    }
+
+    await renderNavbar()
+
+    expect(screen.getByText("Fausto")).toBeInTheDocument()
+    expect(screen.getByText("F")).toBeInTheDocument()
+  })
+
+  it("falls back to 'Usuario' when there is no name in user_metadata (triangulation)", async () => {
+    authState = { session: null, user: { id: "user-1", user_metadata: {} } as never, status: "authenticated" }
+
+    await renderNavbar()
+
+    expect(screen.getByText("Usuario")).toBeInTheDocument()
+    expect(screen.getByText("U")).toBeInTheDocument()
+  })
+
+  it("calls signOut and navigates to /login on logout click, without a manual getUser() re-fetch", async () => {
+    authState = { session: null, user: { id: "user-1", user_metadata: { name: "Tita" } } as never, status: "authenticated" }
+    signOutMock.mockResolvedValue(undefined)
+
+    await renderNavbar()
+    screen.getByRole("button", { name: /Salir/i }).click()
+
+    expect(signOutMock).toHaveBeenCalledTimes(1)
   })
 })
 

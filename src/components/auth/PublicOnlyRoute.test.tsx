@@ -1,16 +1,13 @@
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter, Routes, Route } from "react-router-dom"
 import { PublicOnlyRoute } from "./PublicOnlyRoute"
+import type { AuthState } from "../../features/auth/context/authContext"
 
-const getUserMock = vi.fn()
+let authState: AuthState
 
-vi.mock("../../services/supabaseClient", () => ({
-  supabase: {
-    auth: {
-      getUser: () => getUserMock(),
-    },
-  },
+vi.mock("../../features/auth/context/authContext", () => ({
+  useAuthState: () => authState,
 }))
 
 function renderPublicOnly(initialPath: string) {
@@ -31,21 +28,34 @@ function renderPublicOnly(initialPath: string) {
   )
 }
 
+afterEach(() => {
+  vi.clearAllMocks()
+})
+
 describe("PublicOnlyRoute", () => {
-  it("shows the public page for an unauthenticated visitor", async () => {
-    getUserMock.mockResolvedValue({ data: { user: null } })
+  it("renders nothing while auth status is loading", () => {
+    authState = { session: null, user: null, status: "loading" }
 
     renderPublicOnly("/login")
 
-    expect(await screen.findByTestId("login-page")).toBeInTheDocument()
+    expect(screen.queryByTestId("login-page")).not.toBeInTheDocument()
+    expect(screen.queryByTestId("dashboard-page")).not.toBeInTheDocument()
   })
 
-  it("redirects an already-authenticated visitor away to /dashboard (triangulation)", async () => {
-    getUserMock.mockResolvedValue({ data: { user: { id: "user-1" } } })
+  it("shows the public page for an anonymous visitor", () => {
+    authState = { session: null, user: null, status: "anonymous" }
 
     renderPublicOnly("/login")
 
-    expect(await screen.findByTestId("dashboard-page")).toBeInTheDocument()
+    expect(screen.getByTestId("login-page")).toBeInTheDocument()
+  })
+
+  it("redirects an already-authenticated visitor away to /dashboard (triangulation)", () => {
+    authState = { session: null, user: { id: "user-1" } as never, status: "authenticated" }
+
+    renderPublicOnly("/login")
+
+    expect(screen.getByTestId("dashboard-page")).toBeInTheDocument()
     expect(screen.queryByTestId("login-page")).not.toBeInTheDocument()
   })
 })

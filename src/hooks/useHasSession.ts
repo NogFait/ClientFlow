@@ -1,23 +1,16 @@
-import { useEffect, useState } from "react"
-import { supabase } from "../services/supabaseClient"
+import { useAuthState } from "../features/auth/context/authContext"
 
 interface UseHasSessionResult {
   hasSession: boolean
   loading: boolean
 }
 
-// Lightweight, mount-only session check for PUBLIC pages (landing nav,
-// pricing CTA routing) that need to know "is someone logged in" without
-// pulling in the full route-guard machinery. Mirrors the existing
-// getUser()-in-a-mount-effect pattern used by ProtectedRoute/PublicOnlyRoute
-// and Navbar — a reactive app-wide AuthProvider is tracked separately
-// (M3 batch b) and can replace this once it lands.
+// Lightweight read of the app-wide AuthProvider context for PUBLIC pages
+// (landing nav, pricing CTA routing) that just need "is someone logged in"
+// without the full route-guard machinery. Previously ran its own
+// getUser()-in-a-mount-effect (M3a) — now derives from the single
+// onAuthStateChange subscription in AuthProvider (M3b task 3.1).
 export function useHasSession(): UseHasSessionResult {
-  const [hasSession, setHasSession] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setHasSession(!!data.user))
-  }, [])
-
-  return { hasSession: hasSession ?? false, loading: hasSession === null }
+  const { status } = useAuthState()
+  return { hasSession: status === "authenticated", loading: status === "loading" }
 }

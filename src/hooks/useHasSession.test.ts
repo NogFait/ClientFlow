@@ -1,44 +1,43 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { renderHook, waitFor } from "@testing-library/react"
+import { afterEach, describe, expect, it, vi } from "vitest"
+import { renderHook } from "@testing-library/react"
 import { useHasSession } from "./useHasSession"
+import type { AuthState } from "../features/auth/context/authContext"
 
-const getUserMock = vi.fn()
+let authState: AuthState
 
-vi.mock("../services/supabaseClient", () => ({
-  supabase: {
-    auth: {
-      getUser: () => getUserMock(),
-    },
-  },
+vi.mock("../features/auth/context/authContext", () => ({
+  useAuthState: () => authState,
 }))
-
-beforeEach(() => {
-  getUserMock.mockReset()
-})
 
 afterEach(() => {
   vi.clearAllMocks()
 })
 
 describe("useHasSession", () => {
-  it("starts loading with hasSession false, then reports true once a user is resolved", async () => {
-    getUserMock.mockResolvedValue({ data: { user: { id: "user-1" } } })
+  it("reports loading:true and hasSession:false while auth status is loading", () => {
+    authState = { session: null, user: null, status: "loading" }
 
     const { result } = renderHook(() => useHasSession())
 
     expect(result.current.loading).toBe(true)
     expect(result.current.hasSession).toBe(false)
-
-    await waitFor(() => expect(result.current.loading).toBe(false))
-    expect(result.current.hasSession).toBe(true)
   })
 
-  it("reports hasSession false once resolved with no user (triangulation: anonymous visitor)", async () => {
-    getUserMock.mockResolvedValue({ data: { user: null } })
+  it("reports hasSession:true once authenticated", () => {
+    authState = { session: null, user: { id: "user-1" } as never, status: "authenticated" }
 
     const { result } = renderHook(() => useHasSession())
 
-    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.loading).toBe(false)
+    expect(result.current.hasSession).toBe(true)
+  })
+
+  it("reports hasSession:false for an anonymous visitor (triangulation)", () => {
+    authState = { session: null, user: null, status: "anonymous" }
+
+    const { result } = renderHook(() => useHasSession())
+
+    expect(result.current.loading).toBe(false)
     expect(result.current.hasSession).toBe(false)
   })
 })
