@@ -22,6 +22,27 @@ describe("BarChart — tooltip currency formatting (es-AR)", () => {
     expect(await screen.findByText(money(1500000))).toBeInTheDocument()
   })
 
+  it("uses the short label on the x-axis and the full key in the tooltip", async () => {
+    const user = userEvent.setup()
+    const { container } = render(
+      <BarChart data={[{ key: "Septiembre 2026", shortLabel: "Sep 26", value: 600000 }]} />,
+    )
+
+    expect(screen.getByText("Sep 26")).toBeInTheDocument()
+    expect(screen.queryByText("Septiembre 2026")).not.toBeInTheDocument()
+
+    const trigger = container.querySelector('span[style*="inline-block"]')!
+    await user.hover(trigger)
+    expect(await screen.findByText("Septiembre 2026")).toBeInTheDocument()
+  })
+
+  it("formats y-axis ticks compactly so they fit on mobile", () => {
+    render(<BarChart data={[{ key: "Septiembre 2026", value: 600000 }]} />)
+
+    expect(screen.getByText("600k")).toBeInTheDocument()
+    expect(screen.queryByText("600000")).not.toBeInTheDocument()
+  })
+
   it("renders nothing (no crash, no tooltip) when data is empty (triangulation)", () => {
     const { container } = render(<BarChart data={[]} />)
 

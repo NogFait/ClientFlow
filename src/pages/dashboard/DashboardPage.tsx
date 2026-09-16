@@ -104,8 +104,9 @@ const DashboardPage = () => {
     .reverse()
     .map(({ month, total }) => {
       const [y, m] = month.split("-")
-      const label = `${MONTHS[Number(m) - 1]} ${y}`
-      return { key: label, value: total }
+      const monthName = MONTHS[Number(m) - 1]
+      // Full name for the tooltip, "Sep 26" for the axis (fits on mobile).
+      return { key: `${monthName} ${y}`, shortLabel: `${monthName.slice(0, 3)} ${y.slice(-2)}`, value: total }
     })
 
   return (

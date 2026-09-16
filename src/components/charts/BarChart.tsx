@@ -2,10 +2,14 @@ import type { CSSProperties } from "react"
 import { scaleBand, scaleLinear, max } from "d3"
 import { ClientTooltip, TooltipContent, TooltipTrigger } from "./ClientTooltip"
 import { formatCurrency } from "../../utils/currency"
+import { formatCompactNumber } from "../../utils/compactNumber"
 import styles from "./BarChart.module.css"
 
 interface BarChartProps {
-  data: { key: string; value: number }[]
+  // `key` names the bar (tooltip); `shortLabel`, when given, is what the
+  // x-axis shows — five "Septiembre 2026" ticks overlap on a phone, five
+  // "Sep 26" ticks don't.
+  data: { key: string; shortLabel?: string; value: number }[]
 }
 
 export const BarChart = ({ data }: BarChartProps) => {
@@ -25,29 +29,23 @@ export const BarChart = ({ data }: BarChartProps) => {
   return (
     <div
       className={styles.chartContainer}
-      style={{ "--marginTop": "0px", "--marginRight": "25px", "--marginBottom": "28px", "--marginLeft": "25px" } as CSSProperties}
+      style={{ "--marginTop": "0px", "--marginRight": "12px", "--marginBottom": "28px", "--marginLeft": "40px" } as CSSProperties}
     >
       <div className={styles.yAxis}>
-        {yScale
-          .ticks(6)
-          .map(yScale.tickFormat(6, "d"))
-          .map((value, i) => (
-            <div key={i} className={styles.yAxisLabel} style={{ top: `${yScale(+value)}%` }}>
-              {value}
-            </div>
-          ))}
+        {yScale.ticks(6).map((value, i) => (
+          <div key={i} className={styles.yAxisLabel} style={{ top: `${yScale(value)}%` }}>
+            {formatCompactNumber(value)}
+          </div>
+        ))}
       </div>
 
       <div className={styles.chartArea}>
         <svg viewBox="0 0 100 100" className={styles.chartSvg} preserveAspectRatio="none">
-          {yScale
-            .ticks(6)
-            .map(yScale.tickFormat(6, "d"))
-            .map((active, i) => (
-              <g key={i} transform={`translate(0,${yScale(+active)})`}>
-                <line x1={0} x2={100} className={styles.gridLine} />
-              </g>
-            ))}
+          {yScale.ticks(6).map((tick, i) => (
+            <g key={i} transform={`translate(0,${yScale(tick)})`}>
+              <line x1={0} x2={100} className={styles.gridLine} />
+            </g>
+          ))}
         </svg>
 
         {data.map((entry, i) => {
@@ -62,7 +60,7 @@ export const BarChart = ({ data }: BarChartProps) => {
                 transform: "translateX(-50%)",
               }}
             >
-              {entry.key.length > 15 ? `${entry.key.slice(0, 15)}…` : entry.key}
+              {entry.shortLabel ?? entry.key}
             </div>
           )
         })}
