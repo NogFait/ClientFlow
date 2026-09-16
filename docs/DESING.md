@@ -125,3 +125,17 @@ Los gráficos en ClientFlow evitan el "chart junk".
 14. Conclusión
 
 ClientFlow no es solo un CRM; es una extensión del flujo de trabajo del freelancer. El sistema de diseño "Precision Minimalist" logra un equilibrio entre una herramienta técnica potente y una interfaz amigable que no agota al usuario tras horas de uso. Cada decisión, desde el radio de los bordes hasta la paleta violeta, está enfocada en proyectar un entorno de trabajo premium y profesional.
+
+15. Superficie de marketing
+
+    La landing (`/`), pricing (`/pricing`) y las páginas legales (`/terms`, `/privacy`) comparten `src/components/marketing/` en vez de reutilizar el shell autenticado (Sidebar/Navbar) — son la cara pública del producto y deben renderizar sin sesión ni llamadas protegidas.
+
+    Componentes compartidos: `PublicNav` (CTAs que cambian según haya sesión — "Ingresar/Creala gratis" vs. "Ir al dashboard", vía `useHasSession`), `PublicFooter`, y `ScrollReveal` (fade-up al entrar en viewport).
+
+    Scroll reveal: `useInView` (IntersectionObserver, `threshold: 0.15`, `once: true` — una sección revelada no vuelve a ocultarse al scrollear hacia arriba). Un salto rápido de scroll o un anchor click puede mover un elemento de "debajo del viewport" a "arriba" sin pasar por la intersección — `useInView` trata ese caso ("ya lo pasaste de largo") como revelado, no como oculto.
+
+    Hash scroll en carga fría: la landing es una ruta `React.lazy`, así que cuando alguien entra directo a `/#precios` el navegador intenta scrollear al hash ANTES de que la sección exista en el DOM (el chunk todavía no cargó) y ese intento no hace nada. `LandingPage` corrige esto con un efecto propio que, al montar, busca `location.hash` en el DOM y llama `scrollIntoView` — `behavior: 'smooth'` normalmente, `'auto'` si `prefers-reduced-motion: reduce`. Los clicks a anchors dentro de la página (nav → `#precios`/`#faq`) ya funcionan con el comportamiento nativo del navegador porque la sección ya existe; el efecto solo cubre el caso de carga fría.
+
+    Reduced motion: respetado en dos capas — CSS (`@media (prefers-reduced-motion: reduce)` en `ScrollReveal.module.css` y en las animaciones del Hero) y JS (el hash-scroll de arriba, vía `window.matchMedia`).
+
+    Convención "Ver" (ProjectCard): la tarjeta de proyecto entera es clickeable como atajo hacia `/projects/:id`, pero la afordancia real y accesible es el link "Ver" (`<Link>`, alcanzable con Tab) — la tarjeta no se expone como `role="link"` para no anidar elementos interactivos (un div-link envolviendo botones "Editar"/"Eliminar" sería inválido). "Editar" y "Eliminar" hacen `stopPropagation` para no disparar el atajo de la tarjeta.
