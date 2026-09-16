@@ -1,5 +1,14 @@
 import { SITE_URL } from "../content/site"
-import type { PublicPageMeta } from "../content/pageMeta"
+
+// The three head fields every prerendered page needs. Structurally satisfied
+// by PublicPageMeta (static routes) and by PublicPage (getPublicPages(),
+// which adds the blog) — `path` is a plain string here on purpose so blog
+// slugs, unknown at compile time, fit.
+export interface HeadMeta {
+  path: string
+  title: string
+  description: string
+}
 
 // Pure string transforms applied by scripts/prerender.mjs to the built
 // dist/index.html. Kept DOM-free (no jsdom/cheerio) on purpose: the template
@@ -36,7 +45,7 @@ export function injectApp(template: string, appHtml: string): string {
   return template.replace(ROOT_MARKER, () => `<div id="root">${appHtml}</div>`)
 }
 
-export function applyHeadMeta(template: string, meta: PublicPageMeta): string {
+export function applyHeadMeta(template: string, meta: HeadMeta): string {
   const title = escapeHtml(meta.title)
   const description = escapeHtml(meta.description)
   const url = `${SITE_URL}${meta.path}`

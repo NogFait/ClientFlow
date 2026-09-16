@@ -9,7 +9,7 @@ const TITLE_MAX = 60
 const DESCRIPTION_MAX = 160
 
 describe("PUBLIC_PAGE_META", () => {
-  it("covers exactly the four public indexable routes (the same set as sitemap.xml)", () => {
+  it("covers exactly the four static public routes (blog pages are added by getPublicPages)", () => {
     expect(PUBLIC_PATHS).toEqual(["/", "/pricing", "/terms", "/privacy"])
   })
 

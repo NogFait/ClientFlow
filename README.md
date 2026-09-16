@@ -218,7 +218,9 @@ Plan Free (3 clientes / 5 proyectos) y Pro (mensual o anual, sin límites). Arqu
 
 - **`src/content/site.ts`**: fuente única de `SITE_URL`, descripción y og:image por defecto.
 - **`src/hooks/usePageMeta.ts`**: title, canonical, OG/Twitter y `noindex` por ruta (restaura al desmontar).
-- **`public/robots.txt` / `public/sitemap.xml`**: servidos como archivos estáticos (Vercel los prioriza sobre el rewrite del SPA); cubiertos por `src/seo/publicFiles.test.ts`.
+- **`public/robots.txt`**: servido como archivo estático (Vercel lo prioriza sobre el rewrite del SPA); cubierto por `src/seo/publicFiles.test.ts`.
+- **Prerender + sitemap**: `pnpm build` renderiza a HTML estático cada página de `getPublicPages()` (`src/seo/publicPages.ts`: `/`, `/pricing`, `/terms`, `/privacy`, `/blog` y cada post publicado) vía `scripts/prerender.mjs`, y genera `dist/sitemap.xml` desde esa misma lista (`src/seo/sitemap.ts`). No hay `sitemap.xml` versionado.
+- **Blog**: un archivo Markdown por post en `src/content/blog/*.md` (el nombre es el slug → `/blog/<slug>`; frontmatter `title`, `description`, `date`, `draft`, `tags`; ver `src/content/blog/README.md`). Publicar es commit + push: el build valida el frontmatter, prerenderiza el post y lo suma al sitemap. `draft: true` lo oculta de todo eso. Cada post lleva JSON-LD `BlogPosting`.
 - **JSON-LD**: `Organization`/`SoftwareApplication` estáticos en `index.html`; `FAQPage` inyectado en la landing vía `src/components/seo/JsonLd.tsx` + `src/seo/faqJsonLd.ts`.
 - **Assets**: favicons, `apple-touch-icon`, `og-image.png` y `site.webmanifest` en `public/`, generados desde `public/icon.png`.
 

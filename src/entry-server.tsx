@@ -33,5 +33,7 @@ async function readStream(stream: ReadableStream<Uint8Array>): Promise<string> {
 
 // Re-exported so the prerender script gets everything it needs from the one
 // SSR bundle — no second build, no TypeScript loader in Node.
-export { PUBLIC_PAGE_META, PUBLIC_PATHS } from './content/pageMeta'
+export { PUBLIC_PAGE_META } from './content/pageMeta'
+export { getPublicPages, toSitemapEntries } from './seo/publicPages'
+export { buildSitemapXml } from './seo/sitemap'
 export { applyHeadMeta, injectApp } from './seo/prerenderTemplate'

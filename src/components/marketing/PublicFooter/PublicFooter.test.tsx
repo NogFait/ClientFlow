@@ -28,3 +28,15 @@ describe("PublicFooter", () => {
     )
   })
 })
+
+describe("PublicFooter — blog", () => {
+  it("links to /blog", () => {
+    render(
+      <MemoryRouter>
+        <PublicFooter />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole("link", { name: "Blog" })).toHaveAttribute("href", "/blog")
+  })
+})

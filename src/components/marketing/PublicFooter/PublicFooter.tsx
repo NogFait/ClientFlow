@@ -12,6 +12,9 @@ const PublicFooter = () => {
           <span className={styles.tagline}>· CRM para freelancers</span>
         </div>
         <div className={styles.links}>
+          <Link to="/blog" className={styles.link}>
+            Blog
+          </Link>
           <Link to="/terms" className={styles.link}>
             Términos
           </Link>

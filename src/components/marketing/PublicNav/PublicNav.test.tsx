@@ -53,3 +53,18 @@ describe("PublicNav", () => {
     expect(toggle).toHaveAttribute("aria-expanded", "false")
   })
 })
+
+describe("PublicNav — blog", () => {
+  it("links to /blog in the desktop nav and in the mobile menu", async () => {
+    const user = userEvent.setup()
+    renderNav()
+
+    expect(screen.getAllByRole("link", { name: "Blog" })).toHaveLength(1)
+    expect(screen.getByRole("link", { name: "Blog" })).toHaveAttribute("href", "/blog")
+
+    await user.click(screen.getByRole("button", { name: /Abrir menú/i }))
+    const links = screen.getAllByRole("link", { name: "Blog" })
+    expect(links).toHaveLength(2)
+    links.forEach((link) => expect(link).toHaveAttribute("href", "/blog"))
+  })
+})

@@ -10,7 +10,12 @@ const ANCHOR_LINKS = [
   { href: "#faq", label: "Preguntas" },
 ]
 
-// Sticky, blurred public nav shared by the landing page and /pricing.
+// Real routes (not landing anchors) shown next to the anchors — a router
+// Link so client-side navigation keeps the shell, no full reload.
+const ROUTE_LINKS = [{ to: "/blog", label: "Blog" }]
+
+// Sticky, blurred public nav shared by the landing page, /pricing, the
+// legal pages and the blog.
 // Session-aware: shows the usual anonymous CTAs (Iniciar sesión / Empezar
 // gratis) or, when a session already exists, a single "Ir al dashboard"
 // link — the landing page itself never auto-redirects a logged-in visitor,
@@ -32,6 +37,11 @@ const PublicNav = () => {
             <a key={link.href} href={link.href} className={styles.anchorLink}>
               {link.label}
             </a>
+          ))}
+          {ROUTE_LINKS.map((link) => (
+            <Link key={link.to} to={link.to} className={styles.anchorLink}>
+              {link.label}
+            </Link>
           ))}
         </div>
 
@@ -74,6 +84,11 @@ const PublicNav = () => {
             >
               {link.label}
             </a>
+          ))}
+          {ROUTE_LINKS.map((link) => (
+            <Link key={link.to} to={link.to} className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+              {link.label}
+            </Link>
           ))}
           {hasSession ? (
             <Link to="/dashboard" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>

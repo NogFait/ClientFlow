@@ -9,13 +9,15 @@ import { PublicOnlyRoute } from "../components/auth/PublicOnlyRoute"
 // Landing is eager: it's the entry point for most visitors (including
 // crawlers hitting "/" first), so lazy-loading it would force an extra
 // request waterfall (HTML -> main bundle -> route chunk) before anything
-// renders. Everything else is lazy — /pricing, /terms, /privacy are only
+// renders. Everything else is lazy — /pricing, /terms, /privacy, /blog are only
 // ever a click away from the landing, and every authenticated app page
 // (plus login/register) is never needed by an anonymous visitor just
 // browsing the public site, so none of it should bloat the initial bundle.
 const PricingPage = lazy(() => import("../pages/pricing/PricingPage"))
 const TermsPage = lazy(() => import("../pages/legal/TermsPage"))
 const PrivacyPage = lazy(() => import("../pages/legal/PrivacyPage"))
+const BlogIndexPage = lazy(() => import("../pages/blog/BlogIndexPage"))
+const BlogPostPage = lazy(() => import("../pages/blog/BlogPostPage"))
 
 const Login = lazy(() => import("../pages/auth/Login/Login"))
 const Register = lazy(() => import("../pages/auth/Register/Register"))
@@ -38,6 +40,8 @@ const AppRouter = () => {
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/blog" element={<BlogIndexPage />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
 
         <Route path="/login" element={<PublicOnlyRoute><Login/></PublicOnlyRoute>} />
         <Route path="/register" element={<PublicOnlyRoute><Register/></PublicOnlyRoute>} />

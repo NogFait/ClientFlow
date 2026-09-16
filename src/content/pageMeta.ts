@@ -41,6 +41,7 @@ export const PUBLIC_PAGE_META: Record<PublicPath, PublicPageMeta> = {
   },
 }
 
-// Ordered list of the routes above — the exact set scripts/prerender.mjs
-// emits as static HTML and sitemap.xml advertises.
+// Ordered list of the STATIC routes above. The full prerender/sitemap list
+// (these + /blog + every published post) is getPublicPages() in
+// src/seo/publicPages.ts.
 export const PUBLIC_PATHS = Object.keys(PUBLIC_PAGE_META) as PublicPath[]
