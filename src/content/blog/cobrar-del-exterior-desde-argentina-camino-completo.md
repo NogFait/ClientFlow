@@ -3,7 +3,7 @@ title: Cobrar del exterior desde Argentina: el camino completo
 description: Qué pasa entre "alguien de afuera me quiere pagar" y "la plata en mi cuenta, en blanco": plataforma, factura, ARCA y banco, contado sin humo.
 date: 2026-09-17
 author: Fausto Chirino
-draft: true
+draft: false
 tags: [cobros, freelance, monotributo]
 ---
 
