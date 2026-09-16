@@ -34,7 +34,7 @@ No. Antes de abrir nada, miré qué me pedía el formulario. Pedía un **CBU**. 
 
 La lección es más general que mi caso: **mirá qué te pide el formulario de cobro antes de contratar nada**. Cada plataforma tiene su forma de pagarte, y la cuenta que abras "por las dudas" puede no servir para nada.
 
-Otro detalle que cambió mi planificación: en mi plataforma el retiro es manual. La plata se acumula en un saldo y yo decido cuándo transferirla al banco. Eso, como vas a ver en el paso 4, te da control sobre *cuándo* aparece el ingreso en Argentina.
+Otro detalle que cambió mi planificación: en mi plataforma el retiro es manual. La plata se acumula en un saldo y yo decido cuándo transferirla al banco. Eso no cambia lo que debés (lo que cobrás, lo declarás), pero sí te da algo valioso: **tiempo para tener todo en regla antes de que entre el primer peso**, en vez de correr a inscribirte con la transferencia ya hecha.
 
 ## Paso 3: la factura
 
@@ -56,7 +56,9 @@ Los doce millones (el número exacto cambia cada semestre; a la fecha de este ar
 
 La regla real es otra: si tenés una actividad habitual que genera ingresos, tenés que estar inscripto y facturar desde el primer peso. Un producto con un botón de "pagar" público es una actividad habitual. Una venta ocasional (vendés tu bici) no lo es.
 
-Lo que sí es cierto, y es la parte útil: **la obligación nace cuando cobrás, no cuando publicás**. Tener una app en línea con un plan gratis y cero ingresos no te obliga a nada. Por eso el detalle del retiro manual del paso 2 importa tanto: mientras la plata está en el saldo de la plataforma y no la retiro, no hay ingreso en Argentina que declarar. Puedo darme de alta el mes en que el producto genere lo suficiente para pagar la cuota, y no antes.
+Lo que sí es cierto, y es la parte útil: **la obligación nace cuando empezás a cobrar, no cuando publicás**. Tener una app en línea con un plan gratis y cero ingresos no te obliga a nada todavía. Pero el día que retire el primer pago, tengo que estar inscripto y emitir la factura correspondiente. No hay zona gris ahí.
+
+Por eso el retiro manual del paso 2 importa: me permite ordenar las cosas en el orden correcto. Primero Clave Fiscal, alta en monotributo, punto de venta habilitado; después, y recién después, el primer retiro con su Factura E. Lo contrario (retirar primero y "después veo") es exactamente lo que te trae problemas con el banco y con ARCA.
 
 ### Qué te da ser monotributista
 
@@ -74,7 +76,7 @@ Si tenés un empleo en blanco además de tu actividad independiente, pagás solo
 
 No te voy a dar un número porque depende de tu categoría, de tu provincia (algunas suman Ingresos Brutos a la misma cuota) y de si tenés empleo. Lo que sí te recomiendo es el [simulador oficial de ARCA](https://servicioscf.afip.gob.ar/publico/simuladormonotributo/inicio.aspx): es público, no pide login, y en cinco preguntas te dice tu categoría y cuánto pagarías por mes. Hacelo antes de decidir nada.
 
-La cuenta que hice yo es simple: ¿cuántos clientes pagando USD 12 necesito para que la cuota se pague sola? A partir de ese número, me inscribo. Antes, no tiene sentido pagar un impuesto sobre ingresos que no existen.
+La cuenta que hice yo es simple, y no es para evitar nada: ¿cuántos clientes pagando USD 12 necesito para que la cuota se pague con el producto y no con mis ahorros? Ese número me dice si el proyecto se sostiene. Y me marca el momento de hacer el alta: antes del primer retiro, con la cuota ya cubierta por lo que generó la app. Es planificación, no una forma de zafar.
 
 ## Paso 5: lo que le preguntás al contador
 
@@ -91,7 +93,7 @@ Un consejo para elegir contador: buscá uno que ya tenga freelancers que cobran 
 
 No recibí el primer pago, así que no puedo contarte cómo se ve la transferencia en el banco, cuánto se pierde en el cambio, ni si el contador me hace corregir algo de lo que escribí acá. Cuando pase, actualizo este artículo o escribo la segunda parte. Prefiero eso a inventar una experiencia que no tuve.
 
-Si estás en el mismo punto que yo, el resumen es este: **primero averiguá a quién le facturás, después mirá cómo te paga la plataforma, y recién ahí decidí qué cuenta abrir y cuándo darte de alta.** En ese orden. Yo lo hice al revés y perdí una semana.
+Si estás en el mismo punto que yo, el resumen es este: **primero averiguá a quién le facturás, después mirá cómo te paga la plataforma, y con eso claro hacé el alta y habilitá la facturación antes de retirar el primer peso.** En ese orden. Yo arranqué al revés (abriendo cuentas y creyendo que no tenía que inscribirme) y perdí una semana.
 
 ---
 
