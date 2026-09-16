@@ -1,3 +1,5 @@
+import { useEffect } from "react"
+import { useLocation } from "react-router-dom"
 import PublicNav from "../../components/marketing/PublicNav/PublicNav"
 import PublicFooter from "../../components/marketing/PublicFooter/PublicFooter"
 import ScrollReveal from "../../components/marketing/ScrollReveal/ScrollReveal"
@@ -16,6 +18,24 @@ const LandingPage = () => {
     "ClientFlow — CRM para freelancers",
     "Tus clientes, proyectos y cobros en un solo lugar. Gratis hasta 3 clientes, sin tarjeta.",
   )
+
+  const { hash } = useLocation()
+
+  // Cold-load deep link (e.g. shared "/#precios" URL): this route is
+  // React.lazy (AppRouter), so the target section doesn't exist in the DOM
+  // yet when the browser makes its own one-shot attempt to scroll to the
+  // hash on navigation — that attempt finds nothing and silently no-ops. Do
+  // it ourselves once the section has actually mounted. In-page anchor
+  // clicks (nav links to #precios/#faq) are untouched — native browser
+  // behavior already handles those correctly since the target already exists.
+  useEffect(() => {
+    if (!hash) return
+    const target = document.querySelector(hash)
+    if (!target) return
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    target.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth" })
+  }, [hash])
 
   return (
     <div className={styles.page}>

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import LandingPage from "./LandingPage"
@@ -10,9 +10,9 @@ vi.mock("../../hooks/useHasSession", () => ({
   useHasSession: () => hasSessionValue,
 }))
 
-function renderLanding() {
+function renderLanding(initialEntries: string[] = ["/"]) {
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <LandingPage />
     </MemoryRouter>,
   )
@@ -53,5 +53,55 @@ describe("LandingPage", () => {
     renderLanding()
 
     expect(screen.getByRole("link", { name: /Ir al dashboard/i })).toHaveAttribute("href", "/dashboard")
+  })
+})
+
+describe("LandingPage — hash scroll on cold load (task 3.x, /#precios)", () => {
+  const scrollIntoViewMock = vi.fn()
+
+  beforeEach(() => {
+    scrollIntoViewMock.mockReset()
+    HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it("scrolls the #precios section into view smoothly when the route mounts with that hash", () => {
+    renderLanding(["/#precios"])
+
+    expect(scrollIntoViewMock).toHaveBeenCalledTimes(1)
+    expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: "smooth" })
+    expect(scrollIntoViewMock.mock.instances[0]).toHaveProperty("id", "precios")
+  })
+
+  it("does not scroll when the URL has no hash (triangulation)", () => {
+    renderLanding(["/"])
+
+    expect(scrollIntoViewMock).not.toHaveBeenCalled()
+  })
+
+  it("uses 'auto' behavior when the visitor prefers reduced motion (triangulation)", () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query.includes("prefers-reduced-motion"),
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    }))
+
+    renderLanding(["/#precios"])
+
+    expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: "auto" })
+  })
+
+  it("does not scroll when the hash doesn't match any section id (triangulation)", () => {
+    renderLanding(["/#no-existe"])
+
+    expect(scrollIntoViewMock).not.toHaveBeenCalled()
   })
 })
