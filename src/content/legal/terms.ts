@@ -1,7 +1,8 @@
 import type { LegalDocument } from "./types"
+import { CONTACT_EMAIL } from "../contact"
 
 // DRAFT — see the notice rendered above these sections (LegalPage). Placeholders
-// ([RAZÓN SOCIAL], [EMAIL DE CONTACTO], [JURISDICCIÓN]) need to be filled with
+// ([RAZÓN SOCIAL], [JURISDICCIÓN]) need to be filled with
 // real values before this goes live, and the whole document needs a lawyer's
 // review — it is not a substitute for one. Content describes what the product
 // actually does today; no compliance claims (GDPR/ISO/etc.) are made because
@@ -44,7 +45,7 @@ export const TERMS_DOCUMENT: LegalDocument = {
     {
       heading: "Eliminación de cuenta",
       paragraphs: [
-        "Si querés eliminar tu cuenta y tus datos, escribinos a [EMAIL DE CONTACTO]. Todavía no ofrecemos autoservicio para esto dentro de la app.",
+        `Si querés eliminar tu cuenta y tus datos, escribinos a ${CONTACT_EMAIL}. Todavía no ofrecemos autoservicio para esto dentro de la app.`,
       ],
     },
     {

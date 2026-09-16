@@ -14,4 +14,17 @@ describe("PublicFooter", () => {
     expect(screen.getByRole("link", { name: /Términos/i })).toHaveAttribute("href", "/terms")
     expect(screen.getByRole("link", { name: /Privacidad/i })).toHaveAttribute("href", "/privacy")
   })
+
+  it("links the contact email as a mailto", () => {
+    render(
+      <MemoryRouter>
+        <PublicFooter />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole("link", { name: "hola@clientflow.lat" })).toHaveAttribute(
+      "href",
+      "mailto:hola@clientflow.lat",
+    )
+  })
 })

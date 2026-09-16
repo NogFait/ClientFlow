@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import { CONTACT_EMAIL } from "../../../content/contact"
 import styles from "./PublicFooter.module.css"
 
 const PublicFooter = () => {
@@ -17,7 +18,9 @@ const PublicFooter = () => {
           <Link to="/privacy" className={styles.link}>
             Privacidad
           </Link>
-          <span className={styles.link}>[EMAIL DE CONTACTO]</span>
+          <a href={`mailto:${CONTACT_EMAIL}`} className={styles.link}>
+            {CONTACT_EMAIL}
+          </a>
         </div>
       </div>
     </footer>

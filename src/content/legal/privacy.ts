@@ -1,4 +1,5 @@
 import type { LegalDocument } from "./types"
+import { CONTACT_EMAIL } from "../contact"
 
 // DRAFT — see the notice rendered above these sections (LegalPage). Same
 // placeholder/no-fabricated-claims rules as terms.ts.
@@ -40,7 +41,7 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
     {
       heading: "Tus derechos",
       paragraphs: [
-        "Podés pedirnos acceder, corregir o eliminar tus datos escribiendo a [EMAIL DE CONTACTO].",
+        `Podés pedirnos acceder, corregir o eliminar tus datos escribiendo a ${CONTACT_EMAIL}.`,
       ],
     },
     {
