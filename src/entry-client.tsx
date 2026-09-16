@@ -1,13 +1,19 @@
 import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import App from './App.tsx'
 
+// Vercel Analytics lives in the CLIENT entry only: it's a browser-side
+// beacon (page views + referrers, cookieless), so it has no place in the
+// prerendered HTML and rendering it during SSR would only risk a hydration
+// mismatch. It also auto-disables itself outside Vercel deployments.
 const app = (
   <StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
+    <Analytics />
   </StrictMode>
 )
 
