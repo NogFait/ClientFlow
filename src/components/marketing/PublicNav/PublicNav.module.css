@@ -47,7 +47,13 @@
   gap: var(--spacing-8);
 }
 
+/* Underline that grows from the left on hover/focus — same 700ms/ease
+   family as the rest of the landing, kept short (200ms) so it feels
+   responsive on a nav. Drawn with a pseudo-element instead of
+   text-decoration so it can animate. */
 .anchorLink {
+  position: relative;
+  padding-bottom: 2px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
@@ -55,8 +61,34 @@
   transition: color var(--transition-fast);
 }
 
-.anchorLink:hover {
+.anchorLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--color-primary-600);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.anchorLink:hover,
+.anchorLink:focus-visible {
   color: var(--color-text-primary);
+}
+
+.anchorLink:hover::after,
+.anchorLink:focus-visible::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anchorLink::after {
+    transition: none;
+  }
 }
 
 .actions {
