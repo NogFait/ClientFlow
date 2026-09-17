@@ -5,7 +5,7 @@ import { getClients } from "../../features/clients/services"
 import { getProjects } from "../../features/projects/services"
 import { getPayments } from "../../features/payments/services"
 import { getTasks } from "../../features/tasks/services"
-import { Users, Briefcase, DollarSign, Clock, Calendar, ClipboardList } from "lucide-react"
+import { Wallet, Briefcase, DollarSign, Clock, Calendar, ClipboardList } from "lucide-react"
 import type { ITask } from "../../features/tasks/types"
 import StatCard from "../../components/shared/StatCard/StatCard"
 import PageHeader from "../../components/shared/PageHeader/PageHeader"
@@ -14,6 +14,7 @@ import EmptyState from "../../components/shared/EmptyState/EmptyState"
 import OnboardingChecklist from "../../components/shared/OnboardingChecklist/OnboardingChecklist"
 import { BarChart } from "../../components/charts/BarChart"
 import { formatCurrency } from "../../utils/currency"
+import { summarizeDashboard, localIsoDate, type DashboardSummary } from "../../features/dashboard/domain/dashboardSummary"
 import { getWelcomeMessage } from "./welcomeMessage"
 import styles from "./DashboardPage.module.css"
 
@@ -32,8 +33,7 @@ const DashboardPage = () => {
   const [totalPayments, setTotalPayments] = useState(0)
   const [activeProjects, setActiveProjects] = useState(0)
   const [monthlyIncome, setMonthlyIncome] = useState(0)
-  const [pendingTasks, setPendingTasks] = useState(0)
-  const [progressTasks, setProgressTasks] = useState(0)
+  const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [monthlyEarnings, setMonthlyEarnings] = useState<{ month: string; total: number }[]>([])
   const [upcomingTasks, setUpcomingTasks] = useState<(ITask & { proyectos?: { name: string } | null })[]>([])
   const [loading, setLoading] = useState(true)
@@ -57,8 +57,7 @@ const DashboardPage = () => {
       setTotalProjects(projects.length)
       setTotalPayments(payments.length)
       setActiveProjects(projects.filter(p => p.status === "activo").length)
-      setPendingTasks(tasks.filter(t => t.status === "pendiente").length)
-      setProgressTasks(tasks.filter(t => t.status === "en_progreso").length)
+      setSummary(summarizeDashboard(payments, tasks, localIsoDate()))
 
       const now = new Date()
       const currentMonth = now.getMonth()
@@ -125,10 +124,28 @@ const DashboardPage = () => {
         <div className={styles.loaderSection}><Loader /></div>
       ) : (
         <div className={styles.kpiGrid}>
-          <StatCard label="Total clientes" value={totalClients} icon={Users} variant="primary" />
-          <StatCard label="Proyectos Activos" value={activeProjects} icon={Briefcase} variant="success" />
-          <StatCard label="Ingreso Mensual" value={formatCurrency(monthlyIncome)} icon={DollarSign} variant="primary" />
-          <StatCard label="Tareas" value={pendingTasks} primaryLabel="Pendiente" secondaryValue={progressTasks} secondaryLabel="En Progreso" icon={Clock} variant="warning" />
+          {/* The two questions the dashboard exists to answer, first and in
+              this order: how much is still owed to me, and what do I have to
+              do. Client/project counts are vanity metrics — the sidebar pages
+              already have them. */}
+          <StatCard
+            label="Por cobrar"
+            value={formatCurrency(summary?.receivable ?? 0)}
+            note={summary && summary.overdueAmount > 0 ? `${formatCurrency(summary.overdueAmount)} vencido` : undefined}
+            icon={Wallet}
+            variant={summary && summary.overdueAmount > 0 ? "error" : "primary"}
+          />
+          <StatCard label="Cobrado este mes" value={formatCurrency(monthlyIncome)} icon={DollarSign} variant="success" />
+          <StatCard
+            label="Tareas"
+            value={summary?.tasksDueToday ?? 0}
+            primaryLabel="Para hoy"
+            secondaryValue={summary?.tasksOverdue ?? 0}
+            secondaryLabel="Vencidas"
+            icon={Clock}
+            variant={summary && summary.tasksOverdue > 0 ? "error" : "warning"}
+          />
+          <StatCard label="Proyectos Activos" value={activeProjects} icon={Briefcase} variant="primary" />
         </div>
       )}
 

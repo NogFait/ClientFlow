@@ -12,6 +12,8 @@ interface StatCardProps {
   // 0-100; renders a slim progress bar under the value when provided (e.g.
   // the project hub's Cobrado/Tareas cards). Omitted entirely otherwise.
   progressPct?: number
+  /** Short caption under the value (e.g. "$ 300.000 vencido"). */
+  note?: string
 }
 
 const variantClassMap: Record<string, string> = {
@@ -30,7 +32,7 @@ const valueVariantMap: Record<string, string> = {
   error: "valueError",
 }
 
-const StatCard = ({ label, value, primaryLabel, secondaryValue, secondaryLabel, icon: Icon, variant = "default", progressPct }: StatCardProps) => {
+const StatCard = ({ label, value, primaryLabel, secondaryValue, secondaryLabel, icon: Icon, variant = "default", progressPct, note }: StatCardProps) => {
   const iconVariant = variantClassMap[variant]
   const valueVariant = valueVariantMap[variant]
 
@@ -58,6 +60,7 @@ const StatCard = ({ label, value, primaryLabel, secondaryValue, secondaryLabel, 
       ) : (
         <p className={`${styles.value} ${valueVariant ? styles[valueVariant] : ""}`}>{value}</p>
       )}
+      {note && <p className={styles.note}>{note}</p>}
       {progressPct !== undefined && (
         <div className={styles.progressTrack}>
           <div

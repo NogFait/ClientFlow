@@ -136,3 +136,9 @@
   background: var(--color-primary-500);
   transition: width var(--transition-base);
 }
+
+.note {
+  margin: var(--spacing-1) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-error-text);
+}

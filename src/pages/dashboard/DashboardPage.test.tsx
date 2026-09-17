@@ -145,8 +145,33 @@ describe("DashboardPage — currency formatting (es-AR)", () => {
 
     renderDashboard()
 
-    await waitFor(() => expect(screen.getByText("Ingreso Mensual")).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText("Cobrado este mes")).toBeInTheDocument())
     expect(screen.getByText(money(2500))).toBeInTheDocument()
+  })
+})
+
+describe("DashboardPage — answers 'cuánto me falta cobrar' and 'qué tengo que hacer'", () => {
+  it("shows the receivable total with the overdue part, and tasks due today / overdue", async () => {
+    authState = anonymousAuthState
+    getClientsMock.mockResolvedValue([{ id: "c1" }])
+    getProjectsMock.mockResolvedValue([])
+    getPaymentsMock.mockResolvedValue([
+      { id: "p1", amount: 300, status: "pendiente", payment_date: "2000-01-01" }, // overdue
+      { id: "p2", amount: 200, status: "pendiente", payment_date: "2999-01-01" }, // upcoming
+    ])
+    getTasksMock.mockResolvedValue([
+      { id: "t1", title: "Vieja", status: "pendiente", priority: "high", due_date: "2000-01-01" },
+      { id: "t2", title: "Futura", status: "pendiente", priority: "low", due_date: "2999-01-01" },
+    ])
+
+    renderDashboard()
+
+    await waitFor(() => expect(screen.getByText("Por cobrar")).toBeInTheDocument())
+    expect(screen.getByText(money(500))).toBeInTheDocument()
+    expect(screen.getByText(`${money(300)} vencido`)).toBeInTheDocument()
+    expect(screen.getByText("Vencidas")).toBeInTheDocument()
+    expect(screen.getByText("Cobrado este mes")).toBeInTheDocument()
+    expect(screen.queryByText("Total clientes")).not.toBeInTheDocument()
   })
 })
 
@@ -169,7 +194,7 @@ describe("DashboardPage — onboarding checklist (task 3.11)", () => {
 
     renderDashboard()
 
-    await waitFor(() => expect(screen.getByText("Total clientes")).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText("Por cobrar")).toBeInTheDocument())
     expect(screen.queryByText("Empezá en 3 pasos")).not.toBeInTheDocument()
   })
 })
