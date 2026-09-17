@@ -33,18 +33,20 @@ describe("AppRouter — public surface (M3)", () => {
     expect(await screen.findByRole("heading", { name: /Empezá gratis\. Pagá cuando crezcas\./i })).toBeInTheDocument()
   })
 
-  it("renders the terms page at /terms with the draft notice", async () => {
+  it("renders the final terms page at /terms (operator named, no draft notice)", async () => {
     renderAt("/terms")
 
     expect(await screen.findByRole("heading", { name: /Términos de servicio/i })).toBeInTheDocument()
-    expect(screen.getByText(/Borrador — pendiente de revisión legal/i)).toBeInTheDocument()
+    expect(screen.getByText(/operado por Fausto Chirino/i)).toBeInTheDocument()
+    expect(screen.queryByText(/Borrador/i)).not.toBeInTheDocument()
   })
 
-  it("renders the privacy page at /privacy with the draft notice", async () => {
+  it("renders the final privacy page at /privacy (data-protection section, no draft notice)", async () => {
     renderAt("/privacy")
 
     expect(await screen.findByRole("heading", { name: /Política de privacidad/i })).toBeInTheDocument()
-    expect(screen.getByText(/Borrador — pendiente de revisión legal/i)).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: /Cómo protegemos tus datos/i })).toBeInTheDocument()
+    expect(screen.queryByText(/Borrador/i)).not.toBeInTheDocument()
   })
 
   it("renders the login form at /login for an anonymous visitor", async () => {
