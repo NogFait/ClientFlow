@@ -142,6 +142,9 @@ const PaymentsPage = () => {
     .reduce((sum, p) => sum + Number(p.amount), 0)
 
   const yearLabel = month.slice(0, 4)
+  // Month-scoped cards say WHICH month, so "Pendiente" can't be misread as
+  // an all-time figure (the year card next to it carries the yearly one).
+  const monthLabel = formatMonthEsAr(month).toLowerCase()
 
   return (
     <div>
@@ -151,7 +154,7 @@ const PaymentsPage = () => {
         actionLabel="Registrar pago"
         onAction={() => { setEditingPayment(null); setModalOpen(true) }}
       >
-        <MonthSelector value={month} onChange={handleMonthChange} max={currentMonthKey()} />
+        <MonthSelector value={month} onChange={handleMonthChange} />
       </PageHeader>
 
       {deleteError && (
@@ -172,8 +175,8 @@ const PaymentsPage = () => {
       ) : (
         <>
           <div className={styles.kpiGrid}>
-            <StatCard label="Total Ganados" value={formatCurrency(totalGanado)} icon={DollarSign} variant="success" />
-            <StatCard label="Total Pendiente" value={formatCurrency(totalPendiente)} icon={Clock} variant="warning" />
+            <StatCard label={`Cobrado en ${monthLabel}`} value={formatCurrency(totalGanado)} icon={DollarSign} variant="success" />
+            <StatCard label={`Pendiente en ${monthLabel}`} value={formatCurrency(totalPendiente)} icon={Clock} variant="warning" />
             <StatCard label="Próximo pago proyectado" value={proximoPagoValue} icon={Calendar} variant="primary" />
             <StatCard
               label={`Acumulado ${yearLabel}`}

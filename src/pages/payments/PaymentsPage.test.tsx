@@ -336,7 +336,10 @@ describe("PaymentsPage — month selector (URL sync)", () => {
     expect(screen.getByText("Junio 2026")).toBeInTheDocument()
   })
 
-  it("disables navigating past the current month", async () => {
+  // Pending payments are usually dated in the FUTURE (the next instalment),
+  // so future months must be reachable — otherwise "pendiente" money is
+  // invisible in every monthly view.
+  it("allows navigating to future months, where pending payments live", async () => {
     getPaymentsInRangeMock.mockResolvedValue([])
     getPaymentTotalsMock.mockResolvedValue({ paid: 0, pending: 0 })
     getProjectsMock.mockResolvedValue([])
@@ -344,7 +347,18 @@ describe("PaymentsPage — month selector (URL sync)", () => {
     renderAt("/payments")
 
     await screen.findByText(formatMonthEsAr(currentMonthKey()))
-    expect(screen.getByRole("button", { name: "Mes siguiente" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Mes siguiente" })).toBeEnabled()
+  })
+
+  it("labels the month cards with the month they refer to", async () => {
+    getPaymentsInRangeMock.mockResolvedValue([])
+    getPaymentTotalsMock.mockResolvedValue({ paid: 0, pending: 0 })
+    getProjectsMock.mockResolvedValue([])
+
+    renderAt("/payments?month=2026-03")
+
+    expect(await screen.findByText("Cobrado en marzo 2026")).toBeInTheDocument()
+    expect(screen.getByText("Pendiente en marzo 2026")).toBeInTheDocument()
   })
 
   it("shows the year accumulated stat (paid + pending) using formatCurrency", async () => {

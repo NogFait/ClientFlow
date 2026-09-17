@@ -88,3 +88,42 @@ describe("MonthSelector", () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 })
+
+describe("MonthSelector — quick picker", () => {
+  it("opens a month grid from the label and jumps straight to the chosen month", async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<MonthSelector value="2026-09" onChange={onChange} />)
+
+    await user.click(screen.getByRole("button", { name: /elegir mes/i }))
+    expect(screen.getByRole("dialog", { name: /elegir mes/i })).toBeInTheDocument()
+    expect(screen.getByText("2026")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Mar" }))
+    expect(onChange).toHaveBeenCalledWith("2026-03")
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  })
+
+  it("steps the year inside the picker without changing the value until a month is chosen", async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<MonthSelector value="2026-09" onChange={onChange} />)
+
+    await user.click(screen.getByRole("button", { name: /elegir mes/i }))
+    await user.click(screen.getByRole("button", { name: /año anterior/i }))
+    expect(screen.getByText("2025")).toBeInTheDocument()
+    expect(onChange).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole("button", { name: "Dic" }))
+    expect(onChange).toHaveBeenCalledWith("2025-12")
+  })
+
+  it("disables months beyond max inside the picker", async () => {
+    const user = userEvent.setup()
+    render(<MonthSelector value="2026-09" onChange={vi.fn()} max="2026-09" />)
+
+    await user.click(screen.getByRole("button", { name: /elegir mes/i }))
+    expect(screen.getByRole("button", { name: "Oct" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Sep" })).toBeEnabled()
+  })
+})
