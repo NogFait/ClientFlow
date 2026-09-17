@@ -32,21 +32,36 @@ export async function getPaymentsInRange({ from, to }: DateRange) {
 // utils/month.ts#yearRange). Selects only amount+status and reduces
 // client-side rather than relying on Postgres aggregates, so it stays
 // RLS-safe with the same row-level policy as every other pagos query.
-export async function getPaymentTotals({ from, to }: DateRange): Promise<{ paid: number; pending: number }> {
+export interface PaymentTotals {
+  paid: number
+  pending: number
+  /** Pending amount per "YYYY-MM" — tells the UI WHICH months still owe money. */
+  pendingByMonth: Record<string, number>
+}
+
+export async function getPaymentTotals({ from, to }: DateRange): Promise<PaymentTotals> {
   const { data, error } = await supabase
     .from("pagos")
-    .select("amount,status")
+    .select("amount,status,payment_date")
     .gte("payment_date", from)
     .lt("payment_date", to)
   if (error) throw new Error(error.message)
-  const rows = data as { amount: number; status: string }[]
-  return rows.reduce(
+  const rows = data as { amount: number; status: string; payment_date: string | null }[]
+  return rows.reduce<PaymentTotals>(
     (totals, row) => {
-      if (row.status === "pagado") totals.paid += Number(row.amount)
-      else if (row.status === "pendiente") totals.pending += Number(row.amount)
+      const amount = Number(row.amount)
+      if (row.status === "pagado") {
+        totals.paid += amount
+      } else if (row.status === "pendiente") {
+        totals.pending += amount
+        if (row.payment_date) {
+          const monthKey = row.payment_date.slice(0, 7)
+          totals.pendingByMonth[monthKey] = (totals.pendingByMonth[monthKey] ?? 0) + amount
+        }
+      }
       return totals
     },
-    { paid: 0, pending: 0 },
+    { paid: 0, pending: 0, pendingByMonth: {} },
   )
 }
 

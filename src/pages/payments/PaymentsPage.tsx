@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
 import type { IPayment } from "../../features/payments/types"
 import type { IProject } from "../../features/projects/types"
-import { getPaymentsInRange, getPaymentTotals, deletePayment } from "../../features/payments/services"
+import { getPaymentsInRange, getPaymentTotals, deletePayment, type PaymentTotals } from "../../features/payments/services"
 import { getProjects } from "../../features/projects/services"
 import { usePaymentForm } from "../../features/payments/hooks/usePaymentForm"
 import PaymentTableRow from "../../features/payments/components/PaymentTableRow/PaymentTableRow"
@@ -21,7 +21,7 @@ import Loader from "../../components/shared/Loader/Loader"
 import EmptyState from "../../components/shared/EmptyState/EmptyState"
 import { useToast } from "../../components/shared/Toast/useToast"
 import { formatCurrency } from "../../utils/currency"
-import { currentMonthKey, formatMonthEsAr, monthRange, parseMonthKey, yearRange, type MonthKey } from "../../utils/month"
+import { currentMonthKey, formatMonthEsAr, monthRange, parseMonthKey, shortMonthEsAr, yearRange, type MonthKey } from "../../utils/month"
 import styles from "./PaymentsPage.module.css"
 
 type PaymentWithRelations = IPayment & { proyectos?: { name: string; clientes?: { name: string } | null } | null }
@@ -45,13 +45,15 @@ const PaymentsPage = () => {
   const [loaded, setLoaded] = useState<{
     key: string
     payments: PaymentWithRelations[]
-    yearTotals: { paid: number; pending: number }
+    yearTotals: PaymentTotals
   } | null>(null)
   const [errorKey, setErrorKey] = useState<string | null>(null)
   const paymentsError = errorKey === requestKey
   const paymentsLoading = !paymentsError && loaded?.key !== requestKey
   const payments = loaded?.key === requestKey ? loaded.payments : []
-  const yearTotals = loaded?.key === requestKey ? loaded.yearTotals : { paid: 0, pending: 0 }
+  const yearTotals: PaymentTotals =
+    loaded?.key === requestKey ? loaded.yearTotals : { paid: 0, pending: 0, pendingByMonth: {} }
+  const pendingMonths = Object.keys(yearTotals.pendingByMonth ?? {}).sort() as MonthKey[]
   const toast = useToast()
 
   const handleFormSuccess = (saved: IPayment) => {
@@ -154,7 +156,7 @@ const PaymentsPage = () => {
         actionLabel="Registrar pago"
         onAction={() => { setEditingPayment(null); setModalOpen(true) }}
       >
-        <MonthSelector value={month} onChange={handleMonthChange} />
+        <MonthSelector value={month} onChange={handleMonthChange} markedMonths={pendingMonths} />
       </PageHeader>
 
       {deleteError && (
@@ -182,7 +184,7 @@ const PaymentsPage = () => {
               label={`Acumulado ${yearLabel}`}
               value={formatCurrency(yearTotals.paid)}
               secondaryValue={formatCurrency(yearTotals.pending)}
-              secondaryLabel="pendiente"
+              secondaryLabel={pendingMonths.length > 0 ? `pendiente · ${pendingMonths.map(shortMonthEsAr).join(", ")}` : "pendiente"}
               icon={TrendingUp}
               variant="primary"
             />

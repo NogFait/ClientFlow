@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import { currentMonthKey, formatMonthEsAr, shiftMonth, type MonthKey } from "../../../utils/month"
 import styles from "./MonthSelector.module.css"
 
@@ -7,6 +7,8 @@ interface MonthSelectorProps {
   value: MonthKey
   onChange: (next: MonthKey) => void
   max?: MonthKey
+  /** Months to flag in the picker (e.g. the ones with pending payments). */
+  markedMonths?: MonthKey[]
 }
 
 const SHORT_MONTHS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
@@ -16,7 +18,7 @@ const SHORT_MONTHS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "S
 // "marzo del año pasado" is two clicks instead of eighteen. Purely
 // controlled: the parent owns `value` (usually synced to a URL search
 // param) and decides what a month change means (reload data, etc.).
-const MonthSelector = ({ value, onChange, max }: MonthSelectorProps) => {
+const MonthSelector = ({ value, onChange, max, markedMonths = [] }: MonthSelectorProps) => {
   const today = currentMonthKey()
   const isAtMax = max !== undefined && value >= max
   const isCurrent = value === today
@@ -98,6 +100,7 @@ const MonthSelector = ({ value, onChange, max }: MonthSelectorProps) => {
           onClick={() => (pickerOpen ? setPickerOpen(false) : openPicker())}
         >
           <span aria-live="polite">{formatMonthEsAr(value)}</span>
+          <ChevronDown size={16} className={styles.labelChevron} aria-hidden="true" />
         </button>
 
         <button
@@ -142,21 +145,29 @@ const MonthSelector = ({ value, onChange, max }: MonthSelectorProps) => {
               <ChevronRight size={16} />
             </button>
           </div>
+          {markedMonths.length > 0 && (
+            <p className={styles.pickerHint}>
+              <span className={styles.pickerDot} aria-hidden="true" /> con pagos pendientes
+            </p>
+          )}
           <div className={styles.pickerGrid}>
             {SHORT_MONTHS.map((name, i) => {
               const key = `${pickerYear}-${String(i + 1).padStart(2, "0")}` as MonthKey
               const disabled = max !== undefined && key > max
               const selected = key === value
+              const marked = markedMonths.includes(key)
               return (
                 <button
                   key={key}
                   type="button"
                   className={`${styles.pickerMonth} ${selected ? styles.pickerMonthSelected : ""}`}
                   aria-pressed={selected}
+                  aria-label={marked ? `${name} (con pendientes)` : name}
                   disabled={disabled}
                   onClick={() => pick(i)}
                 >
                   {name}
+                  {marked && <span className={styles.pickerDot} aria-hidden="true" />}
                 </button>
               )
             })}

@@ -133,3 +133,11 @@ describe("isFutureMonth", () => {
     expect(isFutureMonth("2027-01", now)).toBe(true)
   })
 })
+
+describe("shortMonthEsAr", () => {
+  it("abbreviates the month of a key in Spanish, lowercase", async () => {
+    const { shortMonthEsAr } = await import("./month")
+    expect(shortMonthEsAr("2026-10")).toBe("oct")
+    expect(shortMonthEsAr("2026-01")).toBe("ene")
+  })
+})

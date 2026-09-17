@@ -43,15 +43,51 @@
   min-width: 9rem;
   min-height: 40px;
   padding: 0 var(--spacing-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
   text-align: center;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
-  background: transparent;
-  border: 1px solid transparent;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   cursor: pointer;
   transition: var(--transition-base);
+}
+
+.labelChevron {
+  color: var(--color-text-tertiary);
+  transition: transform var(--transition-base);
+}
+
+.label[aria-expanded="true"] .labelChevron {
+  transform: rotate(180deg);
+}
+
+.pickerHint {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.pickerDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-warning);
+}
+
+.pickerMonth .pickerDot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
 }
 
 .label:hover,
@@ -96,6 +132,7 @@
 }
 
 .pickerMonth {
+  position: relative;
   min-height: 36px;
   border-radius: var(--radius-md);
   border: 1px solid transparent;

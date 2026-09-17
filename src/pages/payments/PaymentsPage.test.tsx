@@ -350,6 +350,16 @@ describe("PaymentsPage — month selector (URL sync)", () => {
     expect(screen.getByRole("button", { name: "Mes siguiente" })).toBeEnabled()
   })
 
+  it("lists the months that still have pending payments on the year card", async () => {
+    getPaymentsInRangeMock.mockResolvedValue([])
+    getPaymentTotalsMock.mockResolvedValue({ paid: 0, pending: 350, pendingByMonth: { "2026-10": 300, "2026-11": 50 } })
+    getProjectsMock.mockResolvedValue([])
+
+    renderAt("/payments?month=2026-09")
+
+    expect(await screen.findByText("pendiente · oct, nov")).toBeInTheDocument()
+  })
+
   it("labels the month cards with the month they refer to", async () => {
     getPaymentsInRangeMock.mockResolvedValue([])
     getPaymentTotalsMock.mockResolvedValue({ paid: 0, pending: 0 })

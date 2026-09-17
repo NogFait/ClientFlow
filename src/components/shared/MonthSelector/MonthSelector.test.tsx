@@ -127,3 +127,22 @@ describe("MonthSelector — quick picker", () => {
     expect(screen.getByRole("button", { name: "Sep" })).toBeEnabled()
   })
 })
+
+describe("MonthSelector — marked months", () => {
+  it("marks the months that have pending payments inside the picker", async () => {
+    const user = userEvent.setup()
+    render(<MonthSelector value="2026-09" onChange={vi.fn()} markedMonths={["2026-10", "2026-11"]} />)
+
+    await user.click(screen.getByRole("button", { name: /elegir mes/i }))
+
+    expect(screen.getByRole("button", { name: "Oct (con pendientes)" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Nov (con pendientes)" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Sep" })).toBeInTheDocument()
+  })
+
+  it("shows a chevron so the month label reads as a control", () => {
+    render(<MonthSelector value="2026-09" onChange={vi.fn()} />)
+    const label = screen.getByRole("button", { name: /elegir mes/i })
+    expect(label.querySelector("svg")).not.toBeNull()
+  })
+})

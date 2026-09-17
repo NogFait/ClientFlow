@@ -75,10 +75,28 @@ describe("getPaymentTotals", () => {
     const result = await getPaymentTotals({ from: "2026-01-01", to: "2027-01-01" })
 
     expect(fromMock).toHaveBeenCalledWith("pagos")
-    expect(selectMock).toHaveBeenCalledWith("amount,status")
     expect(gteMock).toHaveBeenCalledWith("payment_date", "2026-01-01")
     expect(ltMock).toHaveBeenCalledWith("payment_date", "2027-01-01")
-    expect(result).toEqual({ paid: 150, pending: 30 })
+    expect(selectMock).toHaveBeenCalledWith("amount,status,payment_date")
+    expect(result).toEqual({ paid: 150, pending: 30, pendingByMonth: {} })
+  })
+
+  it("groups pending amounts by month so the UI can show WHERE the pending money is", async () => {
+    mockTotalsChain({
+      data: [
+        { amount: 100, status: "pendiente", payment_date: "2026-10-15" },
+        { amount: 200, status: "pendiente", payment_date: "2026-10-20" },
+        { amount: 50, status: "pendiente", payment_date: "2026-11-15" },
+        { amount: 999, status: "pagado", payment_date: "2026-10-01" },
+        { amount: 7, status: "pendiente", payment_date: null },
+      ],
+      error: null,
+    })
+
+    const result = await getPaymentTotals({ from: "2026-01-01", to: "2027-01-01" })
+
+    expect(result.pending).toBe(357)
+    expect(result.pendingByMonth).toEqual({ "2026-10": 300, "2026-11": 50 })
   })
 
   it("returns zeros when there are no rows in range (triangulation)", async () => {
@@ -86,7 +104,7 @@ describe("getPaymentTotals", () => {
 
     const result = await getPaymentTotals({ from: "2026-01-01", to: "2027-01-01" })
 
-    expect(result).toEqual({ paid: 0, pending: 0 })
+    expect(result).toEqual({ paid: 0, pending: 0, pendingByMonth: {} })
   })
 
   it("ignores statuses other than pagado/pendiente defensively", async () => {
@@ -94,7 +112,7 @@ describe("getPaymentTotals", () => {
 
     const result = await getPaymentTotals({ from: "2026-01-01", to: "2027-01-01" })
 
-    expect(result).toEqual({ paid: 10, pending: 0 })
+    expect(result).toEqual({ paid: 10, pending: 0, pendingByMonth: {} })
   })
 
   it("throws when supabase returns an error", async () => {

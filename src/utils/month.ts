@@ -66,3 +66,10 @@ export function formatMonthEsAr(key: MonthKey): string {
 export function isFutureMonth(key: MonthKey, now: Date = new Date()): boolean {
   return key > currentMonthKey(now)
 }
+
+const SHORT_MONTHS_ES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+
+/** "2026-10" → "oct" (year omitted: callers list months within one year). */
+export function shortMonthEsAr(key: MonthKey): string {
+  return SHORT_MONTHS_ES[Number(key.slice(5, 7)) - 1] ?? key
+}
