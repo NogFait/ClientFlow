@@ -7,6 +7,7 @@ import { usePageMeta } from "../../hooks/usePageMeta"
 import JsonLd from "../../components/seo/JsonLd"
 import { buildFaqJsonLd } from "../../seo/faqJsonLd"
 import Hero from "./sections/Hero"
+import PainPoints from "./sections/PainPoints"
 import ComoFunciona from "./sections/ComoFunciona"
 import Features from "./sections/Features"
 import PricingSection from "./sections/PricingSection"
@@ -46,6 +47,7 @@ const LandingPage = () => {
       <PublicNav />
       <main>
         <Hero />
+        <PainPoints />
         <ComoFunciona />
         <Features />
 
