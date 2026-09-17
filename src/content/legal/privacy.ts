@@ -1,12 +1,20 @@
 import type { LegalDocument } from "./types"
 import { CONTACT_EMAIL } from "../contact"
 
-// DRAFT — see the notice rendered above these sections (LegalPage). Same
-// placeholder/no-fabricated-claims rules as terms.ts.
+// Plain-language privacy policy. Same rule as terms.ts: only what the
+// product verifiably does today. The "Cómo protegemos tus datos" section
+// mirrors the security audit of 2026-09-16 (RLS, TLS, headers) — update it
+// if that changes.
 export const PRIVACY_DOCUMENT: LegalDocument = {
   title: "Política de privacidad",
   lastUpdated: "Septiembre de 2026",
   sections: [
+    {
+      heading: "Responsable",
+      paragraphs: [
+        `El responsable del tratamiento de los datos es Fausto Chirino, Mendoza, Argentina. Cualquier consulta sobre esta política podés enviarla a ${CONTACT_EMAIL}.`,
+      ],
+    },
     {
       heading: "Qué datos guardamos",
       paragraphs: [
@@ -21,15 +29,29 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
       ],
     },
     {
+      heading: "Cómo protegemos tus datos",
+      paragraphs: [
+        "Cada usuario solo puede acceder a sus propios datos: el aislamiento se aplica en la base de datos (políticas de seguridad a nivel de fila en PostgreSQL), no solo en la interfaz, y está cubierto por pruebas automáticas.",
+        "Toda la comunicación entre tu navegador y ClientFlow viaja cifrada (HTTPS). Las contraseñas nunca se guardan en texto plano: Supabase Auth las almacena con hash.",
+        "Las claves y credenciales del sistema no forman parte del código público de la aplicación y están restringidas al servidor.",
+      ],
+    },
+    {
       heading: "Pagos",
       paragraphs: [
         "Los pagos del plan Pro los procesa Polar, que actúa como Merchant of Record. No vemos ni guardamos números de tarjeta ni otros datos de pago — esa información queda del lado de Polar.",
       ],
     },
     {
+      heading: "Analítica",
+      paragraphs: [
+        "Usamos Vercel Web Analytics para medir visitas de forma agregada (páginas vistas, país, dispositivo). No usa cookies ni identifica a personas individuales.",
+      ],
+    },
+    {
       heading: "Con quién compartimos datos",
       paragraphs: [
-        "Compartimos datos únicamente con los proveedores que hacen funcionar el Servicio: Supabase (infraestructura y autenticación) y Polar (procesamiento de pagos). No vendemos ni compartimos tus datos con nadie más.",
+        "Compartimos datos únicamente con los proveedores que hacen funcionar el Servicio: Supabase (base de datos y autenticación), Vercel (alojamiento de la aplicación y analítica) y Polar (procesamiento de pagos). No vendemos ni compartimos tus datos con nadie más.",
       ],
     },
     {

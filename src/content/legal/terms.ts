@@ -1,12 +1,11 @@
 import type { LegalDocument } from "./types"
 import { CONTACT_EMAIL } from "../contact"
 
-// DRAFT — see the notice rendered above these sections (LegalPage). Placeholders
-// ([RAZÓN SOCIAL], [JURISDICCIÓN]) need to be filled with
-// real values before this goes live, and the whole document needs a lawyer's
-// review — it is not a substitute for one. Content describes what the product
-// actually does today; no compliance claims (GDPR/ISO/etc.) are made because
-// none have been verified.
+// Plain-language terms. Every statement here describes what the product
+// actually does today (verified against the codebase); no compliance claims
+// (GDPR/ISO/etc.) are made because none have been certified. A lawyer's
+// review is still recommended before scaling — keep the text honest rather
+// than impressive.
 export const TERMS_DOCUMENT: LegalDocument = {
   title: "Términos de servicio",
   lastUpdated: "Septiembre de 2026",
@@ -14,7 +13,7 @@ export const TERMS_DOCUMENT: LegalDocument = {
     {
       heading: "Quiénes somos",
       paragraphs: [
-        "ClientFlow es operado por [RAZÓN SOCIAL]. Estos términos regulan el uso de la aplicación web ClientFlow (el \"Servicio\").",
+        "ClientFlow es desarrollado y operado por Fausto Chirino, con domicilio en Mendoza, Argentina. Estos términos regulan el uso de la aplicación web ClientFlow (el \"Servicio\"). Al crear una cuenta, aceptás estos términos.",
       ],
     },
     {
@@ -55,8 +54,23 @@ export const TERMS_DOCUMENT: LegalDocument = {
       ],
     },
     {
+      heading: "Uso aceptable",
+      paragraphs: [
+        "Podés usar ClientFlow para gestionar tu propio trabajo. No está permitido usarlo para actividades ilegales, para cargar datos de terceros sin tener derecho a hacerlo, ni para intentar acceder a cuentas o datos que no sean tuyos.",
+      ],
+    },
+    {
+      heading: "Disponibilidad y responsabilidad",
+      paragraphs: [
+        "ClientFlow es un producto en evolución mantenido por una sola persona. Hacemos lo posible para que esté disponible y funcione bien, pero no garantizamos disponibilidad ininterrumpida ni ausencia de errores. El Servicio se ofrece \"tal cual\"; no somos responsables por pérdidas derivadas de su uso, más allá de lo que la ley exija.",
+        "Sos responsable de la exactitud de los datos que cargás y de conservar tus propios respaldos de la información que consideres crítica.",
+      ],
+    },
+    {
       heading: "Ley aplicable",
-      paragraphs: ["Estos términos se rigen por las leyes de [JURISDICCIÓN]."],
+      paragraphs: [
+        "Estos términos se rigen por las leyes de la República Argentina. Ante cualquier conflicto, las partes se someten a los tribunales ordinarios de la Provincia de Mendoza, Argentina.",
+      ],
     },
   ],
 }
