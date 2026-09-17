@@ -9,6 +9,13 @@ export interface FaqItem {
 // to match the product's real Free-limit/cancellation/currency behavior).
 export const FAQ_ITEMS: FaqItem[] = [
   {
+    // Sets the expectation "CRM" can raise (pipeline, leads) straight — the
+    // audit's positioning note. Honest anti-pitch, and a rich-result line.
+    question: "¿Es un CRM de ventas?",
+    answer:
+      "No. ClientFlow no tiene leads, pipeline ni automatizaciones de marketing. Es para el trabajo que ya tenés: quién es tu cliente, qué le debés entregar y cuánto te falta cobrar.",
+  },
+  {
     question: "¿Necesito tarjeta para empezar?",
     answer: "No. Creás la cuenta con tu email y usás el plan Free todo el tiempo que quieras.",
   },
