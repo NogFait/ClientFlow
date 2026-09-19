@@ -56,3 +56,23 @@ export async function resendSignupConfirmation(email: string) {
   });
   if (error) throw new Error(error.message);
 }
+
+// Password recovery, step 1: Supabase emails a link that lands on
+// /reset-password carrying a *recovery* session. Supabase answers 200 even
+// for unknown addresses (no account enumeration); only its own refusals
+// (e.g. the per-address minimum interval) surface here.
+export async function requestPasswordReset(email: string) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+// Password recovery, step 2, run under the recovery session from the link.
+// "Require current password when updating" is ON in the project, but
+// GoTrue skips that check for recovery sessions (session.IsRecovery()) —
+// the user is here precisely because they don't have the old password.
+export async function updatePassword(password: string) {
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) throw new Error(error.message);
+}

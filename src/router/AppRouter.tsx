@@ -24,6 +24,8 @@ const BlogPostPage = lazy(() => import("../pages/blog/BlogPostPage"))
 
 const Login = lazy(() => import("../pages/auth/Login/Login"))
 const Register = lazy(() => import("../pages/auth/Register/Register"))
+const ForgotPassword = lazy(() => import("../pages/auth/ForgotPassword/ForgotPassword"))
+const ResetPassword = lazy(() => import("../pages/auth/ResetPassword/ResetPassword"))
 
 const DashboardPage = lazy(() => import("../pages/dashboard/DashboardPage"))
 const ClientsPage = lazy(() => import("../pages/clients/ClientsPage"))
@@ -67,6 +69,10 @@ const AppRouter = () => {
 
         <Route path="/login" element={<PublicOnlyRoute><Login/></PublicOnlyRoute>} />
         <Route path="/register" element={<PublicOnlyRoute><Register/></PublicOnlyRoute>} />
+        <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword/></PublicOnlyRoute>} />
+        {/* Deliberately NOT PublicOnly: the recovery link signs the visitor in
+            before landing here (see ResetPassword.tsx). */}
+        <Route path="/reset-password" element={<ResetPassword/>} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>

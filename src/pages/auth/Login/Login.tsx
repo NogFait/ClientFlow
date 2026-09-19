@@ -104,6 +104,9 @@ const Login = () => {
                 <label className={styles.label} htmlFor="login-password">
                   {t("fields.password")}
                 </label>
+                <Link to="/forgot-password" className={styles.forgotLink}>
+                  {t("login.forgotPassword")}
+                </Link>
               </div>
               <div className={styles.inputWrapper}>
                 <Lock size={18} className={styles.inputIcon} aria-hidden="true" />

@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 const signUpMock = vi.fn()
 const signInMock = vi.fn()
 const resendMock = vi.fn()
+const resetPasswordForEmailMock = vi.fn()
+const updateUserMock = vi.fn()
 
 vi.mock("../../services/supabaseClient", () => ({
   supabase: {
@@ -10,6 +12,8 @@ vi.mock("../../services/supabaseClient", () => ({
       signUp: (args: unknown) => signUpMock(args),
       signInWithPassword: (args: unknown) => signInMock(args),
       resend: (args: unknown) => resendMock(args),
+      resetPasswordForEmail: (...args: unknown[]) => resetPasswordForEmailMock(...args),
+      updateUser: (args: unknown) => updateUserMock(args),
     },
   },
 }))
@@ -18,6 +22,8 @@ beforeEach(() => {
   signUpMock.mockReset()
   signInMock.mockReset()
   resendMock.mockReset()
+  resetPasswordForEmailMock.mockReset()
+  updateUserMock.mockReset()
 })
 
 describe("signUpUser", () => {
@@ -88,5 +94,43 @@ describe("resendSignupConfirmation", () => {
     const { resendSignupConfirmation } = await import("./services")
 
     await expect(resendSignupConfirmation("a@b.c")).rejects.toThrow("only request this after 42 seconds")
+  })
+})
+
+describe("requestPasswordReset", () => {
+  it("asks Supabase for a recovery email whose link lands on this origin's /reset-password", async () => {
+    resetPasswordForEmailMock.mockResolvedValue({ error: null })
+    const { requestPasswordReset } = await import("./services")
+
+    await requestPasswordReset("a@b.c")
+
+    expect(resetPasswordForEmailMock).toHaveBeenCalledWith("a@b.c", {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+  })
+
+  it("re-throws Supabase's message when the request is refused (e.g. rate limited)", async () => {
+    resetPasswordForEmailMock.mockResolvedValue({ error: { message: "For security purposes, you can only request this after 42 seconds." } })
+    const { requestPasswordReset } = await import("./services")
+
+    await expect(requestPasswordReset("a@b.c")).rejects.toThrow("only request this after 42 seconds")
+  })
+})
+
+describe("updatePassword", () => {
+  it("sets the new password on the current (recovery) session — no current password, the user forgot it", async () => {
+    updateUserMock.mockResolvedValue({ error: null })
+    const { updatePassword } = await import("./services")
+
+    await updatePassword("n3w-secret")
+
+    expect(updateUserMock).toHaveBeenCalledWith({ password: "n3w-secret" })
+  })
+
+  it("re-throws Supabase's message when the update is refused (triangulation: weak password)", async () => {
+    updateUserMock.mockResolvedValue({ error: { message: "Password should be at least 8 characters." } })
+    const { updatePassword } = await import("./services")
+
+    await expect(updatePassword("short")).rejects.toThrow("at least 8 characters")
   })
 })

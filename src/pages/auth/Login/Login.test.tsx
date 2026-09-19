@@ -58,6 +58,12 @@ describe("Login", () => {
     expect(screen.getByRole("link", { name: /Creala gratis/i })).toHaveAttribute("href", "/register")
   })
 
+  it("links to /forgot-password next to the password field", () => {
+    renderLogin()
+
+    expect(screen.getByRole("link", { name: /Olvidaste tu contraseña/i })).toHaveAttribute("href", "/forgot-password")
+  })
+
   it("submits email/password and navigates to /dashboard on success", async () => {
     signInWithPasswordMock.mockResolvedValue({ error: null })
     const user = userEvent.setup()
