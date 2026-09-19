@@ -248,3 +248,21 @@
     flex: 1;
   }
 }
+
+/* Post-signup "check your inbox" notice (same card, no form) */
+.noticeIcon {
+  color: var(--color-primary-600);
+  margin-bottom: var(--spacing-2);
+}
+
+.noticeBody {
+  margin: 0;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.noticeEmail {
+  color: var(--color-text-primary);
+  word-break: break-all;
+}

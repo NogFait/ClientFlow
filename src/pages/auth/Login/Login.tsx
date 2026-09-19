@@ -8,6 +8,7 @@ import { useLoginForm } from "../../../features/auth/hooks/useAuth"
 import { usePageMeta } from "../../../hooks/usePageMeta"
 import { usePreferredLanguageSync } from "../../../i18n/usePreferredLanguageSync"
 import LanguageSwitch from "../../../components/shared/LanguageSwitch/LanguageSwitch"
+import ResendConfirmation from "../../../components/auth/ResendConfirmation/ResendConfirmation"
 import styles from "./Login.module.css"
 
 // No language in this URL (/login is noindex, one route for both), so the
@@ -20,8 +21,11 @@ const Login = () => {
   usePreferredLanguageSync()
   usePageMeta({ title: t("login.metaTitle"), noindex: true })
 
-  const { register, handleSubmit, onSubmit, errors, isSubmitting } = useLoginForm()
+  const { register, handleSubmit, onSubmit, errors, isSubmitting, submittedEmail } = useLoginForm()
   const [showPassword, setShowPassword] = useState(false)
+  // The account exists but the emailed confirmation link was never clicked:
+  // besides the translated explanation, offer to send that email again.
+  const emailNotConfirmed = errors.root?.serverError?.type === "emailNotConfirmed"
 
   return (
     <div className={styles.page}>
@@ -122,6 +126,9 @@ const Login = () => {
             </div>
 
             {errors.root?.serverError && <p className={styles.error}>{errors.root.serverError.message}</p>}
+            {emailNotConfirmed && (
+              <ResendConfirmation email={submittedEmail()} label={t("login.resendConfirmation")} />
+            )}
 
             <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
               {isSubmitting ? t("login.submitting") : t("login.submit")}

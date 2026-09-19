@@ -1,13 +1,14 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { Mail, Lock, User, Eye, EyeOff } from "lucide-react"
-import { useTranslation } from "react-i18next"
+import { Mail, Lock, User, Eye, EyeOff, MailCheck } from "lucide-react"
+import { Trans, useTranslation } from "react-i18next"
 import { toLocalizedPath } from "../../../i18n/paths"
 import { useCurrentLang } from "../../../i18n/useCurrentLang"
 import { useRegisterForm } from "../../../features/auth/hooks/useAuth"
 import { usePageMeta } from "../../../hooks/usePageMeta"
 import { usePreferredLanguageSync } from "../../../i18n/usePreferredLanguageSync"
 import LanguageSwitch from "../../../components/shared/LanguageSwitch/LanguageSwitch"
+import ResendConfirmation from "../../../components/auth/ResendConfirmation/ResendConfirmation"
 import styles from "./Register.module.css"
 
 // Same language handling as Login: stored preference, "preference" switch.
@@ -19,7 +20,7 @@ const Register = () => {
   usePreferredLanguageSync()
   usePageMeta({ title: t("register.metaTitle"), noindex: true })
 
-  const { register, handleSubmit, onSubmit, errors, isSubmitting } = useRegisterForm()
+  const { register, handleSubmit, onSubmit, errors, isSubmitting, registeredEmail } = useRegisterForm()
   const [showPassword, setShowPassword] = useState(false)
 
   return (
@@ -42,6 +43,32 @@ const Register = () => {
       </section>
 
       <section className={styles.formPanel}>
+        {registeredEmail ? (
+          // Supabase's "Confirm email" is ON: the account exists but can't
+          // sign in until the emailed link is clicked, so say so instead of
+          // sending the user to a login that would only refuse them.
+          <div className={styles.formCard}>
+            <div className={styles.formHeader}>
+              <MailCheck size={36} className={styles.noticeIcon} aria-hidden="true" />
+              <h2 className={styles.welcomeTitle}>{t("register.checkInbox.title")}</h2>
+              <p className={styles.noticeBody}>
+                <Trans
+                  t={t}
+                  i18nKey="register.checkInbox.body"
+                  values={{ email: registeredEmail }}
+                  components={[<span key="0" />, <strong key="1" className={styles.noticeEmail} />]}
+                />
+              </p>
+              <p className={styles.welcomeSub}>{t("register.checkInbox.hint")}</p>
+            </div>
+
+            <ResendConfirmation email={registeredEmail} label={t("register.checkInbox.resend")} />
+
+            <p className={styles.link}>
+              {t("register.checkInbox.alreadyConfirmed")} <Link to="/login">{t("register.login")}</Link>
+            </p>
+          </div>
+        ) : (
         <div className={styles.formCard}>
           <div className={styles.formHeader}>
             <h2 className={styles.welcomeTitle}>{t("register.title")}</h2>
@@ -116,6 +143,7 @@ const Register = () => {
             {t("register.hasAccount")} <Link to="/login">{t("register.login")}</Link>
           </p>
         </div>
+        )}
       </section>
     </div>
   )
