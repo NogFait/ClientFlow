@@ -237,9 +237,24 @@
   color: var(--color-text-secondary);
 }
 
+/* Reads as a link, not as a second label: link colour at rest, underline +
+   darker on hover, visible focus ring for keyboard users. */
 .forgotLink {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
+  color: var(--color-text-link);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+
+.forgotLink:hover {
+  color: var(--color-primary-700);
+  text-decoration: underline;
+}
+
+.forgotLink:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
 }
 
 .inputWrapper {
