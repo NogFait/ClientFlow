@@ -1,5 +1,6 @@
-import { Component, type ReactNode } from "react"
+import { Component, type ErrorInfo, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { reportError } from "../../../monitoring/sentry"
 
 interface Props {
   children: ReactNode
@@ -43,6 +44,12 @@ class ErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error }
+  }
+
+  // Render errors never reach window.onerror, so the boundary is the only
+  // place that can report them — with React's component stack attached.
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    reportError(error, { componentStack: info.componentStack ?? "" })
   }
 
   render() {

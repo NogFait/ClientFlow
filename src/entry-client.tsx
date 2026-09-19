@@ -7,6 +7,17 @@ import App from './App.tsx'
 import { createI18n } from './i18n/createI18n'
 import { resolveInitialLang } from './i18n/paths'
 import { getStoredLang } from './i18n/preference'
+import { initMonitoring } from './monitoring/sentry'
+
+// Error monitoring first, so anything that throws from here on is reported.
+// Client entry only: it's a browser SDK and the prerender never runs it.
+// No-op without VITE_SENTRY_DSN (local dev, tests). VITE_VERCEL_ENV is
+// "production" | "preview" | "development" when Vercel's system env vars
+// are exposed to the build; MODE covers everything else.
+initMonitoring({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  environment: import.meta.env.VITE_VERCEL_ENV ?? import.meta.env.MODE,
+})
 
 // One i18n instance for the life of the page. Its language is decided
 // BEFORE the first render, from the URL (so hydrating /en adopts English
