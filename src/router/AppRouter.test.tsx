@@ -103,14 +103,14 @@ describe("AppRouter — English public surface (/en/*)", () => {
     expect(await screen.findByRole("heading", { name: "Privacy Policy" })).toBeInTheDocument()
   })
 
-  it("pins the Spanish-only blog to Spanish even when the instance starts in English (triangulation)", async () => {
+  it("keeps the English chrome on the blog (posts stay Spanish, the frame follows the user)", async () => {
     renderWithLang(<AppRouter />, "en", { initialEntries: ["/blog"] })
 
     expect(await screen.findByRole("heading", { level: 1, name: "Blog" })).toBeInTheDocument()
-    // "Blog" reads the same in both languages, so the heading alone doesn't
-    // prove the pin — wait for a Spanish-only string (the language switch
-    // re-renders after the lazy page mounts).
-    expect(await screen.findByRole("link", { name: /Iniciar sesión/i })).toBeInTheDocument()
+    expect(await screen.findByRole("link", { name: /Log in/i })).toBeInTheDocument()
+    expect(screen.getByText(/written in Spanish/i)).toBeInTheDocument()
+    // Post content is the author's own words — Spanish title, untouched.
+    expect(screen.getByRole("link", { name: /Cobrar del exterior desde Argentina/i })).toBeInTheDocument()
   })
 
   it("switches from / to /en client-side via the ES|EN control and back", async () => {

@@ -38,5 +38,13 @@
       "title": "Política de privacidad — ClientFlow",
       "description": "Qué datos guarda ClientFlow (tu email y lo que cargás: clientes, proyectos, tareas y pagos), dónde se alojan y cómo pedir que los eliminemos."
     }
+  },
+  "blog": {
+    "title": "Blog",
+    "intro": "Novedades de ClientFlow y notas sobre trabajar por tu cuenta: clientes, proyectos, cobros.",
+    "empty": "Todavía no hay posts. Volvé pronto.",
+    "readingTime": "{{count}} min de lectura",
+    "back": "Volver al blog",
+    "spanishOnly": ""
   }
 }

@@ -109,10 +109,15 @@ describe("LanguageSwitch — mode='route'", () => {
     expect(window.localStorage.getItem(LANG_STORAGE_KEY)).toBeNull()
   })
 
-  it("renders nothing on a page with no localized counterpart (the Spanish-only blog)", () => {
+  it("on a page with no localized counterpart (the blog) switches the language in place and stays on the URL", async () => {
+    const user = userEvent.setup()
     renderRouteMode("/blog/un-post", "es")
 
-    expect(screen.queryByRole("group")).not.toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "English" }))
+
+    expect(screen.getByTestId("location")).toHaveTextContent("/blog/un-post")
+    expect(screen.getByRole("button", { name: "English" })).toHaveAttribute("aria-pressed", "true")
+    expect(window.localStorage.getItem(LANG_STORAGE_KEY)).toBe("en")
   })
 })
 

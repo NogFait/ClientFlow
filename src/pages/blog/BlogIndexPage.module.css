@@ -95,3 +95,9 @@
   line-height: var(--line-height-relaxed);
   color: var(--color-text-secondary);
 }
+
+.note {
+  margin: var(--spacing-3) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}

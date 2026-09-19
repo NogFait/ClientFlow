@@ -8,7 +8,10 @@ import NotFoundPage from "../not-found/NotFoundPage"
 import { usePageMeta } from "../../hooks/usePageMeta"
 import { getPostBySlug } from "../../content/blog"
 import type { BlogPost } from "../../content/blog/types"
-import { formatDateEs } from "../../content/blog/formatDateEs"
+import { useTranslation } from "react-i18next"
+import { formatPostDate } from "../../content/blog/formatPostDate"
+import { useCurrentLang } from "../../i18n/useCurrentLang"
+import { usePreferredLanguageSync } from "../../i18n/usePreferredLanguageSync"
 import { buildBlogPostingJsonLd } from "../../seo/blogPostingJsonLd"
 import { blogPostPath, blogPostTitle } from "../../seo/publicPages"
 import styles from "./BlogPostPage.module.css"
@@ -34,6 +37,9 @@ interface BlogPostArticleProps {
 }
 
 const BlogPostArticle = ({ post }: BlogPostArticleProps) => {
+  usePreferredLanguageSync()
+  const { t } = useTranslation()
+  const lang = useCurrentLang()
   usePageMeta({
     title: blogPostTitle(post.title),
     description: post.description,
@@ -47,16 +53,16 @@ const BlogPostArticle = ({ post }: BlogPostArticleProps) => {
       <main className={styles.main}>
         <Link to="/blog" className={styles.back}>
           <ArrowLeft size={16} aria-hidden="true" />
-          Volver al blog
+          {t("blog.back")}
         </Link>
 
         <article className={styles.article}>
           <header className={styles.header}>
             <h1 className={styles.title}>{post.title}</h1>
             <p className={styles.meta}>
-              <time dateTime={post.date}>{formatDateEs(post.date)}</time>
+              <time dateTime={post.date}>{formatPostDate(post.date, lang)}</time>
               <span aria-hidden="true"> · </span>
-              <span>{post.readingMinutes} min de lectura</span>
+              <span>{t("blog.readingTime", { count: post.readingMinutes })}</span>
               <span aria-hidden="true"> · </span>
               <span>{post.author}</span>
             </p>

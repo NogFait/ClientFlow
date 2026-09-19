@@ -38,5 +38,13 @@
       "title": "Privacy Policy — ClientFlow",
       "description": "What ClientFlow stores (your email and what you enter: clients, projects, tasks and payments), where it is hosted and how to ask us to delete it."
     }
+  },
+  "blog": {
+    "title": "Blog",
+    "intro": "ClientFlow news and notes on working for yourself: clients, projects, payments.",
+    "empty": "No posts yet. Check back soon.",
+    "readingTime": "{{count}} min read",
+    "back": "Back to blog",
+    "spanishOnly": "Posts are written in Spanish — the author's own words. Everything else follows your language."
   }
 }

@@ -30,18 +30,19 @@ const LanguageSwitch = ({ mode, className }: LanguageSwitchProps) => {
   const location = useLocation()
   const navigate = useNavigate()
 
-  // Nothing to switch to on the Spanish-only blog: a control that reloads
-  // the same page is worse than no control ("Blog (es)" in the nav already
-  // says why).
-  if (mode === "route" && !hasLocalizedCounterpart(location.pathname)) return null
+  // Pages without a localized twin (the blog: Spanish posts, translated
+  // frame) switch in place instead of navigating — the URL stays, the
+  // chrome follows the choice, and the preference is stored like anywhere
+  // else so it survives the next page.
+  const switchesInPlace = mode === "preference" || !hasLocalizedCounterpart(location.pathname)
 
   const select = (lang: Lang) => {
     if (lang === current) return
     setStoredLang(lang)
-    if (mode === "route") {
-      navigate({ pathname: toLocalizedPath(location.pathname, lang), search: location.search, hash: location.hash })
-    } else {
+    if (switchesInPlace) {
       void i18n.changeLanguage(lang)
+    } else {
+      navigate({ pathname: toLocalizedPath(location.pathname, lang), search: location.search, hash: location.hash })
     }
   }
 

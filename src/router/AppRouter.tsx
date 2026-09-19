@@ -60,8 +60,10 @@ const AppRouter = () => {
         )}
         {/* Blog is Spanish-only: pinned to "es" so its chrome matches the
             posts even when reached from an English page. No /en twin. */}
-        <Route path="/blog" element={<LocaleRoute lang="es"><BlogIndexPage /></LocaleRoute>} />
-        <Route path="/blog/:slug" element={<LocaleRoute lang="es"><BlogPostPage /></LocaleRoute>} />
+        {/* Blog: posts are Spanish, but the frame follows the user's language
+            (stored preference, applied by the pages themselves) — no LocaleRoute. */}
+        <Route path="/blog" element={<BlogIndexPage />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
 
         <Route path="/login" element={<PublicOnlyRoute><Login/></PublicOnlyRoute>} />
         <Route path="/register" element={<PublicOnlyRoute><Register/></PublicOnlyRoute>} />
