@@ -1,9 +1,11 @@
 import { useEffect } from "react"
 import { useLocation } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import PublicNav from "../../components/marketing/PublicNav/PublicNav"
 import PublicFooter from "../../components/marketing/PublicFooter/PublicFooter"
 import ScrollReveal from "../../components/marketing/ScrollReveal/ScrollReveal"
 import { usePageMeta } from "../../hooks/usePageMeta"
+import { useFaqItems } from "../../hooks/useFaqItems"
 import JsonLd from "../../components/seo/JsonLd"
 import { buildFaqJsonLd } from "../../seo/faqJsonLd"
 import Hero from "./sections/Hero"
@@ -13,14 +15,18 @@ import Features from "./sections/Features"
 import PricingSection from "./sections/PricingSection"
 import Faq from "./sections/Faq"
 import CtaBlock from "./sections/CtaBlock"
-import { FAQ_ITEMS } from "../../content/faq"
-import { PUBLIC_PAGE_META } from "../../content/pageMeta"
+import { getPageMeta } from "../../content/pageMeta"
+import { useCurrentLang } from "../../i18n/useCurrentLang"
 import styles from "./LandingPage.module.css"
 
-const FAQ_JSON_LD = buildFaqJsonLd(FAQ_ITEMS)
-
 const LandingPage = () => {
-  usePageMeta(PUBLIC_PAGE_META["/"])
+  const { t } = useTranslation("landing")
+  const lang = useCurrentLang()
+  usePageMeta(getPageMeta("/", lang))
+
+  // FAQ copy and its structured data come from the same translated list,
+  // so the JSON-LD a crawler reads at /en is the English FAQ it sees on-page.
+  const faqItems = useFaqItems()
 
   const { hash } = useLocation()
 
@@ -43,7 +49,7 @@ const LandingPage = () => {
 
   return (
     <div className={styles.page}>
-      <JsonLd data={FAQ_JSON_LD} />
+      <JsonLd data={buildFaqJsonLd(faqItems)} />
       <PublicNav />
       <main>
         <Hero />
@@ -51,30 +57,30 @@ const LandingPage = () => {
         <ComoFunciona />
         <Features />
 
+        {/* Section ids (#precios, #faq, #como) are language-neutral on
+            purpose: nav anchors and shared deep links work at / and /en. */}
         <section id="precios" className={styles.pricingSection}>
           <div className={styles.pricingInner}>
             <ScrollReveal className={styles.pricingHeading}>
-              <span className={styles.eyebrow}>PRECIOS</span>
-              <h2 className={styles.title}>Empezá gratis. Pagá cuando crezcas.</h2>
-              <p className={styles.subtitle}>
-                Un solo plan pago, sin letra chica. Cancelás cuando quieras y seguís hasta el fin del período.
-              </p>
+              <span className={styles.eyebrow}>{t("pricing.eyebrow")}</span>
+              <h2 className={styles.title}>{t("pricing.title")}</h2>
+              <p className={styles.subtitle}>{t("pricing.subtitle")}</p>
             </ScrollReveal>
             <ScrollReveal>
               <PricingSection />
             </ScrollReveal>
-            <p className={styles.pricingNote}>Precios en dólares. El cobro lo procesa Polar, con tarjeta internacional.</p>
+            <p className={styles.pricingNote}>{t("pricing.note")}</p>
           </div>
         </section>
 
         <section id="faq" className={styles.faqSection}>
           <div className={styles.faqInner}>
             <div className={styles.faqHeading}>
-              <span className={styles.eyebrow}>PREGUNTAS</span>
-              <h2 className={styles.title}>Lo que nos preguntan antes de empezar.</h2>
+              <span className={styles.eyebrow}>{t("faq.eyebrow")}</span>
+              <h2 className={styles.title}>{t("faq.title")}</h2>
             </div>
             <ScrollReveal>
-              <Faq items={FAQ_ITEMS} />
+              <Faq items={faqItems} />
             </ScrollReveal>
           </div>
         </section>

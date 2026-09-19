@@ -162,3 +162,74 @@ describe("usePageMeta", () => {
     expect(getMeta("property", "og:image")?.getAttribute("content")).toBe(DEFAULT_OG_IMAGE)
   })
 })
+
+describe("usePageMeta — language", () => {
+  beforeEach(() => {
+    clearHead()
+    seedStaticHead()
+    const ogLocale = document.createElement("meta")
+    ogLocale.setAttribute("property", "og:locale")
+    ogLocale.setAttribute("content", "es_AR")
+    document.head.appendChild(ogLocale)
+  })
+
+  afterEach(() => {
+    clearHead()
+    document.head.querySelectorAll('link[rel="alternate"]').forEach((el) => el.remove())
+  })
+
+  const alternates = [
+    { hreflang: "es" as const, href: `${SITE_URL}/pricing` },
+    { hreflang: "en" as const, href: `${SITE_URL}/en/pricing` },
+    { hreflang: "x-default" as const, href: `${SITE_URL}/pricing` },
+  ]
+
+  it("sets og:locale from lang and restores the baseline on unmount", () => {
+    const { unmount } = renderHook(() => usePageMeta({ title: "Pricing", lang: "en" }))
+
+    expect(getMeta("property", "og:locale")?.getAttribute("content")).toBe("en_US")
+
+    unmount()
+
+    expect(getMeta("property", "og:locale")?.getAttribute("content")).toBe("es_AR")
+  })
+
+  it("leaves og:locale alone when no lang is given (triangulation)", () => {
+    renderHook(() => usePageMeta({ title: "Iniciar sesión — ClientFlow", noindex: true }))
+
+    expect(getMeta("property", "og:locale")?.getAttribute("content")).toBe("es_AR")
+  })
+
+  it("adds one <link rel=alternate hreflang> per alternate and removes them on unmount", () => {
+    const { unmount } = renderHook(() => usePageMeta({ title: "Pricing", lang: "en", alternates }))
+
+    const links = [...document.head.querySelectorAll<HTMLLinkElement>('link[rel="alternate"]')]
+    expect(links.map((link) => [link.getAttribute("hreflang"), link.getAttribute("href")])).toEqual([
+      ["es", `${SITE_URL}/pricing`],
+      ["en", `${SITE_URL}/en/pricing`],
+      ["x-default", `${SITE_URL}/pricing`],
+    ])
+
+    unmount()
+
+    expect(document.head.querySelector('link[rel="alternate"]')).toBeNull()
+  })
+
+  it("overwrites (and later restores) alternates that already exist in the head, as on a hydrated prerendered page", () => {
+    const existing = document.createElement("link")
+    existing.setAttribute("rel", "alternate")
+    existing.setAttribute("hreflang", "en")
+    existing.setAttribute("href", `${SITE_URL}/en`)
+    document.head.appendChild(existing)
+
+    const { unmount } = renderHook(() => usePageMeta({ title: "Pricing", lang: "en", alternates }))
+
+    expect(document.head.querySelectorAll('link[rel="alternate"][hreflang="en"]')).toHaveLength(1)
+    expect(existing.getAttribute("href")).toBe(`${SITE_URL}/en/pricing`)
+
+    unmount()
+
+    expect(existing.getAttribute("href")).toBe(`${SITE_URL}/en`)
+    expect(existing.isConnected).toBe(true)
+  })
+})

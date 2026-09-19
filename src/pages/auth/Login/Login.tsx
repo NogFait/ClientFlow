@@ -1,12 +1,19 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Mail, Lock, Eye, EyeOff } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { useLoginForm } from "../../../features/auth/hooks/useAuth"
 import { usePageMeta } from "../../../hooks/usePageMeta"
+import { usePreferredLanguageSync } from "../../../i18n/usePreferredLanguageSync"
+import LanguageSwitch from "../../../components/shared/LanguageSwitch/LanguageSwitch"
 import styles from "./Login.module.css"
 
+// No language in this URL (/login is noindex, one route for both), so the
+// stored preference drives it and the switch works in "preference" mode.
 const Login = () => {
-  usePageMeta({ title: "Iniciar sesión — ClientFlow", noindex: true })
+  const { t } = useTranslation("auth")
+  usePreferredLanguageSync()
+  usePageMeta({ title: t("login.metaTitle"), noindex: true })
 
   const { register, handleSubmit, onSubmit, errors, isSubmitting } = useLoginForm()
   const [showPassword, setShowPassword] = useState(false)
@@ -14,61 +21,62 @@ const Login = () => {
   return (
     <div className={styles.page}>
       <section className={styles.brandPanel}>
-        <Link to="/" className={styles.brand}>
-          <img src="/icon-192.png" alt="ClientFlow" className={styles.brandLogo} />
-          <span className={styles.brandName}>ClientFlow</span>
-        </Link>
+        <div className={styles.brandRow}>
+          <Link to="/" className={styles.brand}>
+            <img src="/icon-192.png" alt="ClientFlow" className={styles.brandLogo} />
+            <span className={styles.brandName}>ClientFlow</span>
+          </Link>
+          <LanguageSwitch mode="preference" />
+        </div>
 
         <div className={styles.brandContent}>
           <div className={styles.brandCopy}>
-            <h1 className={styles.brandTitle}>Todo tu trabajo freelance, en orden.</h1>
-            <p className={styles.brandTagline}>
-              Clientes, proyectos, tareas y cobros. Qué hacer hoy y cuánto te falta cobrar, de un vistazo.
-            </p>
+            <h1 className={styles.brandTitle}>{t("login.brandTitle")}</h1>
+            <p className={styles.brandTagline}>{t("login.brandTagline")}</p>
           </div>
 
           <div className={styles.mockCard}>
             <div className={styles.mockHeader}>
-              <span className={styles.mockHeaderLabel}>Pagos · Septiembre 2026</span>
-              <span className={styles.mockHeaderAccumulated}>Acumulado 2026 · $ 2.140.000</span>
+              <span className={styles.mockHeaderLabel}>{t("login.mock.title")}</span>
+              <span className={styles.mockHeaderAccumulated}>{t("login.mock.accumulated")}</span>
             </div>
             <div className={styles.mockStatsRow}>
               <div className={styles.mockStat}>
-                <span className={styles.mockStatLabel}>Cobrado</span>
+                <span className={styles.mockStatLabel}>{t("login.mock.collected")}</span>
                 <span className={styles.mockStatValueGreen}>$ 372.000</span>
               </div>
               <div className={styles.mockStat}>
-                <span className={styles.mockStatLabel}>Pendiente</span>
+                <span className={styles.mockStatLabel}>{t("login.mock.pending")}</span>
                 <span className={styles.mockStatValueAmber}>$ 80.000</span>
               </div>
             </div>
             <div className={styles.mockList}>
               <div className={styles.mockListRow}>
-                <span>Sistema Web · Tita</span>
-                <span className={styles.mockPaid}>Pagado</span>
+                <span>{t("login.mock.row1")}</span>
+                <span className={styles.mockPaid}>{t("login.mock.paid")}</span>
               </div>
               <div className={styles.mockListRow}>
-                <span>Landing Page · Pepe</span>
-                <span className={styles.mockPending}>Pendiente</span>
+                <span>{t("login.mock.row2")}</span>
+                <span className={styles.mockPending}>{t("login.mock.pendingStatus")}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <p className={styles.brandNote}>Gratis hasta 3 clientes. Sin tarjeta.</p>
+        <p className={styles.brandNote}>{t("brandNote")}</p>
       </section>
 
       <section className={styles.formPanel}>
         <div className={styles.formCard}>
           <div className={styles.formHeader}>
-            <h2 className={styles.welcomeTitle}>Bienvenido de nuevo</h2>
-            <p className={styles.welcomeSub}>Ingresá con tu email y contraseña.</p>
+            <h2 className={styles.welcomeTitle}>{t("login.title")}</h2>
+            <p className={styles.welcomeSub}>{t("login.subtitle")}</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className={styles.form} noValidate>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="login-email">
-                Email
+                {t("fields.email")}
               </label>
               <div className={styles.inputWrapper}>
                 <Mail size={18} className={styles.inputIcon} aria-hidden="true" />
@@ -76,7 +84,7 @@ const Login = () => {
                   id="login-email"
                   className={styles.input}
                   type="email"
-                  placeholder="vos@tuestudio.com"
+                  placeholder={t("fields.emailPlaceholder")}
                   {...register("email", { required: true })}
                 />
               </div>
@@ -85,7 +93,7 @@ const Login = () => {
             <div className={styles.field}>
               <div className={styles.labelRow}>
                 <label className={styles.label} htmlFor="login-password">
-                  Contraseña
+                  {t("fields.password")}
                 </label>
               </div>
               <div className={styles.inputWrapper}>
@@ -100,7 +108,7 @@ const Login = () => {
                 <button
                   type="button"
                   className={styles.togglePassword}
-                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  aria-label={showPassword ? t("fields.hidePassword") : t("fields.showPassword")}
                   onClick={() => setShowPassword((visible) => !visible)}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -111,12 +119,12 @@ const Login = () => {
             {errors.root?.serverError && <p className={styles.error}>{errors.root.serverError.message}</p>}
 
             <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Ingresando..." : "Iniciar sesión"}
+              {isSubmitting ? t("login.submitting") : t("login.submit")}
             </button>
           </form>
 
           <p className={styles.link}>
-            ¿No tenés cuenta? <Link to="/register">Creala gratis</Link>
+            {t("login.noAccount")} <Link to="/register">{t("login.createFree")}</Link>
           </p>
         </div>
       </section>

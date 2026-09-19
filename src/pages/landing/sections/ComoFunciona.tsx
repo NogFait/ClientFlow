@@ -1,41 +1,24 @@
+import { useTranslation } from "react-i18next"
 import ScrollReveal from "../../../components/marketing/ScrollReveal/ScrollReveal"
 import styles from "./ComoFunciona.module.css"
 
-const STEPS = [
-  {
-    number: "1",
-    title: "Cargá tus clientes",
-    description: "Nombre, contacto y estado. Nada más. Cada cliente agrupa todo lo que hacés para él.",
-  },
-  {
-    number: "2",
-    title: "Armá proyectos con presupuesto",
-    description:
-      "Un proyecto por trabajo, con su presupuesto y sus fechas. Ahí viven sus tareas y sus cobros.",
-  },
-  {
-    number: "3",
-    title: "Registrá cobros y tareas",
-    description:
-      "Cada pago que entra y cada tarea que cerrás mueven la barra del proyecto. Ves el avance real, no el que creés.",
-  },
-]
-
+// Copy lives in landing.json → "how" (three numbered steps).
 const ComoFunciona = () => {
+  const { t } = useTranslation("landing")
+  const steps = t("how.steps", { returnObjects: true })
+
   return (
     <section id="como" className={styles.section}>
       <div className={styles.inner}>
         <ScrollReveal className={styles.heading}>
-          <span className={styles.eyebrow}>CÓMO FUNCIONA</span>
-          <h2 className={styles.title}>Tres pasos y ya estás ordenado.</h2>
-          <p className={styles.subtitle}>
-            No hay configuración. Cargás lo que ya tenés en la cabeza y ClientFlow lo convierte en un tablero.
-          </p>
+          <span className={styles.eyebrow}>{t("how.eyebrow")}</span>
+          <h2 className={styles.title}>{t("how.title")}</h2>
+          <p className={styles.subtitle}>{t("how.subtitle")}</p>
         </ScrollReveal>
         <div className={styles.grid}>
-          {STEPS.map((step) => (
-            <ScrollReveal key={step.number} className={styles.card}>
-              <span className={styles.number}>{step.number}</span>
+          {steps.map((step, index) => (
+            <ScrollReveal key={step.title} className={styles.card}>
+              <span className={styles.number}>{index + 1}</span>
               <h3 className={styles.cardTitle}>{step.title}</h3>
               <p className={styles.cardDescription}>{step.description}</p>
             </ScrollReveal>

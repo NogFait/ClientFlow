@@ -1,0 +1,20 @@
+{
+  "plans": {
+    "free": {
+      "name": "Free",
+      "features": ["3 clients", "5 projects", "Unlimited tasks and payments within them"]
+    },
+    "pro_monthly": {
+      "name": "Pro monthly",
+      "priceSuffix": "/month",
+      "features": ["Unlimited clients", "Unlimited projects", "Unlimited tasks and payments", "Priority support"]
+    },
+    "pro_yearly": {
+      "name": "Pro yearly",
+      "priceSuffix": "/year",
+      "features": ["Unlimited clients", "Unlimited projects", "Unlimited tasks and payments", "Priority support"],
+      "badge": "2 months free",
+      "note": "equivalent to USD 10/month"
+    }
+  }
+}

@@ -38,6 +38,7 @@
 .links {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--spacing-5);
 }
 

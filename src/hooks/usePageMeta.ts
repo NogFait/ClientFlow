@@ -1,9 +1,18 @@
 import { useEffect } from "react"
 import { SITE_URL, DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE } from "../content/site"
+import type { Lang } from "../i18n"
+import type { HreflangAlternate } from "../seo/alternates"
+import { OG_LOCALE } from "../seo/prerenderTemplate"
 
 export interface PageMetaOptions {
   title: string
   description?: string
+  /** Page language → og:locale. Omit to leave the static baseline (es_AR).
+   *  <html lang> is NOT set here: HtmlLangSync follows the i18n instance so
+   *  it's right on every route, not only the ones that call this hook. */
+  lang?: Lang
+  /** hreflang set for localized public pages; one <link rel="alternate"> each. */
+  alternates?: HreflangAlternate[]
   /** Route path (e.g. "/pricing") used to build the canonical URL and og:url.
    *  Omit it to leave whatever index.html already set untouched — useful for
    *  routes (login/register) whose canonical doesn't matter because they're noindex. */
@@ -54,7 +63,7 @@ function manageAttr(
 // directive — all restored to whatever index.html shipped statically when
 // the page unmounts, so navigating between routes never leaks one page's
 // metadata into the next.
-export function usePageMeta({ title, description, path, noindex, ogImage }: PageMetaOptions): void {
+export function usePageMeta({ title, description, path, noindex, ogImage, lang, alternates }: PageMetaOptions): void {
   useEffect(() => {
     const previousTitle = document.title
     document.title = title
@@ -94,9 +103,30 @@ export function usePageMeta({ title, description, path, noindex, ogImage }: Page
       restores.push(manageAttr('meta[name="robots"]', "meta", { name: "robots" }, "content", "noindex,nofollow"))
     }
 
+    if (lang !== undefined) {
+      restores.push(
+        manageAttr('meta[property="og:locale"]', "meta", { property: "og:locale" }, "content", OG_LOCALE[lang]),
+      )
+    }
+
+    // On a hydrated prerendered page the alternates already exist in <head>
+    // (applyHeadMeta put them there) and get overwritten in place; on a
+    // client-side navigation they're created and removed with the page.
+    alternates?.forEach(({ hreflang, href }) => {
+      restores.push(
+        manageAttr(
+          `link[rel="alternate"][hreflang="${hreflang}"]`,
+          "link",
+          { rel: "alternate", hreflang },
+          "href",
+          href,
+        ),
+      )
+    })
+
     return () => {
       document.title = previousTitle
       restores.forEach((restore) => restore())
     }
-  }, [title, description, path, noindex, ogImage])
+  }, [title, description, path, noindex, ogImage, lang, alternates])
 }

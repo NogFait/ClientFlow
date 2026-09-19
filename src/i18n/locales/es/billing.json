@@ -1,0 +1,20 @@
+{
+  "plans": {
+    "free": {
+      "name": "Free",
+      "features": ["3 clientes", "5 proyectos", "Tareas y pagos ilimitados dentro de ellos"]
+    },
+    "pro_monthly": {
+      "name": "Pro mensual",
+      "priceSuffix": "/mes",
+      "features": ["Clientes ilimitados", "Proyectos ilimitados", "Tareas y pagos ilimitados", "Soporte prioritario"]
+    },
+    "pro_yearly": {
+      "name": "Pro anual",
+      "priceSuffix": "/año",
+      "features": ["Clientes ilimitados", "Proyectos ilimitados", "Tareas y pagos ilimitados", "Soporte prioritario"],
+      "badge": "2 meses gratis",
+      "note": "equivale a USD 10/mes"
+    }
+  }
+}

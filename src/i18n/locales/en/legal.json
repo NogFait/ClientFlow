@@ -1,0 +1,141 @@
+{
+  "notice": "This is a courtesy translation. The Spanish version prevails.",
+  "lastUpdated": "Last updated",
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "September 2026",
+    "sections": [
+      {
+        "heading": "Who we are",
+        "paragraphs": [
+          "ClientFlow is developed and operated by Fausto Chirino, based in Mendoza, Argentina. These terms govern your use of the ClientFlow web application (the \"Service\"). By creating an account, you accept these terms."
+        ]
+      },
+      {
+        "heading": "What ClientFlow is",
+        "paragraphs": [
+          "ClientFlow is a CRM built for freelancers: it lets you record clients, projects, tasks and payments so you can track your work in one place."
+        ]
+      },
+      {
+        "heading": "Your account",
+        "paragraphs": [
+          "You create an account with your email and a password. Authentication is handled by Supabase Auth. You are responsible for keeping your credentials secure and for all activity that happens under your account."
+        ]
+      },
+      {
+        "heading": "Plans and payments",
+        "paragraphs": [
+          "ClientFlow offers a Free plan with usage limits and a Pro plan (monthly or yearly) without those limits.",
+          "Pro plan payments are processed by Polar, which acts as Merchant of Record: Polar invoices and charges you, not us. ClientFlow does not store card numbers or any other payment details — all of that stays entirely on Polar's side."
+        ]
+      },
+      {
+        "heading": "Cancellation",
+        "paragraphs": [
+          "You can cancel your Pro subscription at any time from your account. If you cancel, you keep Pro access until the end of the period you already paid for; after that your account automatically returns to the Free plan (your data is not deleted)."
+        ]
+      },
+      {
+        "heading": "Account deletion",
+        "paragraphs": [
+          "If you want to delete your account and your data, write to us at {{contactEmail}}. We do not yet offer self-service deletion inside the app."
+        ]
+      },
+      {
+        "heading": "Changes to these terms",
+        "paragraphs": [
+          "We may update these terms in the future. If we make a significant change, we will let you know by email or inside the application."
+        ]
+      },
+      {
+        "heading": "Acceptable use",
+        "paragraphs": [
+          "You may use ClientFlow to manage your own work. You may not use it for illegal activities, to upload third-party data you have no right to, or to attempt to access accounts or data that are not yours."
+        ]
+      },
+      {
+        "heading": "Availability and liability",
+        "paragraphs": [
+          "ClientFlow is an evolving product maintained by a single person. We do our best to keep it available and working well, but we do not guarantee uninterrupted availability or the absence of errors. The Service is provided \"as is\"; we are not liable for losses arising from its use beyond what the law requires.",
+          "You are responsible for the accuracy of the data you enter and for keeping your own backups of any information you consider critical."
+        ]
+      },
+      {
+        "heading": "Governing law",
+        "paragraphs": [
+          "These terms are governed by the laws of the Argentine Republic. In the event of any dispute, the parties submit to the ordinary courts of the Province of Mendoza, Argentina."
+        ]
+      }
+    ]
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "September 2026",
+    "sections": [
+      {
+        "heading": "Data controller",
+        "paragraphs": [
+          "The party responsible for processing your data is Fausto Chirino, Mendoza, Argentina. Any question about this policy can be sent to {{contactEmail}}."
+        ]
+      },
+      {
+        "heading": "What data we store",
+        "paragraphs": [
+          "Your email, to identify your account.",
+          "The data you enter in the application: clients, projects, tasks and payments. All of it is entered by you — ClientFlow does not obtain it from any other source."
+        ]
+      },
+      {
+        "heading": "Where your data is hosted",
+        "paragraphs": [
+          "We use Supabase as our database and authentication infrastructure. The Supabase servers for this project are hosted in the United States."
+        ]
+      },
+      {
+        "heading": "How we protect your data",
+        "paragraphs": [
+          "Each user can only access their own data: isolation is enforced in the database (row-level security policies in PostgreSQL), not just in the interface, and is covered by automated tests.",
+          "All communication between your browser and ClientFlow is encrypted (HTTPS). Passwords are never stored in plain text: Supabase Auth stores them hashed.",
+          "System keys and credentials are not part of the application's public code and are restricted to the server."
+        ]
+      },
+      {
+        "heading": "Payments",
+        "paragraphs": [
+          "Pro plan payments are processed by Polar, which acts as Merchant of Record. We never see or store card numbers or any other payment details — that information stays on Polar's side."
+        ]
+      },
+      {
+        "heading": "Analytics",
+        "paragraphs": [
+          "We use Vercel Web Analytics to measure visits in aggregate (page views, country, device). It uses no cookies and does not identify individual people."
+        ]
+      },
+      {
+        "heading": "Who we share data with",
+        "paragraphs": [
+          "We share data only with the providers that make the Service work: Supabase (database and authentication), Vercel (application hosting and analytics) and Polar (payment processing). We do not sell or share your data with anyone else."
+        ]
+      },
+      {
+        "heading": "How long we keep your data",
+        "paragraphs": [
+          "We keep your data for as long as your account is active. You can request the deletion of your account and your data at any time (see \"Your rights\" below)."
+        ]
+      },
+      {
+        "heading": "Your rights",
+        "paragraphs": [
+          "You can ask us to access, correct or delete your data by writing to {{contactEmail}}."
+        ]
+      },
+      {
+        "heading": "Changes to this policy",
+        "paragraphs": [
+          "We may update this policy in the future. If we make a significant change, we will let you know by email or inside the application."
+        ]
+      }
+    ]
+  }
+}

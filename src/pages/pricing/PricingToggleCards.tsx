@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { Check } from "lucide-react"
-import { getPlanCatalogEntry } from "../../features/billing/domain/planCatalog"
+import { useTranslation } from "react-i18next"
+import { findPlanCatalogEntry } from "../../features/billing/domain/planCatalog"
+import { usePlanCatalog } from "../../features/billing/hooks/usePlanCatalog"
 import type { PlanCode } from "../../features/billing/types"
 import styles from "./PricingToggleCards.module.css"
 
@@ -10,27 +12,29 @@ interface PricingToggleCardsProps {
   onSelectPlan: (plan: PlanCode) => void
 }
 
-const FREE_ENTRY = getPlanCatalogEntry("free")
-
 // Dedicated /pricing page comparison: Free (static) + a single Pro card
 // whose price/features/CTA switch between the monthly and yearly catalog
 // entries via a toggle (spec `pricing-page`: "toggles interval"). Values
-// always come from PLAN_CATALOG — never hardcoded — so a price change in
-// the catalog is reflected here automatically.
+// always come from the plan catalog (in the current language) — never
+// hardcoded — so a price change in the catalog is reflected here
+// automatically.
 const PricingToggleCards = ({ onSelectPlan }: PricingToggleCardsProps) => {
+  const { t } = useTranslation("landing")
+  const catalog = usePlanCatalog()
   const [billingInterval, setBillingInterval] = useState<Interval>("monthly")
-  const proEntry = getPlanCatalogEntry(billingInterval === "monthly" ? "pro_monthly" : "pro_yearly")
+  const freeEntry = findPlanCatalogEntry(catalog, "free")
+  const proEntry = findPlanCatalogEntry(catalog, billingInterval === "monthly" ? "pro_monthly" : "pro_yearly")
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.toggle} role="group" aria-label="Intervalo de facturación">
+      <div className={styles.toggle} role="group" aria-label={t("pricing.intervalLabel")}>
         <button
           type="button"
           className={billingInterval === "monthly" ? styles.toggleActive : styles.toggleOption}
           aria-pressed={billingInterval === "monthly"}
           onClick={() => setBillingInterval("monthly")}
         >
-          Mensual
+          {t("pricing.monthly")}
         </button>
         <button
           type="button"
@@ -38,18 +42,18 @@ const PricingToggleCards = ({ onSelectPlan }: PricingToggleCardsProps) => {
           aria-pressed={billingInterval === "yearly"}
           onClick={() => setBillingInterval("yearly")}
         >
-          Anual
+          {t("pricing.yearly")}
         </button>
       </div>
 
       <div className={styles.grid}>
         <div className={styles.card}>
           <div className={styles.header}>
-            <h3 className={styles.name}>{FREE_ENTRY.name}</h3>
-            <p className={styles.price}>{FREE_ENTRY.price}</p>
+            <h3 className={styles.name}>{freeEntry.name}</h3>
+            <p className={styles.price}>{freeEntry.price}</p>
           </div>
           <ul className={styles.features}>
-            {FREE_ENTRY.features.map((feature) => (
+            {freeEntry.features.map((feature) => (
               <li key={feature} className={styles.feature}>
                 <Check size={18} className={styles.featureIcon} />
                 {feature}
@@ -57,7 +61,7 @@ const PricingToggleCards = ({ onSelectPlan }: PricingToggleCardsProps) => {
             ))}
           </ul>
           <button type="button" className={styles.ctaGhost} onClick={() => onSelectPlan("free")}>
-            Crear cuenta gratis
+            {t("pricing.cta.free")}
           </button>
         </div>
 
@@ -84,7 +88,7 @@ const PricingToggleCards = ({ onSelectPlan }: PricingToggleCardsProps) => {
             className={styles.ctaPrimary}
             onClick={() => onSelectPlan(billingInterval === "monthly" ? "pro_monthly" : "pro_yearly")}
           >
-            Elegir Pro {billingInterval === "monthly" ? "mensual" : "anual"}
+            {billingInterval === "monthly" ? t("pricing.chooseProMonthly") : t("pricing.chooseProYearly")}
           </button>
         </div>
       </div>

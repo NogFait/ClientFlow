@@ -13,6 +13,7 @@ const TEMPLATE = `<!doctype html>
       content="Default description."
     />
     <link rel="canonical" href="${SITE_URL}/" />
+    <meta property="og:locale" content="es_AR" />
     <meta property="og:title" content="ClientFlow — CRM para freelancers" />
     <meta property="og:description" content="Default description." />
     <meta property="og:url" content="${SITE_URL}/" />
@@ -48,7 +49,12 @@ describe("injectApp", () => {
 })
 
 describe("applyHeadMeta", () => {
-  const meta = { path: "/pricing" as const, title: "Precios — ClientFlow", description: "Un solo plan pago." }
+  const meta = {
+    path: "/pricing" as const,
+    title: "Precios — ClientFlow",
+    description: "Un solo plan pago.",
+    lang: "es" as const,
+  }
 
   it("rewrites title, description, canonical, og:* and twitter:* for the route", () => {
     const result = applyHeadMeta(TEMPLATE, meta)
@@ -66,7 +72,7 @@ describe("applyHeadMeta", () => {
   })
 
   it("keeps the canonical/og:url for the root route as SITE_URL + '/' (no trailing-slash drift)", () => {
-    const result = applyHeadMeta(TEMPLATE, { path: "/", title: "Home", description: "Desc" })
+    const result = applyHeadMeta(TEMPLATE, { path: "/", title: "Home", description: "Desc", lang: "es" })
     expect(result).toContain(`<link rel="canonical" href="${SITE_URL}/" />`)
     expect(result).toContain(`<meta property="og:url" content="${SITE_URL}/" />`)
   })
@@ -76,6 +82,7 @@ describe("applyHeadMeta", () => {
       path: "/terms",
       title: 'A & B <"c">',
       description: "x < y & z",
+      lang: "es",
     })
     expect(result).toContain("<title>A &amp; B &lt;&quot;c&quot;&gt;</title>")
     expect(result).toContain('content="x &lt; y &amp; z"')
@@ -85,5 +92,67 @@ describe("applyHeadMeta", () => {
   it("throws when a tag it must rewrite is missing from the template", () => {
     const withoutCanonical = TEMPLATE.replace(/<link rel="canonical"[^>]*\/>/, "")
     expect(() => applyHeadMeta(withoutCanonical, meta)).toThrow(/canonical/)
+  })
+})
+
+describe("applyHeadMeta — language", () => {
+  const alternates = [
+    { hreflang: "es" as const, href: `${SITE_URL}/pricing` },
+    { hreflang: "en" as const, href: `${SITE_URL}/en/pricing` },
+    { hreflang: "x-default" as const, href: `${SITE_URL}/pricing` },
+  ]
+  const en = { path: "/en/pricing", title: "Pricing — ClientFlow", description: "One paid plan.", lang: "en" as const }
+  const es = { path: "/pricing", title: "Precios — ClientFlow", description: "Un solo plan pago.", lang: "es" as const }
+
+  it("rewrites <html lang> and og:locale for an English page", () => {
+    const result = applyHeadMeta(TEMPLATE, en)
+
+    expect(result).toContain('<html lang="en">')
+    expect(result).not.toContain('<html lang="es">')
+    expect(result).toContain('<meta property="og:locale" content="en_US" />')
+    expect(result).toContain(`<link rel="canonical" href="${SITE_URL}/en/pricing" />`)
+  })
+
+  it("keeps <html lang=\"es\"> and og:locale es_AR for a Spanish page (triangulation)", () => {
+    const result = applyHeadMeta(TEMPLATE, es)
+
+    expect(result).toContain('<html lang="es">')
+    expect(result).toContain('<meta property="og:locale" content="es_AR" />')
+  })
+
+  it("inserts one <link rel=\"alternate\" hreflang> per alternate right after the canonical link", () => {
+    const result = applyHeadMeta(TEMPLATE, { ...en, alternates })
+
+    expect(result).toContain(
+      [
+        `<link rel="canonical" href="${SITE_URL}/en/pricing" />`,
+        `<link rel="alternate" hreflang="es" href="${SITE_URL}/pricing" />`,
+        `<link rel="alternate" hreflang="en" href="${SITE_URL}/en/pricing" />`,
+        `<link rel="alternate" hreflang="x-default" href="${SITE_URL}/pricing" />`,
+      ].join("\n    "),
+    )
+  })
+
+  it("emits no hreflang links for a page without alternates (the Spanish-only blog)", () => {
+    const result = applyHeadMeta(TEMPLATE, { path: "/blog", title: "Blog", description: "d", lang: "es" })
+
+    expect(result).not.toContain('rel="alternate"')
+  })
+
+  it("replaces any alternates already present in the template instead of stacking duplicates", () => {
+    const withStale = TEMPLATE.replace(
+      `<link rel="canonical" href="${SITE_URL}/" />`,
+      `<link rel="canonical" href="${SITE_URL}/" />\n    <link rel="alternate" hreflang="en" href="${SITE_URL}/en" />`,
+    )
+
+    const result = applyHeadMeta(withStale, { ...en, alternates })
+
+    expect(result.match(/rel="alternate"/g)).toHaveLength(3)
+    expect(result).not.toContain(`href="${SITE_URL}/en" />`)
+  })
+
+  it("throws when the template has no <html lang> or og:locale to rewrite", () => {
+    expect(() => applyHeadMeta(TEMPLATE.replace('<html lang="es">', "<html>"), en)).toThrow(/html lang/)
+    expect(() => applyHeadMeta(TEMPLATE.replace(/<meta property="og:locale"[^>]*\/>/, ""), en)).toThrow(/og:locale/)
   })
 })

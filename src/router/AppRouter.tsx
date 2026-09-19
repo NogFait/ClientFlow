@@ -1,10 +1,13 @@
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, type ReactElement } from "react"
 import { Routes, Route } from "react-router-dom"
 import LandingPage from "../pages/landing/LandingPage"
 import NotFoundPage from "../pages/not-found/NotFoundPage"
 import Layout from "../components/layout/Layout/Layout"
 import { ProtectedRoute } from "../components/auth/ProtectedRoute"
 import { PublicOnlyRoute } from "../components/auth/PublicOnlyRoute"
+import LocaleRoute from "../components/i18n/LocaleRoute"
+import { SUPPORTED_LANGS } from "../i18n"
+import { toLocalizedPath } from "../i18n/paths"
 
 // Landing is eager: it's the entry point for most visitors (including
 // crawlers hitting "/" first), so lazy-loading it would force an extra
@@ -30,18 +33,35 @@ const TaskPage = lazy(() => import("../pages/tasks/TaskPage"))
 const PaymentsPage = lazy(() => import("../pages/payments/PaymentsPage"))
 const BillingSettingsPage = lazy(() => import("../pages/settings/billing/BillingSettingsPage"))
 
+// The localized public pages exist once per language — Spanish at the
+// canonical path, English under /en — each wrapped in a LocaleRoute that
+// switches the i18n instance to the URL's language. Registering them from
+// one list keeps "/en/pricing exists" and "/pricing exists" one fact.
+// Landing is always public — it never redirects a logged-in visitor away;
+// PublicNav just swaps its CTAs for "Ir al dashboard".
+const LOCALIZED_PUBLIC_ROUTES: Array<[path: string, element: ReactElement]> = [
+  ["/", <LandingPage />],
+  ["/pricing", <PricingPage />],
+  ["/terms", <TermsPage />],
+  ["/privacy", <PrivacyPage />],
+]
+
 const AppRouter = () => {
   return (
     <Suspense fallback={null}>
       <Routes>
-        {/* Landing is always public — it never redirects a logged-in visitor
-            away; PublicNav just swaps its CTAs for "Ir al dashboard". */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/blog" element={<BlogIndexPage />} />
-        <Route path="/blog/:slug" element={<BlogPostPage />} />
+        {LOCALIZED_PUBLIC_ROUTES.flatMap(([path, element]) =>
+          SUPPORTED_LANGS.map((lang) => {
+            const localizedPath = toLocalizedPath(path, lang)
+            return (
+              <Route key={localizedPath} path={localizedPath} element={<LocaleRoute lang={lang}>{element}</LocaleRoute>} />
+            )
+          }),
+        )}
+        {/* Blog is Spanish-only: pinned to "es" so its chrome matches the
+            posts even when reached from an English page. No /en twin. */}
+        <Route path="/blog" element={<LocaleRoute lang="es"><BlogIndexPage /></LocaleRoute>} />
+        <Route path="/blog/:slug" element={<LocaleRoute lang="es"><BlogPostPage /></LocaleRoute>} />
 
         <Route path="/login" element={<PublicOnlyRoute><Login/></PublicOnlyRoute>} />
         <Route path="/register" element={<PublicOnlyRoute><Register/></PublicOnlyRoute>} />

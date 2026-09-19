@@ -1,12 +1,18 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { useRegisterForm } from "../../../features/auth/hooks/useAuth"
 import { usePageMeta } from "../../../hooks/usePageMeta"
+import { usePreferredLanguageSync } from "../../../i18n/usePreferredLanguageSync"
+import LanguageSwitch from "../../../components/shared/LanguageSwitch/LanguageSwitch"
 import styles from "./Register.module.css"
 
+// Same language handling as Login: stored preference, "preference" switch.
 const Register = () => {
-  usePageMeta({ title: "Creá tu cuenta — ClientFlow", noindex: true })
+  const { t } = useTranslation("auth")
+  usePreferredLanguageSync()
+  usePageMeta({ title: t("register.metaTitle"), noindex: true })
 
   const { register, handleSubmit, onSubmit, errors, isSubmitting } = useRegisterForm()
   const [showPassword, setShowPassword] = useState(false)
@@ -14,32 +20,33 @@ const Register = () => {
   return (
     <div className={styles.page}>
       <section className={styles.brandPanel}>
-        <Link to="/" className={styles.brand}>
-          <img src="/icon-192.png" alt="ClientFlow" className={styles.brandLogo} />
-          <span className={styles.brandName}>ClientFlow</span>
-        </Link>
-
-        <div className={styles.brandContent}>
-          <h1 className={styles.brandTitle}>Tus clientes, proyectos y cobros. En un solo lugar.</h1>
-          <p className={styles.brandTagline}>
-            ClientFlow te muestra qué tenés que hacer hoy y cuánto te falta cobrar. Sin planillas.
-          </p>
+        <div className={styles.brandRow}>
+          <Link to="/" className={styles.brand}>
+            <img src="/icon-192.png" alt="ClientFlow" className={styles.brandLogo} />
+            <span className={styles.brandName}>ClientFlow</span>
+          </Link>
+          <LanguageSwitch mode="preference" />
         </div>
 
-        <p className={styles.brandNote}>Gratis hasta 3 clientes. Sin tarjeta.</p>
+        <div className={styles.brandContent}>
+          <h1 className={styles.brandTitle}>{t("register.brandTitle")}</h1>
+          <p className={styles.brandTagline}>{t("register.brandTagline")}</p>
+        </div>
+
+        <p className={styles.brandNote}>{t("brandNote")}</p>
       </section>
 
       <section className={styles.formPanel}>
         <div className={styles.formCard}>
           <div className={styles.formHeader}>
-            <h2 className={styles.welcomeTitle}>Creá tu cuenta</h2>
-            <p className={styles.welcomeSub}>Gratis hasta 3 clientes. Sin tarjeta.</p>
+            <h2 className={styles.welcomeTitle}>{t("register.title")}</h2>
+            <p className={styles.welcomeSub}>{t("register.subtitle")}</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className={styles.form} noValidate>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="register-name">
-                Nombre
+                {t("fields.name")}
               </label>
               <div className={styles.inputWrapper}>
                 <User size={18} className={styles.inputIcon} aria-hidden="true" />
@@ -47,7 +54,7 @@ const Register = () => {
                   id="register-name"
                   className={styles.input}
                   type="text"
-                  placeholder="Tu nombre"
+                  placeholder={t("fields.namePlaceholder")}
                   {...register("name", { required: true })}
                 />
               </div>
@@ -55,7 +62,7 @@ const Register = () => {
 
             <div className={styles.field}>
               <label className={styles.label} htmlFor="register-email">
-                Email
+                {t("fields.email")}
               </label>
               <div className={styles.inputWrapper}>
                 <Mail size={18} className={styles.inputIcon} aria-hidden="true" />
@@ -63,7 +70,7 @@ const Register = () => {
                   id="register-email"
                   className={styles.input}
                   type="email"
-                  placeholder="vos@tuestudio.com"
+                  placeholder={t("fields.emailPlaceholder")}
                   {...register("email", { required: true })}
                 />
               </div>
@@ -71,7 +78,7 @@ const Register = () => {
 
             <div className={styles.field}>
               <label className={styles.label} htmlFor="register-password">
-                Contraseña
+                {t("fields.password")}
               </label>
               <div className={styles.inputWrapper}>
                 <Lock size={18} className={styles.inputIcon} aria-hidden="true" />
@@ -85,7 +92,7 @@ const Register = () => {
                 <button
                   type="button"
                   className={styles.togglePassword}
-                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  aria-label={showPassword ? t("fields.hidePassword") : t("fields.showPassword")}
                   onClick={() => setShowPassword((visible) => !visible)}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -96,12 +103,12 @@ const Register = () => {
             {errors.root?.serverError && <p className={styles.error}>{errors.root.serverError.message}</p>}
 
             <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creando cuenta..." : "Creá tu cuenta"}
+              {isSubmitting ? t("register.submitting") : t("register.submit")}
             </button>
           </form>
 
           <p className={styles.link}>
-            ¿Ya tenés cuenta? <Link to="/login">Iniciar sesión</Link>
+            {t("register.hasAccount")} <Link to="/login">{t("register.login")}</Link>
           </p>
         </div>
       </section>

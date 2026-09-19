@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
 import AppRouter from "./AppRouter"
+import { renderWithLang } from "../test/i18n"
 
 // AppRouter itself renders below AuthProvider in the real app (App.tsx) —
 // here every route is exercised as an anonymous visitor, so the context is
@@ -71,5 +73,58 @@ describe("AppRouter — public surface (M3)", () => {
     renderAt("/this-route-does-not-exist")
 
     expect(await screen.findByRole("link", { name: /Volver al inicio/i })).toHaveAttribute("href", "/")
+  })
+})
+
+// English twins live under /en. The instance starts in Spanish here on
+// purpose: it proves LocaleRoute switches the language from the URL, the
+// same thing that happens on a client-side ES → EN navigation.
+describe("AppRouter — English public surface (/en/*)", () => {
+  it("renders the English landing at /en", async () => {
+    renderWithLang(<AppRouter />, "es", { initialEntries: ["/en"] })
+
+    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent(
+      "Your clients, projects and payments. In one place.",
+    )
+  })
+
+  it("renders the English pricing page at /en/pricing", async () => {
+    renderWithLang(<AppRouter />, "es", { initialEntries: ["/en/pricing"] })
+
+    expect(await screen.findByRole("heading", { name: /Start for free\. Pay when you grow\./i })).toBeInTheDocument()
+  })
+
+  it("renders the English terms and privacy pages at /en/terms and /en/privacy", async () => {
+    const { unmount } = renderWithLang(<AppRouter />, "es", { initialEntries: ["/en/terms"] })
+    expect(await screen.findByRole("heading", { name: "Terms of Service" })).toBeInTheDocument()
+    unmount()
+
+    renderWithLang(<AppRouter />, "es", { initialEntries: ["/en/privacy"] })
+    expect(await screen.findByRole("heading", { name: "Privacy Policy" })).toBeInTheDocument()
+  })
+
+  it("pins the Spanish-only blog to Spanish even when the instance starts in English (triangulation)", async () => {
+    renderWithLang(<AppRouter />, "en", { initialEntries: ["/blog"] })
+
+    expect(await screen.findByRole("heading", { level: 1, name: "Blog" })).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: /Iniciar sesión/i })).toBeInTheDocument()
+  })
+
+  it("switches from / to /en client-side via the ES|EN control and back", async () => {
+    const user = userEvent.setup()
+    renderWithLang(<AppRouter />, "es", { initialEntries: ["/"] })
+    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("Tus clientes, proyectos y cobros.")
+
+    await user.click(screen.getAllByRole("button", { name: "English" })[0])
+    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("Your clients, projects and payments.")
+
+    await user.click(screen.getAllByRole("button", { name: "Español" })[0])
+    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("Tus clientes, proyectos y cobros.")
+  })
+
+  it("has no /en/blog route", async () => {
+    renderWithLang(<AppRouter />, "es", { initialEntries: ["/en/blog"] })
+
+    expect(await screen.findByRole("link", { name: /Volver al inicio/i })).toBeInTheDocument()
   })
 })

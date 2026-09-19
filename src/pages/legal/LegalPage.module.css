@@ -25,6 +25,17 @@
   color: var(--color-text-tertiary);
 }
 
+/* English courtesy-translation disclaimer: a quiet callout, not an alert. */
+.notice {
+  margin: 0;
+  padding: var(--spacing-3) var(--spacing-4);
+  border-left: 3px solid var(--color-primary-300);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-secondary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
 .section {
   display: flex;
   flex-direction: column;

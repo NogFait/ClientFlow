@@ -14,6 +14,15 @@
   gap: var(--spacing-6);
 }
 
+/* Brand link + ES|EN switch on one row; the switch sits on the purple
+   gradient, so its own white pill provides the contrast. */
+.brandRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+}
+
 .brand {
   display: inline-flex;
   align-items: center;

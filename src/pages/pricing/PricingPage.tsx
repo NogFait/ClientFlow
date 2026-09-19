@@ -1,11 +1,13 @@
 import { useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import PublicNav from "../../components/marketing/PublicNav/PublicNav"
 import PublicFooter from "../../components/marketing/PublicFooter/PublicFooter"
 import Faq from "../landing/sections/Faq"
 import CtaBlock from "../landing/sections/CtaBlock"
-import { FAQ_ITEMS } from "../../content/faq"
-import { PUBLIC_PAGE_META } from "../../content/pageMeta"
+import { useFaqItems } from "../../hooks/useFaqItems"
+import { getPageMeta } from "../../content/pageMeta"
 import { usePageMeta } from "../../hooks/usePageMeta"
+import { useCurrentLang } from "../../i18n/useCurrentLang"
 import { useHasSession } from "../../hooks/useHasSession"
 import { useCheckout } from "../../features/billing/hooks/useCheckout"
 import { BILLING_ENABLED } from "../../config/features"
@@ -22,7 +24,10 @@ import styles from "./PricingPage.module.css"
 // Free while already signed in has nothing to check out, so it just returns
 // them to the dashboard instead of back through signup.
 const PricingPage = () => {
-  usePageMeta(PUBLIC_PAGE_META["/pricing"])
+  const { t } = useTranslation("landing")
+  const lang = useCurrentLang()
+  usePageMeta(getPageMeta("/pricing", lang))
+  const faqItems = useFaqItems()
 
   const navigate = useNavigate()
   const { hasSession } = useHasSession()
@@ -55,25 +60,23 @@ const PricingPage = () => {
       <main>
         <section className={styles.hero}>
           <div className={styles.heroInner}>
-            <span className={styles.eyebrow}>PRECIOS</span>
-            <h1 className={styles.title}>Empezá gratis. Pagá cuando crezcas.</h1>
-            <p className={styles.subtitle}>
-              Un solo plan pago, sin letra chica. Cancelás cuando quieras y seguís hasta el fin del período.
-            </p>
+            <span className={styles.eyebrow}>{t("pricing.eyebrow")}</span>
+            <h1 className={styles.title}>{t("pricing.title")}</h1>
+            <p className={styles.subtitle}>{t("pricing.subtitle")}</p>
           </div>
         </section>
 
         <section className={styles.cardsSection}>
           <div className={styles.cardsInner}>
             <PricingToggleCards onSelectPlan={handleSelectPlan} />
-            <p className={styles.note}>Precios en dólares. El cobro lo procesa Polar, con tarjeta internacional.</p>
+            <p className={styles.note}>{t("pricing.note")}</p>
           </div>
         </section>
 
         <section className={styles.faqSection}>
           <div className={styles.faqInner}>
-            <h2 className={styles.faqTitle}>Lo que nos preguntan antes de empezar.</h2>
-            <Faq items={FAQ_ITEMS} />
+            <h2 className={styles.faqTitle}>{t("faq.title")}</h2>
+            <Faq items={faqItems} />
           </div>
         </section>
 

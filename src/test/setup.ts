@@ -2,6 +2,8 @@ import { afterEach } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { _reset as resetToasts } from '../components/shared/Toast/toastStore'
+import { setI18n } from 'react-i18next'
+import { createI18n } from '../i18n/createI18n'
 
 // @testing-library/react only auto-registers its afterEach(cleanup) when it
 // detects a global `afterEach` (i.e. `test.globals: true` in vitest config).
@@ -34,3 +36,11 @@ if (!window.matchMedia) {
       dispatchEvent: () => false,
     }) as unknown as MediaQueryList
 }
+
+// Components read translations through react-i18next's useTranslation. The
+// real app supplies an instance via <I18nextProvider> (entry-client /
+// entry-server); tests render components bare, so register a Spanish
+// instance as react-i18next's fallback — every existing test keeps asserting
+// the same Spanish copy it always did. Tests that need English render
+// through renderWithLang() (src/test/i18n.tsx) with an instance of their own.
+setI18n(createI18n("es"))

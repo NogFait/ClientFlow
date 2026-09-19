@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { PUBLIC_PAGE_META, PUBLIC_PATHS } from "./pageMeta"
-import { DEFAULT_DESCRIPTION } from "./site"
+import { PUBLIC_PAGE_META, PUBLIC_PAGE_META_BY_LANG, PUBLIC_PATHS, getPageMeta } from "./pageMeta"
+import { DEFAULT_DESCRIPTION, SITE_URL } from "./site"
 
 // Soft SEO budgets: Google truncates titles around 60 chars and snippets
 // around 155–160. Not hard limits of the platform, but a regression guard so
@@ -42,5 +42,43 @@ describe("PUBLIC_PAGE_META", () => {
 
   it("keeps the landing description identical to the site default (index.html baseline)", () => {
     expect(PUBLIC_PAGE_META["/"].description).toBe(DEFAULT_DESCRIPTION)
+  })
+})
+
+describe("getPageMeta (language-aware)", () => {
+  it("returns the Spanish entry unchanged for 'es' (same object shape PUBLIC_PAGE_META exposes)", () => {
+    expect(getPageMeta("/pricing", "es")).toEqual(PUBLIC_PAGE_META["/pricing"])
+    expect(getPageMeta("/pricing", "es").path).toBe("/pricing")
+    expect(getPageMeta("/pricing", "es").lang).toBe("es")
+  })
+
+  it("localizes the path and copy for 'en' (triangulation: other language)", () => {
+    const meta = getPageMeta("/pricing", "en")
+
+    expect(meta.path).toBe("/en/pricing")
+    expect(meta.lang).toBe("en")
+    expect(meta.title).toBe("Pricing — ClientFlow")
+    expect(meta.title).not.toBe(PUBLIC_PAGE_META["/pricing"].title)
+    expect(getPageMeta("/", "en").path).toBe("/en")
+  })
+
+  it("shares one hreflang set between both language versions (es, en, x-default → es)", () => {
+    const es = getPageMeta("/terms", "es")
+    const en = getPageMeta("/terms", "en")
+
+    expect(en.alternates).toEqual(es.alternates)
+    expect(es.alternates.map((alt) => alt.hreflang)).toEqual(["es", "en", "x-default"])
+    expect(es.alternates.find((alt) => alt.hreflang === "x-default")?.href).toBe(`${SITE_URL}/terms`)
+    expect(es.alternates.find((alt) => alt.hreflang === "en")?.href).toBe(`${SITE_URL}/en/terms`)
+  })
+
+  it("keeps the English titles/descriptions unique and within the same SEO budget as Spanish", () => {
+    const entries = PUBLIC_PATHS.map((path) => PUBLIC_PAGE_META_BY_LANG.en[path])
+    expect(new Set(entries.map((entry) => entry.title)).size).toBe(entries.length)
+    expect(new Set(entries.map((entry) => entry.description)).size).toBe(entries.length)
+    entries.forEach((entry) => {
+      expect(entry.title.length).toBeLessThanOrEqual(TITLE_MAX)
+      expect(entry.description.length).toBeLessThanOrEqual(DESCRIPTION_MAX)
+    })
   })
 })

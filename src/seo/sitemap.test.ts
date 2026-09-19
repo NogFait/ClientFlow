@@ -11,7 +11,7 @@ describe("buildSitemapXml", () => {
     expect(xml).toBe(
       [
         '<?xml version="1.0" encoding="UTF-8"?>',
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
         "  <url>",
         "    <loc>https://clientflow.lat/</loc>",
         "    <lastmod>2026-09-16</lastmod>",
@@ -35,7 +35,48 @@ describe("buildSitemapXml", () => {
   })
 
   it("renders an empty urlset for no entries", () => {
-    expect(buildSitemapXml([])).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n</urlset>')
+    expect(buildSitemapXml([])).toMatch(/<urlset [^>]*>\n<\/urlset>/)
+  })
+
+  it("emits one <xhtml:link rel=\"alternate\"> per hreflang alternate, inside the <url>, after <loc>", () => {
+    const xml = buildSitemapXml([
+      {
+        loc: "https://clientflow.lat/pricing",
+        lastmod: "2026-09-16",
+        priority: 0.8,
+        alternates: [
+          { hreflang: "es", href: "https://clientflow.lat/pricing" },
+          { hreflang: "en", href: "https://clientflow.lat/en/pricing" },
+          { hreflang: "x-default", href: "https://clientflow.lat/pricing" },
+        ],
+      },
+    ])
+
+    expect(xml).toContain(
+      [
+        "  <url>",
+        "    <loc>https://clientflow.lat/pricing</loc>",
+        '    <xhtml:link rel="alternate" hreflang="es" href="https://clientflow.lat/pricing" />',
+        '    <xhtml:link rel="alternate" hreflang="en" href="https://clientflow.lat/en/pricing" />',
+        '    <xhtml:link rel="alternate" hreflang="x-default" href="https://clientflow.lat/pricing" />',
+        "    <lastmod>2026-09-16</lastmod>",
+        "    <priority>0.8</priority>",
+        "  </url>",
+      ].join("\n"),
+    )
+  })
+
+  it("escapes XML special characters in alternate hrefs (triangulation)", () => {
+    const xml = buildSitemapXml([
+      {
+        loc: "https://x.test/",
+        lastmod: "2026-01-01",
+        priority: 0.5,
+        alternates: [{ hreflang: "en", href: "https://x.test/en?a=1&b=2" }],
+      },
+    ])
+
+    expect(xml).toContain('href="https://x.test/en?a=1&amp;b=2"')
   })
 
   it("rejects a lastmod that is not YYYY-MM-DD or a priority outside 0..1", () => {

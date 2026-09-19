@@ -1,0 +1,129 @@
+{
+  "hero": {
+    "eyebrow": "CRM FOR FREELANCERS",
+    "title": "Your clients, projects and payments. In one place.",
+    "subtitle": "ClientFlow shows you what to do today and how much you still have to collect. No spreadsheets, no chasing payments from memory.",
+    "ctaPrimary": "Start for free",
+    "ctaGhost": "See how it works",
+    "note": "Free for up to 3 clients. No card required.",
+    "mock": {
+      "breadcrumb": "Projects › Web System",
+      "projectTitle": "Web System",
+      "status": "● Active",
+      "budget": "Budget",
+      "collected": "Collected · 62 %",
+      "tasks": "Tasks",
+      "tasksDone": "5 / 8 done",
+      "task1": "Design the home page",
+      "priorityHigh": "High",
+      "due": "due Sep 20",
+      "task2": "Set up the repository",
+      "done": "done",
+      "paymentsTitle": "Payments · September 2026",
+      "collectedThisMonth": "Collected this month",
+      "payment1": "Sep 10 · Bank transfer",
+      "payment2": "Oct 01 · Bank transfer",
+      "paid": "Paid",
+      "pending": "Pending"
+    }
+  },
+  "pain": {
+    "eyebrow": "SOUND FAMILIAR?",
+    "title": "Sound familiar? Your work, scattered across four apps.",
+    "items": [
+      { "tool": "WhatsApp", "text": "The client asked for a change in a voice note from three weeks ago." },
+      { "tool": "Excel", "text": "The payments spreadsheet that is never up to date." },
+      { "tool": "Notion or Trello", "text": "Tasks live on a board you open every now and then." },
+      { "tool": "Calendar", "text": "The due date is in the calendar. The amount, in your head." }
+    ],
+    "closing": "None of them is wrong. The problem is that none of them knows about the others. ClientFlow brings clients, projects, tasks and payments together in one place, and tells you what is left to do and what is left to collect."
+  },
+  "how": {
+    "eyebrow": "HOW IT WORKS",
+    "title": "Three steps and you're organized.",
+    "subtitle": "There is nothing to configure. You enter what is already in your head and ClientFlow turns it into a dashboard.",
+    "steps": [
+      {
+        "title": "Add your clients",
+        "description": "Name, contact and status. Nothing more. Each client groups everything you do for them."
+      },
+      {
+        "title": "Create projects with a budget",
+        "description": "One project per job, with its budget and dates. That is where its tasks and payments live."
+      },
+      {
+        "title": "Log payments and tasks",
+        "description": "Every payment that comes in and every task you close moves the project bar. You see real progress, not the progress you assume."
+      }
+    ]
+  },
+  "features": {
+    "eyebrow": "WHAT IT DOES FOR YOU",
+    "title": "Answers, not spreadsheets.",
+    "items": [
+      {
+        "title": "One hub per project",
+        "description": "Budget, collected, pending and tasks on a single screen. Mark a task done with one click and the bar moves."
+      },
+      {
+        "title": "Income month by month",
+        "description": "Browse by month, see how much you collected, how much is left and the year's running total. December's question, answered in September."
+      },
+      {
+        "title": "Task board",
+        "description": "Pending, in progress, done. With priority and due date, so you know what comes first when everything feels urgent."
+      },
+      {
+        "title": "Works on your phone",
+        "description": "Log a payment from a café, check off a task from the bus. Everything you do on your computer, you can do on your phone."
+      }
+    ]
+  },
+  "pricing": {
+    "eyebrow": "PRICING",
+    "title": "Start for free. Pay when you grow.",
+    "subtitle": "One paid plan, no fine print. Cancel whenever you want and keep access until the end of the period.",
+    "note": "Prices in US dollars. Payments are processed by Polar with an international card.",
+    "cta": {
+      "free": "Create a free account",
+      "pro_monthly": "Choose Pro monthly",
+      "pro_yearly": "Choose Pro yearly"
+    },
+    "intervalLabel": "Billing interval",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "chooseProMonthly": "Choose Pro monthly",
+    "chooseProYearly": "Choose Pro yearly"
+  },
+  "faq": {
+    "eyebrow": "QUESTIONS",
+    "title": "What people ask us before getting started.",
+    "items": [
+      {
+        "question": "Is it a sales CRM?",
+        "answer": "No. ClientFlow has no leads, pipeline or marketing automation. It is for the work you already have: who your client is, what you owe them and how much you still have to collect."
+      },
+      {
+        "question": "Do I need a card to get started?",
+        "answer": "No. You create the account with your email and use the Free plan for as long as you want."
+      },
+      {
+        "question": "What happens when I go over 3 clients?",
+        "answer": "You lose nothing. You can keep viewing, editing and using what you already entered, but you will not be able to create a fourth client until you upgrade to Pro."
+      },
+      {
+        "question": "Can I cancel whenever I want?",
+        "answer": "Yes. Cancel whenever you want from your account and keep Pro access until the end of the period you already paid for."
+      },
+      {
+        "question": "What currency do I pay in?",
+        "answer": "Prices are in US dollars (USD). Payments are processed by Polar with an international card."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Stop chasing payments from memory.",
+    "subtitle": "Your first client entered in two minutes. Free, no card required.",
+    "button": "Start for free"
+  }
+}

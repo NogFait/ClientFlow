@@ -1,0 +1,129 @@
+{
+  "hero": {
+    "eyebrow": "CRM PARA FREELANCERS",
+    "title": "Tus clientes, proyectos y cobros. En un solo lugar.",
+    "subtitle": "ClientFlow te muestra qué tenés que hacer hoy y cuánto te falta cobrar. Sin planillas, sin perseguir pagos de memoria.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaGhost": "Ver cómo funciona",
+    "note": "Gratis hasta 3 clientes. Sin tarjeta.",
+    "mock": {
+      "breadcrumb": "Proyectos › Sistema Web",
+      "projectTitle": "Sistema Web",
+      "status": "● Activo",
+      "budget": "Presupuesto",
+      "collected": "Cobrado · 62 %",
+      "tasks": "Tareas",
+      "tasksDone": "5 / 8 hechas",
+      "task1": "Diseñar la home",
+      "priorityHigh": "Alta",
+      "due": "vence 20 sep",
+      "task2": "Setup del repositorio",
+      "done": "hecha",
+      "paymentsTitle": "Pagos · Septiembre 2026",
+      "collectedThisMonth": "Cobrado este mes",
+      "payment1": "10 sep · Transferencia",
+      "payment2": "01 oct · Transferencia",
+      "paid": "Pagado",
+      "pending": "Pendiente"
+    }
+  },
+  "pain": {
+    "eyebrow": "¿TE PASA ESTO?",
+    "title": "¿Te pasa esto? Tu trabajo, repartido en cuatro apps.",
+    "items": [
+      { "tool": "WhatsApp", "text": "El cliente pidió un cambio en un audio de hace tres semanas." },
+      { "tool": "Excel", "text": "La planilla de pagos que nunca está actualizada." },
+      { "tool": "Notion o Trello", "text": "Las tareas viven en un tablero que abrís cada tanto." },
+      { "tool": "Calendario", "text": "El vencimiento está en el calendario. El monto, en tu memoria." }
+    ],
+    "closing": "Ninguna está mal. El problema es que ninguna sabe de las otras. ClientFlow junta clientes, proyectos, tareas y cobros en un solo lugar, y te dice qué falta hacer y qué falta cobrar."
+  },
+  "how": {
+    "eyebrow": "CÓMO FUNCIONA",
+    "title": "Tres pasos y ya estás ordenado.",
+    "subtitle": "No hay configuración. Cargás lo que ya tenés en la cabeza y ClientFlow lo convierte en un tablero.",
+    "steps": [
+      {
+        "title": "Cargá tus clientes",
+        "description": "Nombre, contacto y estado. Nada más. Cada cliente agrupa todo lo que hacés para él."
+      },
+      {
+        "title": "Armá proyectos con presupuesto",
+        "description": "Un proyecto por trabajo, con su presupuesto y sus fechas. Ahí viven sus tareas y sus cobros."
+      },
+      {
+        "title": "Registrá cobros y tareas",
+        "description": "Cada pago que entra y cada tarea que cerrás mueven la barra del proyecto. Ves el avance real, no el que creés."
+      }
+    ]
+  },
+  "features": {
+    "eyebrow": "LO QUE HACE POR VOS",
+    "title": "Respuestas, no planillas.",
+    "items": [
+      {
+        "title": "Un hub por proyecto",
+        "description": "Presupuesto, cobrado, pendiente y tareas en una sola pantalla. Marcás una tarea hecha con un click y la barra se mueve."
+      },
+      {
+        "title": "Ingresos mes a mes",
+        "description": "Navegás por mes, ves cuánto cobraste, cuánto falta y el acumulado del año. La pregunta de diciembre, respondida en septiembre."
+      },
+      {
+        "title": "Tablero de tareas",
+        "description": "Pendiente, en progreso, hechas. Con prioridad y vencimiento, para saber qué va primero cuando todo parece urgente."
+      },
+      {
+        "title": "Funciona en el celular",
+        "description": "Registrás un cobro desde el bar, marcás una tarea desde el colectivo. Todo lo que hacés en la compu, lo hacés en el teléfono."
+      }
+    ]
+  },
+  "pricing": {
+    "eyebrow": "PRECIOS",
+    "title": "Empezá gratis. Pagá cuando crezcas.",
+    "subtitle": "Un solo plan pago, sin letra chica. Cancelás cuando quieras y seguís hasta el fin del período.",
+    "note": "Precios en dólares. El cobro lo procesa Polar, con tarjeta internacional.",
+    "cta": {
+      "free": "Crear cuenta gratis",
+      "pro_monthly": "Elegir Pro mensual",
+      "pro_yearly": "Elegir Pro anual"
+    },
+    "intervalLabel": "Intervalo de facturación",
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "chooseProMonthly": "Elegir Pro mensual",
+    "chooseProYearly": "Elegir Pro anual"
+  },
+  "faq": {
+    "eyebrow": "PREGUNTAS",
+    "title": "Lo que nos preguntan antes de empezar.",
+    "items": [
+      {
+        "question": "¿Es un CRM de ventas?",
+        "answer": "No. ClientFlow no tiene leads, pipeline ni automatizaciones de marketing. Es para el trabajo que ya tenés: quién es tu cliente, qué le debés entregar y cuánto te falta cobrar."
+      },
+      {
+        "question": "¿Necesito tarjeta para empezar?",
+        "answer": "No. Creás la cuenta con tu email y usás el plan Free todo el tiempo que quieras."
+      },
+      {
+        "question": "¿Qué pasa cuando supero los 3 clientes?",
+        "answer": "No perdés nada. Podés seguir viendo, editando y usando lo que ya cargaste, pero no vas a poder crear un cuarto cliente hasta pasar a Pro."
+      },
+      {
+        "question": "¿Puedo cancelar cuando quiera?",
+        "answer": "Sí. Cancelás cuando quieras desde tu cuenta y mantenés el acceso Pro hasta el final del período que ya pagaste."
+      },
+      {
+        "question": "¿En qué moneda pago?",
+        "answer": "Los precios están en dólares (USD). El cobro lo procesa Polar, con tarjeta internacional."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Dejá de perseguir pagos de memoria.",
+    "subtitle": "Tu primer cliente cargado en dos minutos. Gratis, sin tarjeta.",
+    "button": "Empezar gratis"
+  }
+}

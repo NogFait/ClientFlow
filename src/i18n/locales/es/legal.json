@@ -1,0 +1,141 @@
+{
+  "notice": "",
+  "lastUpdated": "Última actualización",
+  "terms": {
+    "title": "Términos de servicio",
+    "lastUpdated": "Septiembre de 2026",
+    "sections": [
+      {
+        "heading": "Quiénes somos",
+        "paragraphs": [
+          "ClientFlow es desarrollado y operado por Fausto Chirino, con domicilio en Mendoza, Argentina. Estos términos regulan el uso de la aplicación web ClientFlow (el \"Servicio\"). Al crear una cuenta, aceptás estos términos."
+        ]
+      },
+      {
+        "heading": "Qué es ClientFlow",
+        "paragraphs": [
+          "ClientFlow es un CRM pensado para freelancers: te permite cargar clientes, proyectos, tareas y pagos para llevar el seguimiento de tu trabajo en un solo lugar."
+        ]
+      },
+      {
+        "heading": "Tu cuenta",
+        "paragraphs": [
+          "Creás una cuenta con tu email y una contraseña. La autenticación la maneja Supabase Auth. Sos responsable de mantener tus credenciales seguras y de toda la actividad que ocurra bajo tu cuenta."
+        ]
+      },
+      {
+        "heading": "Planes y pagos",
+        "paragraphs": [
+          "ClientFlow ofrece un plan Free con límites de uso y un plan Pro (mensual o anual) sin esos límites.",
+          "Los pagos del plan Pro los procesa Polar, que actúa como Merchant of Record: es Polar quien te factura y cobra, no nosotros. ClientFlow no almacena números de tarjeta ni otros datos de pago — eso queda enteramente del lado de Polar."
+        ]
+      },
+      {
+        "heading": "Cancelación",
+        "paragraphs": [
+          "Podés cancelar tu suscripción Pro cuando quieras desde tu cuenta. Si cancelás, mantenés el acceso Pro hasta el final del período que ya pagaste; después tu cuenta vuelve automáticamente al plan Free (tus datos no se borran)."
+        ]
+      },
+      {
+        "heading": "Eliminación de cuenta",
+        "paragraphs": [
+          "Si querés eliminar tu cuenta y tus datos, escribinos a {{contactEmail}}. Todavía no ofrecemos autoservicio para esto dentro de la app."
+        ]
+      },
+      {
+        "heading": "Cambios a estos términos",
+        "paragraphs": [
+          "Podemos actualizar estos términos en el futuro. Si hacemos un cambio importante, te avisamos por email o dentro de la aplicación."
+        ]
+      },
+      {
+        "heading": "Uso aceptable",
+        "paragraphs": [
+          "Podés usar ClientFlow para gestionar tu propio trabajo. No está permitido usarlo para actividades ilegales, para cargar datos de terceros sin tener derecho a hacerlo, ni para intentar acceder a cuentas o datos que no sean tuyos."
+        ]
+      },
+      {
+        "heading": "Disponibilidad y responsabilidad",
+        "paragraphs": [
+          "ClientFlow es un producto en evolución mantenido por una sola persona. Hacemos lo posible para que esté disponible y funcione bien, pero no garantizamos disponibilidad ininterrumpida ni ausencia de errores. El Servicio se ofrece \"tal cual\"; no somos responsables por pérdidas derivadas de su uso, más allá de lo que la ley exija.",
+          "Sos responsable de la exactitud de los datos que cargás y de conservar tus propios respaldos de la información que consideres crítica."
+        ]
+      },
+      {
+        "heading": "Ley aplicable",
+        "paragraphs": [
+          "Estos términos se rigen por las leyes de la República Argentina. Ante cualquier conflicto, las partes se someten a los tribunales ordinarios de la Provincia de Mendoza, Argentina."
+        ]
+      }
+    ]
+  },
+  "privacy": {
+    "title": "Política de privacidad",
+    "lastUpdated": "Septiembre de 2026",
+    "sections": [
+      {
+        "heading": "Responsable",
+        "paragraphs": [
+          "El responsable del tratamiento de los datos es Fausto Chirino, Mendoza, Argentina. Cualquier consulta sobre esta política podés enviarla a {{contactEmail}}."
+        ]
+      },
+      {
+        "heading": "Qué datos guardamos",
+        "paragraphs": [
+          "Tu email, para identificar tu cuenta.",
+          "Los datos que vos cargás en la aplicación: clientes, proyectos, tareas y pagos. Todo eso lo ingresás vos — ClientFlow no lo obtiene de ninguna otra fuente."
+        ]
+      },
+      {
+        "heading": "Dónde se alojan tus datos",
+        "paragraphs": [
+          "Usamos Supabase como infraestructura de base de datos y autenticación. Los servidores de Supabase para este proyecto están alojados en Estados Unidos."
+        ]
+      },
+      {
+        "heading": "Cómo protegemos tus datos",
+        "paragraphs": [
+          "Cada usuario solo puede acceder a sus propios datos: el aislamiento se aplica en la base de datos (políticas de seguridad a nivel de fila en PostgreSQL), no solo en la interfaz, y está cubierto por pruebas automáticas.",
+          "Toda la comunicación entre tu navegador y ClientFlow viaja cifrada (HTTPS). Las contraseñas nunca se guardan en texto plano: Supabase Auth las almacena con hash.",
+          "Las claves y credenciales del sistema no forman parte del código público de la aplicación y están restringidas al servidor."
+        ]
+      },
+      {
+        "heading": "Pagos",
+        "paragraphs": [
+          "Los pagos del plan Pro los procesa Polar, que actúa como Merchant of Record. No vemos ni guardamos números de tarjeta ni otros datos de pago — esa información queda del lado de Polar."
+        ]
+      },
+      {
+        "heading": "Analítica",
+        "paragraphs": [
+          "Usamos Vercel Web Analytics para medir visitas de forma agregada (páginas vistas, país, dispositivo). No usa cookies ni identifica a personas individuales."
+        ]
+      },
+      {
+        "heading": "Con quién compartimos datos",
+        "paragraphs": [
+          "Compartimos datos únicamente con los proveedores que hacen funcionar el Servicio: Supabase (base de datos y autenticación), Vercel (alojamiento de la aplicación y analítica) y Polar (procesamiento de pagos). No vendemos ni compartimos tus datos con nadie más."
+        ]
+      },
+      {
+        "heading": "Cuánto tiempo guardamos tus datos",
+        "paragraphs": [
+          "Guardamos tus datos mientras tu cuenta esté activa. Podés pedir la eliminación de tu cuenta y tus datos en cualquier momento (ver \"Tus derechos\" más abajo)."
+        ]
+      },
+      {
+        "heading": "Tus derechos",
+        "paragraphs": [
+          "Podés pedirnos acceder, corregir o eliminar tus datos escribiendo a {{contactEmail}}."
+        ]
+      },
+      {
+        "heading": "Cambios a esta política",
+        "paragraphs": [
+          "Podemos actualizar esta política en el futuro. Si hacemos un cambio importante, te avisamos por email o dentro de la aplicación."
+        ]
+      }
+    ]
+  }
+}

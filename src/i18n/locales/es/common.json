@@ -1,0 +1,42 @@
+{
+  "brand": "ClientFlow",
+  "tagline": "CRM para freelancers",
+  "language": {
+    "label": "Idioma",
+    "es": "Español",
+    "en": "English"
+  },
+  "nav": {
+    "how": "Cómo funciona",
+    "pricing": "Precios",
+    "faq": "Preguntas",
+    "blog": "Blog",
+    "login": "Iniciar sesión",
+    "start": "Empezar gratis",
+    "dashboard": "Ir al dashboard",
+    "openMenu": "Abrir menú"
+  },
+  "footer": {
+    "blog": "Blog",
+    "terms": "Términos",
+    "privacy": "Privacidad"
+  },
+  "meta": {
+    "home": {
+      "title": "ClientFlow — CRM para freelancers",
+      "description": "Tus clientes, proyectos y cobros en un solo lugar. Gratis hasta 3 clientes, sin tarjeta."
+    },
+    "pricing": {
+      "title": "Precios — ClientFlow",
+      "description": "Un solo plan pago, sin letra chica. Empezá gratis y pagá cuando crezcas."
+    },
+    "terms": {
+      "title": "Términos de servicio — ClientFlow",
+      "description": "Términos de servicio de ClientFlow, el CRM para freelancers: tu cuenta, planes Free y Pro, pagos vía Polar, cancelación y eliminación de datos."
+    },
+    "privacy": {
+      "title": "Política de privacidad — ClientFlow",
+      "description": "Qué datos guarda ClientFlow (tu email y lo que cargás: clientes, proyectos, tareas y pagos), dónde se alojan y cómo pedir que los eliminemos."
+    }
+  }
+}

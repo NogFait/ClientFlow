@@ -1,24 +1,23 @@
 import { Link } from "react-router-dom"
 import { Check } from "lucide-react"
-import { PLAN_CATALOG } from "../../../features/billing/domain/planCatalog"
+import { useTranslation } from "react-i18next"
+import { usePlanCatalog } from "../../../features/billing/hooks/usePlanCatalog"
 import styles from "./PricingSection.module.css"
 
-const CTA_LABEL: Record<string, string> = {
-  free: "Crear cuenta gratis",
-  pro_monthly: "Elegir Pro mensual",
-  pro_yearly: "Elegir Pro anual",
-}
-
 // Public pricing cards — landing (#precios) and the dedicated /pricing page
-// both render straight from PLAN_CATALOG (single source of truth shared
-// with the authenticated PlanCards component), so a price change never
-// needs to touch markup in more than one place. CTAs always go to /register
-// here — auth-aware checkout routing only applies on the standalone
-// /pricing page (spec `pricing-page`).
+// both render straight from the plan catalog (single source of truth shared
+// with the authenticated PlanCards component, here in the current language
+// via usePlanCatalog), so a price change never needs to touch markup in
+// more than one place. CTAs always go to /register here — auth-aware
+// checkout routing only applies on the standalone /pricing page (spec
+// `pricing-page`).
 const PricingSection = () => {
+  const { t } = useTranslation("landing")
+  const catalog = usePlanCatalog()
+
   return (
     <div className={styles.grid}>
-      {PLAN_CATALOG.map((entry) => (
+      {catalog.map((entry) => (
         <div key={entry.code} className={entry.badge ? `${styles.card} ${styles.recommended}` : styles.card}>
           {entry.badge && <span className={styles.badge}>{entry.badge}</span>}
           <div className={styles.header}>
@@ -41,7 +40,7 @@ const PricingSection = () => {
             to={`/register?plan=${entry.code}`}
             className={entry.code === "free" ? styles.ctaGhost : styles.ctaPrimary}
           >
-            {CTA_LABEL[entry.code]}
+            {t(`pricing.cta.${entry.code}`)}
           </Link>
         </div>
       ))}

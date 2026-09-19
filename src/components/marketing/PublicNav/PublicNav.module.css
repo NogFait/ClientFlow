@@ -133,6 +133,21 @@
   transform: translateY(-1px);
 }
 
+/* ES | EN: desktop only in the bar (the mobile menu carries its own copy
+   next to the links, where there's room for a 44px row). */
+.languageSwitch {
+  display: none;
+}
+
+.mobileLanguage {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: var(--spacing-1);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--color-border-light);
+}
+
 .hamburger {
   display: inline-flex;
   align-items: center;
@@ -177,6 +192,11 @@
   .ctaGhost {
     display: inline-flex;
     height: 40px;
+  }
+
+  .languageSwitch {
+    display: inline-flex;
+    margin-right: var(--spacing-2);
   }
 
   .ctaPrimary {
