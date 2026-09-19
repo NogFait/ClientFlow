@@ -23,6 +23,13 @@ function parseConstraintName(error: PostgrestErrorLike): string | undefined {
   return match?.[1]
 }
 
+// Message of the generic Error when Postgres/PostgREST sent none at all. A
+// CODE rather than a sentence: this module has no i18n instance, and every
+// caller that surfaces the failure already shows its own translated copy
+// (clients.deleteError, payments.saveError, …) — app.json's errors.unexpected
+// is the display form should one ever need to render it.
+export const UNEXPECTED_ERROR_CODE = "UNEXPECTED_ERROR"
+
 // Central mapping point for every Supabase write in the app: turns the raw
 // PostgrestError into a LimitExceededError or ForeignKeyViolationError when
 // it matches a known contract, otherwise a generic Error with its message
@@ -35,5 +42,5 @@ export function mapSupabaseError(error: PostgrestErrorLike): Error {
     return new ForeignKeyViolationError(parseConstraintName(error))
   }
 
-  return new Error(error.message ?? "Ocurrió un error inesperado.")
+  return new Error(error.message ?? UNEXPECTED_ERROR_CODE)
 }

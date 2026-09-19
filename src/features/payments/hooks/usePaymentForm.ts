@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import type { IPayment } from "../types"
 import { createPayment, updatePayment } from "../services"
 
@@ -8,6 +9,7 @@ import { createPayment, updatePayment } from "../services"
 // field never gets a value from react-hook-form. Undefined outside the hub
 // keeps PaymentsPage's own behavior unchanged.
 export function usePaymentForm(onSuccess: (saved: IPayment) => void, defaultValues?: IPayment, lockedProjectId?: string) {
+  const { t } = useTranslation("app")
   const { register, handleSubmit, reset, setError, formState: { errors, isSubmitting } } = useForm<IPayment>({ values: defaultValues })
 
   const onSubmit = async (data: IPayment) => {
@@ -27,7 +29,7 @@ export function usePaymentForm(onSuccess: (saved: IPayment) => void, defaultValu
     } catch {
       setError("root.serverError", {
         type: "manual",
-        message: "Ocurrió un error al guardar el pago. Intentalo de nuevo.",
+        message: t("payments.saveError"),
       })
     }
   }

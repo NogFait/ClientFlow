@@ -1,23 +1,32 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { startCheckout, openPortal, BillingApiError } from "../services"
 import type { PaidPlanCode } from "../ports/BillingProvider"
 
-// User-facing Spanish copy for each server error code (api/billing/{checkout,portal}.ts).
-const ERROR_MESSAGES: Record<string, string> = {
-  billing_disabled: "La facturación no está disponible en este momento.",
-  unauthorized: "Tu sesión expiró. Iniciá sesión de nuevo.",
-  invalid_plan: "El plan seleccionado no es válido.",
-  already_subscribed: "Ya tenés una suscripción Pro activa.",
-  missing_email: "Tu cuenta no tiene un email válido para facturar.",
-  no_billing_customer: "Todavía no tenés una suscripción para gestionar.",
-}
-const DEFAULT_ERROR_MESSAGE = "Ocurrió un error. Intentalo de nuevo."
+// Server error codes (api/billing/{checkout,portal}.ts) with a dedicated
+// message in app.json's billing.errors; anything else falls back to
+// billing.errors.default. Kept as a list (not a Record of strings) so the
+// copy stays in the locale files and the mapping is language-agnostic.
+const KNOWN_ERROR_CODES = [
+  "billing_disabled",
+  "unauthorized",
+  "invalid_plan",
+  "already_subscribed",
+  "missing_email",
+  "no_billing_customer",
+] as const
 
-function messageFor(error: unknown): string {
-  if (error instanceof BillingApiError) {
-    return ERROR_MESSAGES[error.code] ?? DEFAULT_ERROR_MESSAGE
+type KnownErrorCode = (typeof KNOWN_ERROR_CODES)[number]
+
+function isKnownErrorCode(code: string): code is KnownErrorCode {
+  return (KNOWN_ERROR_CODES as readonly string[]).includes(code)
+}
+
+export function checkoutErrorKey(error: unknown): `billing.errors.${KnownErrorCode | "default"}` {
+  if (error instanceof BillingApiError && isKnownErrorCode(error.code)) {
+    return `billing.errors.${error.code}`
   }
-  return DEFAULT_ERROR_MESSAGE
+  return "billing.errors.default"
 }
 
 export interface UseCheckoutResult {
@@ -32,6 +41,7 @@ export interface UseCheckoutResult {
 // startCheckout/openPortal), so `loading` only needs to be cleared on the
 // error path — there is no "success" state to render.
 export function useCheckout(): UseCheckoutResult {
+  const { t } = useTranslation("app")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,7 +51,7 @@ export function useCheckout(): UseCheckoutResult {
     try {
       await startCheckout(plan)
     } catch (err) {
-      setError(messageFor(err))
+      setError(t(checkoutErrorKey(err)))
       setLoading(false)
     }
   }
@@ -52,7 +62,7 @@ export function useCheckout(): UseCheckoutResult {
     try {
       await openPortal()
     } catch (err) {
-      setError(messageFor(err))
+      setError(t(checkoutErrorKey(err)))
       setLoading(false)
     }
   }

@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
+import { useCurrentLang } from "../../i18n/useCurrentLang"
+import { formatDate } from "../../i18n/locale"
+import { monthName } from "../../utils/month"
 import { useAuthState } from "../../features/auth/context/authContext"
 import { getClients } from "../../features/clients/services"
 import { getProjects } from "../../features/projects/services"
@@ -15,15 +19,12 @@ import OnboardingChecklist from "../../components/shared/OnboardingChecklist/Onb
 import { BarChart } from "../../components/charts/BarChart"
 import { formatCurrency } from "../../utils/currency"
 import { summarizeDashboard, localIsoDate, type DashboardSummary } from "../../features/dashboard/domain/dashboardSummary"
-import { getWelcomeMessage } from "./welcomeMessage"
+import { getWelcomeName } from "./welcomeMessage"
 import styles from "./DashboardPage.module.css"
 
-const MONTHS = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
-]
-
 const DashboardPage = () => {
+  const { t } = useTranslation("app")
+  const lang = useCurrentLang()
   const { user: authUser } = useAuthState()
   const user = authUser
     ? { name: authUser.user_metadata?.name as string | undefined, email: authUser.email }
@@ -98,19 +99,22 @@ const DashboardPage = () => {
     .finally(() => setLoading(false))
   }, [])
 
+  const welcomeName = getWelcomeName(user)
+  const welcome = welcomeName ? t("dashboard.welcomeNamed", { name: welcomeName }) : t("dashboard.welcome")
+
   const chartData = monthlyEarnings
     .slice()
     .reverse()
     .map(({ month, total }) => {
       const [y, m] = month.split("-")
-      const monthName = MONTHS[Number(m) - 1]
+      const name = monthName(Number(m) - 1, lang)
       // Full name for the tooltip, "Sep 26" for the axis (fits on mobile).
-      return { key: `${monthName} ${y}`, shortLabel: `${monthName.slice(0, 3)} ${y.slice(-2)}`, value: total }
+      return { key: `${name} ${y}`, shortLabel: `${name.slice(0, 3)} ${y.slice(-2)}`, value: total }
     })
 
   return (
     <div>
-      <PageHeader title="Dashboard" description={getWelcomeMessage(user)} />
+      <PageHeader title={t("dashboard.title")} description={welcome} />
 
       {!loading && (
         <OnboardingChecklist
@@ -129,36 +133,36 @@ const DashboardPage = () => {
               do. Client/project counts are vanity metrics — the sidebar pages
               already have them. */}
           <StatCard
-            label="Por cobrar"
+            label={t("dashboard.receivable")}
             value={formatCurrency(summary?.receivable ?? 0)}
-            note={summary && summary.overdueAmount > 0 ? `${formatCurrency(summary.overdueAmount)} vencido` : undefined}
+            note={summary && summary.overdueAmount > 0 ? t("dashboard.overdueNote", { amount: formatCurrency(summary.overdueAmount) }) : undefined}
             icon={Wallet}
             variant={summary && summary.overdueAmount > 0 ? "error" : "primary"}
           />
-          <StatCard label="Cobrado este mes" value={formatCurrency(monthlyIncome)} icon={DollarSign} variant="success" />
+          <StatCard label={t("dashboard.collectedThisMonth")} value={formatCurrency(monthlyIncome)} icon={DollarSign} variant="success" />
           <StatCard
-            label="Tareas"
+            label={t("dashboard.tasks")}
             value={summary?.tasksDueToday ?? 0}
-            primaryLabel="Para hoy"
+            primaryLabel={t("dashboard.dueToday")}
             secondaryValue={summary?.tasksOverdue ?? 0}
-            secondaryLabel="Vencidas"
+            secondaryLabel={t("dashboard.overdue")}
             icon={Clock}
             variant={summary && summary.tasksOverdue > 0 ? "error" : "warning"}
           />
-          <StatCard label="Proyectos Activos" value={activeProjects} icon={Briefcase} variant="primary" />
+          <StatCard label={t("dashboard.activeProjects")} value={activeProjects} icon={Briefcase} variant="primary" />
         </div>
       )}
 
       {!loading && (
         <div className={styles.dashboardGrid}>
           <section>
-            <h2 className={styles.sectionTitle}>Estadísticas Mensuales</h2>
+            <h2 className={styles.sectionTitle}>{t("dashboard.monthlyStats")}</h2>
             {chartData.length === 0 ? (
               <EmptyState
                 icon={DollarSign}
-                title="Aún no hay cobros registrados"
-                description="Registrá tus cobros para ver la evolución de tus ingresos mes a mes."
-                actionLabel="Registrar pago"
+                title={t("dashboard.noPayments.title")}
+                description={t("dashboard.noPayments.description")}
+                actionLabel={t("dashboard.noPayments.action")}
                 onAction={() => navigate("/payments")}
               />
             ) : (
@@ -169,13 +173,13 @@ const DashboardPage = () => {
           </section>
 
           <section>
-            <h2 className={styles.sectionTitle}>Próximas Tareas</h2>
+            <h2 className={styles.sectionTitle}>{t("dashboard.upcomingTasks")}</h2>
             {upcomingTasks.length === 0 ? (
               <EmptyState
                 icon={ClipboardList}
-                title="No hay tareas pendientes con fecha"
-                description="Asignale una fecha de vencimiento a tus tareas para verlas acá antes de que venzan."
-                actionLabel="Ver tareas"
+                title={t("dashboard.noTasks.title")}
+                description={t("dashboard.noTasks.description")}
+                actionLabel={t("dashboard.noTasks.action")}
                 onAction={() => navigate("/tasks")}
               />
             ) : (
@@ -186,10 +190,7 @@ const DashboardPage = () => {
                     const today = new Date()
                     today.setHours(0, 0, 0, 0)
                     const isOverdue = due.getTime() < today.getTime()
-                    const formatted = due.toLocaleDateString("es-AR", {
-                      day: "2-digit",
-                      month: "short",
-                    })
+                    const formatted = formatDate(due, lang, { day: "2-digit", month: "short" })
 
                     return (
                       <li key={task.id} className={`${styles.taskItem} ${isOverdue ? styles.taskOverdue : ""}`} onClick={() => navigate("/tasks")}>

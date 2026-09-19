@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import type { Entitlements } from "../../../features/billing/types"
 import type { AuthState } from "../../../features/auth/context/authContext"
@@ -152,5 +152,24 @@ describe("Navbar — mobile menu toggle", () => {
     await renderNavbar({ mobileNavOpen: true, onOpenMobileNav: vi.fn() })
 
     expect(screen.getByRole("button", { name: /Abrir menú/i })).toHaveAttribute("aria-expanded", "true")
+  })
+})
+
+describe("Navbar — language switch", () => {
+  it("renders the ES | EN preference switch and flips the visible labels when EN is chosen", async () => {
+    const { default: Navbar } = await import("./Navbar")
+    const { renderWithLang } = await import("../../../test/i18n")
+    const userEvent = (await import("@testing-library/user-event")).default
+    const user = userEvent.setup()
+
+    renderWithLang(<Navbar />, "es")
+
+    expect(screen.getByRole("button", { name: "Salir" })).toBeInTheDocument()
+
+    await user.click(within(screen.getByRole("group", { name: "Idioma" })).getByRole("button", { name: "English" }))
+
+    expect(await screen.findByRole("button", { name: "Log out" })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Salir" })).not.toBeInTheDocument()
+    expect(localStorage.getItem("clientflow.lang")).toBe("en")
   })
 })

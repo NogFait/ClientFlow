@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react"
 import { X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import styles from "./Modal.module.css"
 
 interface ModalProps {
@@ -13,6 +14,7 @@ interface ModalProps {
 }
 
 const Modal = ({ isOpen, onClose, title, children, initialFocusRef }: ModalProps) => {
+  const { t } = useTranslation("app")
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
@@ -70,7 +72,7 @@ const Modal = ({ isOpen, onClose, title, children, initialFocusRef }: ModalProps
             type="button"
             className={styles.closeButton}
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t("shared.close")}
           >
             <X size={20} aria-hidden="true" />
           </button>

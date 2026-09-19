@@ -1,10 +1,12 @@
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { IUser } from "../types";
-import { signUpUser, signInUser } from "../services";
+import { signUpUser, signInUser, AuthError } from "../services";
 import { storePendingPlan } from "../pendingPlan";
 
 export function useRegisterForm() {
+  const { t } = useTranslation("auth");
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const {
@@ -24,9 +26,11 @@ export function useRegisterForm() {
       if (plan) storePendingPlan(plan);
       navigate("/login");
     } catch (error) {
+      // Our own AuthError carries a code → translated here; Supabase's
+      // errors carry their (English) message and are shown as they come.
       setError("root.serverError", {
         type: "manual",
-        message: (error as Error).message,
+        message: error instanceof AuthError ? t(`errors.${error.code}`) : (error as Error).message,
       });
     }
   };

@@ -1,1 +1,372 @@
-{}
+{
+  "nav": {
+    "userFallback": "Usuario",
+    "openMenu": "Abrir menú",
+    "logout": "Salir"
+  },
+  "sidebar": {
+    "tagline": "Freelancer CRM",
+    "menuLabel": "Menú de navegación",
+    "expand": "Expandir sidebar",
+    "collapse": "Colapsar sidebar",
+    "items": {
+      "dashboard": "Dashboard",
+      "clients": "Clientes",
+      "projects": "Proyectos",
+      "tasks": "Tareas",
+      "payments": "Pagos",
+      "billing": "Plan y facturación"
+    }
+  },
+  "shared": {
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "closeNotification": "Cerrar notificación",
+    "delete": "Eliminar",
+    "deleting": "Eliminando…",
+    "edit": "Editar",
+    "view": "Ver",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "required": "Requerido",
+    "understood": "Entendido",
+    "retry": "Reintentar",
+    "irreversible": "Esta acción no se puede deshacer.",
+    "errorBoundary": {
+      "title": "Algo salió mal",
+      "reload": "Recargar página"
+    },
+    "onboarding": {
+      "title": "Empezá en 3 pasos",
+      "dismiss": "Cerrar",
+      "stepDone": "Paso completado",
+      "steps": {
+        "client": "Cargá tu primer cliente",
+        "project": "Creá un proyecto",
+        "payment": "Registrá un cobro"
+      }
+    },
+    "monthSelector": {
+      "group": "Selector de mes",
+      "previous": "Mes anterior",
+      "next": "Mes siguiente",
+      "pick": "Elegir mes (actual: {{month}})",
+      "pickerTitle": "Elegir mes",
+      "today": "Hoy",
+      "previousYear": "Año anterior",
+      "nextYear": "Año siguiente",
+      "pendingHint": "con pagos pendientes",
+      "monthWithPending": "{{month}} (con pendientes)"
+    }
+  },
+  "status": {
+    "client": {
+      "activo": "Activo",
+      "pendiente": "Pendiente",
+      "inactivo": "Inactivo"
+    },
+    "project": {
+      "activo": "Activo",
+      "pausado": "Pausado",
+      "completo": "Completo"
+    },
+    "task": {
+      "pendiente": "Pendiente",
+      "en_progreso": "En Progreso",
+      "hechas": "Hechas"
+    },
+    "payment": {
+      "pendiente": "Pendiente",
+      "pagado": "Pagado"
+    },
+    "priority": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "method": {
+      "efectivo": "Efectivo",
+      "transferencia": "Transferencia",
+      "tarjeta": "Tarjeta",
+      "other": "Otro"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Bienvenido",
+    "welcomeNamed": "Bienvenido {{name}}",
+    "receivable": "Por cobrar",
+    "overdueNote": "{{amount}} vencido",
+    "collectedThisMonth": "Cobrado este mes",
+    "tasks": "Tareas",
+    "dueToday": "Para hoy",
+    "overdue": "Vencidas",
+    "activeProjects": "Proyectos Activos",
+    "monthlyStats": "Estadísticas Mensuales",
+    "noPayments": {
+      "title": "Aún no hay cobros registrados",
+      "description": "Registrá tus cobros para ver la evolución de tus ingresos mes a mes.",
+      "action": "Registrar pago"
+    },
+    "upcomingTasks": "Próximas Tareas",
+    "noTasks": {
+      "title": "No hay tareas pendientes con fecha",
+      "description": "Asignale una fecha de vencimiento a tus tareas para verlas acá antes de que venzan.",
+      "action": "Ver tareas"
+    }
+  },
+  "clients": {
+    "title": "Clientes",
+    "description": "Gestione las relaciones con sus clientes, realice un seguimiento de su estado y supervise sus niveles de inversión desde una única vista unificada.",
+    "new": "Nuevo Cliente",
+    "edit": "Editar Cliente",
+    "detail": "Detalle del Cliente",
+    "saved": "Cliente guardado",
+    "deleted": "Cliente eliminado",
+    "cannotDeleteTitle": "No se puede eliminar a {{name}}",
+    "cannotDeleteDescription": "Tiene {{count}} proyecto(s) asociado(s). Eliminá o reasigná esos proyectos primero.",
+    "confirmDelete": "¿Eliminar a {{name}}?",
+    "deleteFkError": "No se puede eliminar: el cliente tiene proyectos asociados.",
+    "deleteError": "No se pudo eliminar el cliente. Intentalo de nuevo.",
+    "saveError": "Ocurrió un error al guardar el cliente. Intentalo de nuevo.",
+    "stats": {
+      "active": "Total Activos",
+      "pending": "Pendientes",
+      "inactive": "Inactivos"
+    },
+    "empty": {
+      "title": "Todavía no tenés clientes",
+      "description": "Cargá a las personas o empresas para las que trabajás.",
+      "action": "Agregar primer cliente"
+    },
+    "fields": {
+      "name": "Nombre",
+      "email": "Email",
+      "phone": "Celular",
+      "company": "Empresa",
+      "status": "Estado",
+      "actions": "Acciones",
+      "created": "Creado"
+    },
+    "aria": {
+      "view": "Ver a {{name}}",
+      "edit": "Editar a {{name}}",
+      "delete": "Eliminar a {{name}}"
+    }
+  },
+  "projects": {
+    "title": "Proyectos",
+    "description": "Gestiona tu trabajo activo y tus relaciones con los clientes.",
+    "new": "Nuevo Proyecto",
+    "edit": "Editar Proyecto",
+    "saved": "Proyecto guardado",
+    "deleted": "Proyecto eliminado",
+    "cannotDeleteTitle": "No se puede eliminar {{name}}",
+    "cannotDeleteDescription": "Tiene {{count}} pago(s) registrado(s). Eliminá esos pagos primero.",
+    "confirmDelete": "¿Eliminar el proyecto \"{{name}}\"?",
+    "deleteFkError": "No se puede eliminar: el proyecto tiene pagos asociados.",
+    "deleteError": "No se pudo eliminar el proyecto. Intentalo de nuevo.",
+    "saveError": "Ocurrió un error al guardar el proyecto. Intentalo de nuevo.",
+    "stats": {
+      "active": "Activos",
+      "paused": "Pausados",
+      "completed": "Completados",
+      "monthlyIncome": "Ingreso Mensual"
+    },
+    "empty": {
+      "title": "Todavía no tenés proyectos",
+      "description": "Un proyecto agrupa tareas y pagos de un cliente.",
+      "action": "Crear primer proyecto"
+    },
+    "card": {
+      "status": {
+        "activo": "Activo",
+        "pausado": "Pausado",
+        "completo": "Completado"
+      },
+      "client": "Cliente: {{name}}",
+      "start": "Inicio: {{date}}",
+      "view": "Ver proyecto {{name}}"
+    },
+    "noClient": "Sin cliente",
+    "fields": {
+      "name": "Nombre",
+      "description": "Descripción",
+      "client": "Cliente",
+      "status": "Estado",
+      "budget": "Presupuesto",
+      "startDate": "Fecha inicio",
+      "endDate": "Fecha fin"
+    }
+  },
+  "projectHub": {
+    "notFound": {
+      "title": "Proyecto no encontrado",
+      "description": "Puede que haya sido eliminado o que no tengas acceso a él.",
+      "back": "Volver a proyectos"
+    },
+    "loadError": "No se pudo cargar el proyecto. Intentalo de nuevo.",
+    "breadcrumb": "Proyectos",
+    "statusLabel": "Estado del proyecto",
+    "budget": "Presupuesto",
+    "noBudget": "Sin presupuesto",
+    "collected": "Cobrado",
+    "pendingCollection": "Pendiente de cobro",
+    "paymentsCount": "{{count}} pago(s)",
+    "tasks": "Tareas",
+    "tasksDone": "{{done}} / {{total}} hechas",
+    "newTask": "+ Nueva tarea",
+    "newTaskTitle": "Nueva tarea",
+    "taskSaved": "Tarea guardada",
+    "noTasks": {
+      "title": "Sin tareas en este proyecto",
+      "description": "Agregá tareas para hacer seguimiento del trabajo."
+    },
+    "markPending": "Marcar como pendiente",
+    "markDone": "Marcar como hecha",
+    "payments": "Pagos",
+    "registerPayment": "+ Registrar pago",
+    "registerPaymentTitle": "Registrar pago",
+    "paymentSaved": "Pago registrado",
+    "noPayments": {
+      "title": "Sin pagos en este proyecto",
+      "description": "Registrá los cobros para hacer seguimiento de los ingresos."
+    },
+    "paymentsFooter": "Cobrado {{paid}} · Pendiente {{pending}}"
+  },
+  "tasks": {
+    "title": "Tablero de Tareas",
+    "create": "Crear Tarea",
+    "new": "Nueva Tarea",
+    "edit": "Editar Tarea",
+    "detail": "Detalle de Tarea",
+    "saved": "Tarea guardada",
+    "deleted": "Tarea eliminada",
+    "confirmDelete": "¿Eliminar \"{{title}}\"?",
+    "deleteError": "No se pudo eliminar la tarea. Intentalo de nuevo.",
+    "saveError": "Ocurrió un error al guardar la tarea. Intentalo de nuevo.",
+    "empty": {
+      "title": "Todavía no tenés tareas",
+      "description": "Organizá el trabajo de tus proyectos en Pendiente, En progreso y Hechas.",
+      "action": "Crear primera tarea"
+    },
+    "columnEmpty": "Sin tareas",
+    "due": "Vence: {{date}}",
+    "noProject": "Sin proyecto",
+    "view": {
+      "statusDone": "Hecha"
+    },
+    "fields": {
+      "title": "Título",
+      "description": "Descripción",
+      "project": "Proyecto",
+      "status": "Estado",
+      "priority": "Prioridad",
+      "dueDate": "Fecha límite",
+      "due": "Vence",
+      "created": "Creado"
+    }
+  },
+  "payments": {
+    "title": "Pagos e Ingresos",
+    "description": "Administra tus finanzas y realiza un seguimiento de los ingresos de tus proyectos",
+    "register": "Registrar pago",
+    "edit": "Editar pago",
+    "detail": "Detalle del Pago",
+    "registered": "Pago registrado",
+    "registeredIn": "Pago registrado en {{month}}",
+    "updated": "Pago actualizado",
+    "deleted": "Pago eliminado",
+    "confirmDelete": "¿Eliminar pago de {{amount}}?",
+    "deleteError": "No se pudo eliminar el pago. Intentalo de nuevo.",
+    "saveError": "Ocurrió un error al guardar el pago. Intentalo de nuevo.",
+    "loadError": "No se pudieron cargar los pagos de este mes. Intentalo de nuevo.",
+    "stats": {
+      "collectedIn": "Cobrado en {{month}}",
+      "pendingIn": "Pendiente en {{month}}",
+      "nextProjected": "Próximo pago proyectado",
+      "accumulated": "Acumulado {{year}}",
+      "pending": "pendiente",
+      "pendingMonths": "pendiente · {{months}}"
+    },
+    "empty": {
+      "title": "No registraste pagos en {{month}}",
+      "description": "Anotá cada cobro para ver tus ingresos y lo que falta cobrar."
+    },
+    "noProject": "Sin proyecto",
+    "fields": {
+      "date": "Fecha",
+      "client": "Cliente",
+      "project": "Proyecto",
+      "amount": "Monto",
+      "status": "Estado",
+      "method": "Método",
+      "actions": "Acciones",
+      "paymentDate": "Fecha de pago",
+      "notes": "Notas",
+      "created": "Creado"
+    },
+    "aria": {
+      "view": "Ver pago de {{amount}}",
+      "edit": "Editar pago de {{amount}}",
+      "delete": "Eliminar pago de {{amount}}"
+    }
+  },
+  "billing": {
+    "title": "Plan y facturación",
+    "description": "Gestioná tu plan, tu uso y tu método de pago.",
+    "updating": "Actualizando tu plan…",
+    "status": {
+      "endsOn": "Termina el {{date}} — podés reactivarlo cuando quieras",
+      "renewsOn": "Activo · se renueva el {{date}}",
+      "active": "Activo",
+      "pastDueUntil": "Pago pendiente · acceso Pro hasta {{date}}",
+      "pastDue": "Pago pendiente",
+      "canceled": "Sin suscripción activa",
+      "free": "Plan gratuito"
+    },
+    "meters": {
+      "clients": "Clientes",
+      "projects": "Proyectos",
+      "unlimited": "{{used}} — ilimitado"
+    },
+    "reactivate": "Reactivar suscripción",
+    "manage": "Gestionar suscripción",
+    "planCards": {
+      "current": "Plan actual",
+      "recommended": "Recomendado",
+      "currentCta": "Tu plan actual",
+      "choose": "Elegir {{name}}"
+    },
+    "badge": {
+      "pastDue": "Pago pendiente",
+      "canceled": "Cancelado"
+    },
+    "upgradePrompt": {
+      "title": "Alcanzaste el límite de tu plan",
+      "message": "Llegaste a <1>{{current}} / {{limit}}</1> {{resource}} del plan Free. Actualizá a Pro para agregar {{resource}} sin límite.",
+      "monthly": "Mensual — {{price}}",
+      "yearly": "Anual — {{price}}",
+      "resources": {
+        "clientes": "clientes",
+        "proyectos": "proyectos"
+      }
+    },
+    "errors": {
+      "billing_disabled": "La facturación no está disponible en este momento.",
+      "unauthorized": "Tu sesión expiró. Iniciá sesión de nuevo.",
+      "invalid_plan": "El plan seleccionado no es válido.",
+      "already_subscribed": "Ya tenés una suscripción Pro activa.",
+      "missing_email": "Tu cuenta no tiene un email válido para facturar.",
+      "no_billing_customer": "Todavía no tenés una suscripción para gestionar.",
+      "default": "Ocurrió un error. Intentalo de nuevo."
+    }
+  },
+  "errors": {
+    "unexpected": "Ocurrió un error inesperado."
+  },
+  "notFound": {
+    "message": "La página que buscas no existe.",
+    "back": "Volver al inicio"
+  }
+}

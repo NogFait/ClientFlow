@@ -33,6 +33,12 @@
   }
 }
 
+/* The switch sits between the spacer and the plan badge; flex-shrink: 0
+   keeps its two segments from collapsing when the user name is long. */
+.languageSwitch {
+  flex-shrink: 0;
+}
+
 .planBadgeLink {
   text-decoration: none;
   display: inline-flex;

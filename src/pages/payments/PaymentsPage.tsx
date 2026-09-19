@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
+import { useTranslation } from "react-i18next"
+import { useCurrentLang } from "../../i18n/useCurrentLang"
+import { formatDate } from "../../i18n/locale"
 import type { IPayment } from "../../features/payments/types"
 import type { IProject } from "../../features/projects/types"
 import { getPaymentsInRange, getPaymentTotals, deletePayment, type PaymentTotals } from "../../features/payments/services"
@@ -21,12 +24,14 @@ import Loader from "../../components/shared/Loader/Loader"
 import EmptyState from "../../components/shared/EmptyState/EmptyState"
 import { useToast } from "../../components/shared/Toast/useToast"
 import { formatCurrency } from "../../utils/currency"
-import { currentMonthKey, formatMonthEsAr, monthRange, parseMonthKey, shortMonthEsAr, yearRange, type MonthKey } from "../../utils/month"
+import { currentMonthKey, formatMonth, monthRange, parseMonthKey, shortMonth, yearRange, type MonthKey } from "../../utils/month"
 import styles from "./PaymentsPage.module.css"
 
 type PaymentWithRelations = IPayment & { proyectos?: { name: string; clientes?: { name: string } | null } | null }
 
 const PaymentsPage = () => {
+  const { t } = useTranslation("app")
+  const lang = useCurrentLang()
   const [searchParams, setSearchParams] = useSearchParams()
   const monthParam = searchParams.get("month")
   const month: MonthKey = (monthParam && parseMonthKey(monthParam)) || currentMonthKey()
@@ -66,13 +71,13 @@ const PaymentsPage = () => {
       const savedMonth = effectiveDate.slice(0, 7) as MonthKey
       if (savedMonth !== month) {
         setSearchParams({ month: savedMonth })
-        toast.success(`Pago registrado en ${formatMonthEsAr(savedMonth)}`)
+        toast.success(t("payments.registeredIn", { month: formatMonth(savedMonth, lang) }))
         return
       }
     }
 
     setRefreshTick(t => t + 1)
-    toast.success(wasEdit ? "Pago actualizado" : "Pago registrado")
+    toast.success(wasEdit ? t("payments.updated") : t("payments.registered"))
   }
 
   const { register, handleSubmit, onSubmit, reset, errors, isSubmitting } = usePaymentForm(
@@ -116,14 +121,14 @@ const PaymentsPage = () => {
   const isMobile = useMediaQuery("(max-width: 767px)")
 
   const handleDelete = async (payment: IPayment) => {
-    const confirmed = await confirm({ title: `¿Eliminar pago de ${formatCurrency(Number(payment.amount))}?` })
+    const confirmed = await confirm({ title: t("payments.confirmDelete", { amount: formatCurrency(Number(payment.amount)) }) })
     if (!confirmed) return
     try {
       await deletePayment(payment.id!)
       setRefreshTick(t => t + 1)
-      toast.success("Pago eliminado")
+      toast.success(t("payments.deleted"))
     } catch {
-      setDeleteError("No se pudo eliminar el pago. Intentalo de nuevo.")
+      setDeleteError(t("payments.deleteError"))
     }
   }
 
@@ -132,7 +137,7 @@ const PaymentsPage = () => {
     .sort((a, b) => new Date(a.payment_date!).getTime() - new Date(b.payment_date!).getTime())[0]
 
   const proximoPagoValue = proximoPago
-    ? `${new Date(proximoPago.payment_date!).toLocaleDateString()} — ${formatCurrency(Number(proximoPago.amount))}`
+    ? `${formatDate(proximoPago.payment_date!, lang)} — ${formatCurrency(Number(proximoPago.amount))}`
     : "—"
 
   const totalGanado = payments
@@ -146,14 +151,16 @@ const PaymentsPage = () => {
   const yearLabel = month.slice(0, 4)
   // Month-scoped cards say WHICH month, so "Pendiente" can't be misread as
   // an all-time figure (the year card next to it carries the yearly one).
-  const monthLabel = formatMonthEsAr(month).toLowerCase()
+  // Lowercased mid-sentence in Spanish ("Cobrado en septiembre 2026");
+  // English month names are proper nouns and keep their capital.
+  const monthLabel = lang === "es" ? formatMonth(month, lang).toLowerCase() : formatMonth(month, lang)
 
   return (
     <div>
       <PageHeader
-        title="Pagos e Ingresos"
-        description="Administra tus finanzas y realiza un seguimiento de los ingresos de tus proyectos"
-        actionLabel="Registrar pago"
+        title={t("payments.title")}
+        description={t("payments.description")}
+        actionLabel={t("payments.register")}
         onAction={() => { setEditingPayment(null); setModalOpen(true) }}
       >
         <MonthSelector value={month} onChange={handleMonthChange} markedMonths={pendingMonths} />
@@ -168,7 +175,7 @@ const PaymentsPage = () => {
 
       {paymentsError && (
         <div className={styles.errorBanner}>
-          <span>No se pudieron cargar los pagos de este mes. Intentalo de nuevo.</span>
+          <span>{t("payments.loadError")}</span>
         </div>
       )}
 
@@ -177,14 +184,18 @@ const PaymentsPage = () => {
       ) : (
         <>
           <div className={styles.kpiGrid}>
-            <StatCard label={`Cobrado en ${monthLabel}`} value={formatCurrency(totalGanado)} icon={DollarSign} variant="success" />
-            <StatCard label={`Pendiente en ${monthLabel}`} value={formatCurrency(totalPendiente)} icon={Clock} variant="warning" />
-            <StatCard label="Próximo pago proyectado" value={proximoPagoValue} icon={Calendar} variant="primary" />
+            <StatCard label={t("payments.stats.collectedIn", { month: monthLabel })} value={formatCurrency(totalGanado)} icon={DollarSign} variant="success" />
+            <StatCard label={t("payments.stats.pendingIn", { month: monthLabel })} value={formatCurrency(totalPendiente)} icon={Clock} variant="warning" />
+            <StatCard label={t("payments.stats.nextProjected")} value={proximoPagoValue} icon={Calendar} variant="primary" />
             <StatCard
-              label={`Acumulado ${yearLabel}`}
+              label={t("payments.stats.accumulated", { year: yearLabel })}
               value={formatCurrency(yearTotals.paid)}
               secondaryValue={formatCurrency(yearTotals.pending)}
-              secondaryLabel={pendingMonths.length > 0 ? `pendiente · ${pendingMonths.map(shortMonthEsAr).join(", ")}` : "pendiente"}
+              secondaryLabel={
+                pendingMonths.length > 0
+                  ? t("payments.stats.pendingMonths", { months: pendingMonths.map(key => shortMonth(key, lang)).join(", ") })
+                  : t("payments.stats.pending")
+              }
               icon={TrendingUp}
               variant="primary"
             />
@@ -193,9 +204,9 @@ const PaymentsPage = () => {
           {payments.length === 0 && (
             <EmptyState
               icon={DollarSign}
-              title={`No registraste pagos en ${formatMonthEsAr(month)}`}
-              description="Anotá cada cobro para ver tus ingresos y lo que falta cobrar."
-              actionLabel="Registrar pago"
+              title={t("payments.empty.title", { month: formatMonth(month, lang) })}
+              description={t("payments.empty.description")}
+              actionLabel={t("payments.register")}
               onAction={() => { setEditingPayment(null); setModalOpen(true) }}
             />
           )}
@@ -210,13 +221,13 @@ const PaymentsPage = () => {
               <div className={styles.tableWrapper}><table className={styles.paymentsTable}>
               <thead>
                 <tr>
-                  <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th>Proyecto</th>
-                  <th>Monto</th>
-                  <th>Estado</th>
-                  <th>Método</th>
-                  <th>Acciones</th>
+                  <th>{t("payments.fields.date")}</th>
+                  <th>{t("payments.fields.client")}</th>
+                  <th>{t("payments.fields.project")}</th>
+                  <th>{t("payments.fields.amount")}</th>
+                  <th>{t("payments.fields.status")}</th>
+                  <th>{t("payments.fields.method")}</th>
+                  <th>{t("payments.fields.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -230,7 +241,7 @@ const PaymentsPage = () => {
         </>
       )}
 
-      <Modal isOpen={modalOpen} onClose={closeModal} title={editingPayment ? "Editar pago" : "Registrar pago"}>
+      <Modal isOpen={modalOpen} onClose={closeModal} title={editingPayment ? t("payments.edit") : t("payments.register")}>
         <PaymentForm
           register={register}
           handleSubmit={handleSubmit}
@@ -242,13 +253,13 @@ const PaymentsPage = () => {
         />
       </Modal>
 
-      <Modal isOpen={viewModalOpen} onClose={() => setViewModalOpen(false)} title="Detalle del Pago">
+      <Modal isOpen={viewModalOpen} onClose={() => setViewModalOpen(false)} title={t("payments.detail")}>
         {viewingPayment && <PaymentView payment={viewingPayment} />}
       </Modal>
 
       <ConfirmDialog
         {...dialogProps}
-        description={dialogProps.description ?? "Esta acción no se puede deshacer."}
+        description={dialogProps.description ?? t("shared.irreversible")}
       />
     </div>
   )

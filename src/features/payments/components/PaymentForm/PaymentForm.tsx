@@ -1,4 +1,5 @@
 import { useId } from "react"
+import { useTranslation } from "react-i18next"
 import type { UseFormRegister, FieldErrors, UseFormHandleSubmit } from "react-hook-form"
 import type { IPayment, PaymentMethod, PaymentStatus } from "../../types"
 import type { IProject } from "../../../projects/types"
@@ -26,6 +27,7 @@ const PaymentForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, o
   // Prefixes every field id with a per-mount unique id — this form can be
   // rendered more than once on the same page in principle (create/edit
   // modals), so plain string ids like "payment-amount" would collide.
+  const { t } = useTranslation("app")
   const uid = useId()
   const projectId = `${uid}-project_id`
   const amountId = `${uid}-amount`
@@ -39,9 +41,9 @@ const PaymentForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, o
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       {!lockedProjectId && (
         <div>
-          <label htmlFor={projectId} className={styles.label}>Proyecto</label>
+          <label htmlFor={projectId} className={styles.label}>{t("payments.fields.project")}</label>
           <select id={projectId} className={styles.select} {...register("project_id")}>
-            <option value="">Sin proyecto</option>
+            <option value="">{t("payments.noProject")}</option>
             {projects.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
@@ -50,7 +52,7 @@ const PaymentForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, o
       )}
 
       <div>
-        <label htmlFor={amountId} className={styles.label}>Monto</label>
+        <label htmlFor={amountId} className={styles.label}>{t("payments.fields.amount")}</label>
         <input
           id={amountId}
           className={styles.input}
@@ -60,38 +62,38 @@ const PaymentForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, o
           aria-describedby={errors.amount ? amountErrorId : undefined}
           {...register("amount", { required: true })}
         />
-        {errors.amount && <span id={amountErrorId} className={styles.error}>Requerido</span>}
+        {errors.amount && <span id={amountErrorId} className={styles.error}>{t("shared.required")}</span>}
       </div>
 
       <div>
-        <label htmlFor={paymentDateId} className={styles.label}>Fecha de pago</label>
+        <label htmlFor={paymentDateId} className={styles.label}>{t("payments.fields.paymentDate")}</label>
         <input id={paymentDateId} className={styles.input} type="date" {...register("payment_date")} />
       </div>
 
       <div>
-        <label htmlFor={methodId} className={styles.label}>Método</label>
+        <label htmlFor={methodId} className={styles.label}>{t("payments.fields.method")}</label>
         <select id={methodId} className={styles.select} {...register("method")}>
           {methods.map(m => (
             <option key={m} value={m}>
-              {m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : m === "tarjeta" ? "Tarjeta" : "Otro"}
+              {t(`status.method.${m}`)}
             </option>
           ))}
         </select>
       </div>
 
       <div>
-        <label htmlFor={statusId} className={styles.label}>Estado</label>
+        <label htmlFor={statusId} className={styles.label}>{t("payments.fields.status")}</label>
         <select id={statusId} className={styles.select} {...register("status")}>
           {statuses.map(s => (
             <option key={s} value={s}>
-              {s === "pendiente" ? "Pendiente" : "Pagado"}
+              {t(`status.payment.${s}`)}
             </option>
           ))}
         </select>
       </div>
 
       <div className={styles.fullWidth}>
-        <label htmlFor={notesId} className={styles.label}>Notas</label>
+        <label htmlFor={notesId} className={styles.label}>{t("payments.fields.notes")}</label>
         <textarea id={notesId} className={styles.textarea} {...register("notes")} />
       </div>
 
@@ -100,9 +102,9 @@ const PaymentForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, o
       )}
 
       <div className={styles.actions}>
-        <button type="button" className={styles.cancelBtn} onClick={onCancel}>Cancelar</button>
+        <button type="button" className={styles.cancelBtn} onClick={onCancel}>{t("shared.cancel")}</button>
         <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
-          {isSubmitting ? "Guardando..." : "Guardar"}
+          {isSubmitting ? t("shared.saving") : t("shared.save")}
         </button>
       </div>
     </form>

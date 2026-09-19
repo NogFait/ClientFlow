@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
+import { useCurrentLang } from "../../i18n/useCurrentLang"
+import { formatDate } from "../../i18n/locale"
 import type { ITask } from "../../features/tasks/types"
 import type { IProject } from "../../features/projects/types"
 import { getTasks, deleteTask } from "../../features/tasks/services"
@@ -18,13 +21,12 @@ import styles from "./TaskPage.module.css"
 
 type ModalMode = "create" | "edit" | "view" | null
 
-const columns = [
-  { key: "pendiente" as const, title: "Pendiente" },
-  { key: "en_progreso" as const, title: "En Progreso" },
-  { key: "hechas" as const, title: "Hechas" },
-]
+// Board columns = the DB status values; titles come from status.task.*.
+const columns = ["pendiente", "en_progreso", "hechas"] as const
 
 const TaskPage = () => {
+  const { t } = useTranslation("app")
+  const lang = useCurrentLang()
   const [tasks, setTasks] = useState<(ITask & { proyectos?: { name: string } | null })[]>([])
   const [projects, setProjects] = useState<IProject[]>([])
   const [modalMode, setModalMode] = useState<ModalMode>(null)
@@ -41,7 +43,7 @@ const TaskPage = () => {
     setModalMode(null)
     setSelectedTask(null)
     refreshTasks()
-    toast.success("Tarea guardada")
+    toast.success(t("tasks.saved"))
   }, selectedTask ?? undefined)
 
   const closeModal = () => {
@@ -71,14 +73,14 @@ const TaskPage = () => {
   const { confirm, dialogProps } = useConfirm()
 
   const handleDelete = async (task: ITask) => {
-    const confirmed = await confirm({ title: `¿Eliminar "${task.title}"?` })
+    const confirmed = await confirm({ title: t("tasks.confirmDelete", { title: task.title }) })
     if (!confirmed) return
     try {
       await deleteTask(task.id!)
       refreshTasks()
-      toast.success("Tarea eliminada")
+      toast.success(t("tasks.deleted"))
     } catch {
-      setDeleteError("No se pudo eliminar la tarea. Intentalo de nuevo.")
+      setDeleteError(t("tasks.deleteError"))
     }
   }
 
@@ -87,20 +89,20 @@ const TaskPage = () => {
     setModalMode("create")
   }
 
-  const modalTitle = modalMode === "create" ? "Nueva Tarea"
-    : modalMode === "edit" ? "Editar Tarea"
-    : modalMode === "view" ? "Detalle de Tarea"
+  const modalTitle = modalMode === "create" ? t("tasks.new")
+    : modalMode === "edit" ? t("tasks.edit")
+    : modalMode === "view" ? t("tasks.detail")
     : ""
 
   const selectedWithProject = selectedTask
-    ? tasks.find(t => t.id === selectedTask.id)
+    ? tasks.find(task => task.id === selectedTask.id)
     : null
 
   return (
     <div>
       <PageHeader
-        title="Tablero de Tareas"
-        actionLabel="Crear Tarea"
+        title={t("tasks.title")}
+        actionLabel={t("tasks.create")}
         onAction={handleNewTaskAction}
       />
 
@@ -116,18 +118,18 @@ const TaskPage = () => {
       ) : tasks.length === 0 ? (
         <EmptyState
           icon={ClipboardList}
-          title="Todavía no tenés tareas"
-          description="Organizá el trabajo de tus proyectos en Pendiente, En progreso y Hechas."
-          actionLabel="Crear primera tarea"
+          title={t("tasks.empty.title")}
+          description={t("tasks.empty.description")}
+          actionLabel={t("tasks.empty.action")}
           onAction={handleNewTaskAction}
         />
       ) : (
         <div className={styles.columnsContainer}>
-          {columns.map(col => (
+          {columns.map(status => (
             <TaskColumn
-              key={col.key}
-              title={col.title}
-              tasks={tasks.filter(t => t.status === col.key)}
+              key={status}
+              title={t(`status.task.${status}`)}
+              tasks={tasks.filter(task => task.status === status)}
               onView={handleView}
               onEdit={handleEdit}
               onDelete={handleDelete}
@@ -140,40 +142,40 @@ const TaskPage = () => {
         {modalMode === "view" && selectedWithProject && (
           <div className={styles.viewMode}>
             <div className={`${styles.field} ${styles.fieldFull}`}>
-              <span className={styles.label}>Título</span>
+              <span className={styles.label}>{t("tasks.fields.title")}</span>
               <span className={styles.value}>{selectedWithProject.title}</span>
             </div>
             <div className={styles.field}>
-              <span className={styles.label}>Estado</span>
+              <span className={styles.label}>{t("tasks.fields.status")}</span>
               <span className={`${styles.badge} ${styles[selectedWithProject.status === "pendiente" ? "badgePendiente" : selectedWithProject.status === "en_progreso" ? "badgeEnProgreso" : "badgeHechas"]}`}>
-                {selectedWithProject.status === "pendiente" ? "Pendiente" : selectedWithProject.status === "en_progreso" ? "En Progreso" : "Hecha"}
+                {selectedWithProject.status === "hechas" ? t("tasks.view.statusDone") : t(`status.task.${selectedWithProject.status}`)}
               </span>
             </div>
             <div className={styles.field}>
-              <span className={styles.label}>Prioridad</span>
+              <span className={styles.label}>{t("tasks.fields.priority")}</span>
               <span className={`${styles.badge} ${styles[selectedWithProject.priority === "low" ? "badgeBaja" : selectedWithProject.priority === "medium" ? "badgeMedia" : "badgeAlta"]}`}>
-                {selectedWithProject.priority === "low" ? "Baja" : selectedWithProject.priority === "medium" ? "Media" : "Alta"}
+                {t(`status.priority.${selectedWithProject.priority}`)}
               </span>
             </div>
             <div className={styles.field}>
-              <span className={styles.label}>Proyecto</span>
-              <span className={styles.value}>{selectedWithProject.proyectos?.name ?? "Sin proyecto"}</span>
+              <span className={styles.label}>{t("tasks.fields.project")}</span>
+              <span className={styles.value}>{selectedWithProject.proyectos?.name ?? t("tasks.noProject")}</span>
             </div>
             {selectedWithProject.due_date && (
               <div className={styles.field}>
-                <span className={styles.label}>Vence</span>
-                <span className={styles.value}>{new Date(selectedWithProject.due_date).toLocaleDateString()}</span>
+                <span className={styles.label}>{t("tasks.fields.due")}</span>
+                <span className={styles.value}>{formatDate(selectedWithProject.due_date, lang)}</span>
               </div>
             )}
             <div className={styles.field}>
-              <span className={styles.label}>Creado</span>
-              <span className={styles.value}>{new Date(selectedWithProject.created_at!).toLocaleDateString()}</span>
+              <span className={styles.label}>{t("tasks.fields.created")}</span>
+              <span className={styles.value}>{formatDate(selectedWithProject.created_at!, lang)}</span>
             </div>
             <div className={`${styles.field} ${styles.fieldFull}`}>
-              <span className={styles.label}>Descripción</span>
+              <span className={styles.label}>{t("tasks.fields.description")}</span>
               <span className={`${styles.value} ${styles.valueMuted}`}>{selectedWithProject.description ?? "—"}</span>
             </div>
-            <button className={styles.closeBtn} onClick={closeModal}>Cerrar</button>
+            <button className={styles.closeBtn} onClick={closeModal}>{t("shared.close")}</button>
           </div>
         )}
 
@@ -192,7 +194,7 @@ const TaskPage = () => {
 
       <ConfirmDialog
         {...dialogProps}
-        description={dialogProps.description ?? "Esta acción no se puede deshacer."}
+        description={dialogProps.description ?? t("shared.irreversible")}
       />
     </div>
   )

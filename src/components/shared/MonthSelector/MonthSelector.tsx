@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react"
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
-import { currentMonthKey, formatMonthEsAr, shiftMonth, type MonthKey } from "../../../utils/month"
+import { useTranslation } from "react-i18next"
+import { useCurrentLang } from "../../../i18n/useCurrentLang"
+import { currentMonthKey, formatMonth, shiftMonth, shortMonth, type MonthKey } from "../../../utils/month"
 import styles from "./MonthSelector.module.css"
 
 interface MonthSelectorProps {
@@ -11,15 +13,23 @@ interface MonthSelectorProps {
   markedMonths?: MonthKey[]
 }
 
-const SHORT_MONTHS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-
 // Prev/next/"Hoy" navigation for a single calendar month, plus a quick
 // picker (year stepper + 12-month grid) behind the label so jumping to
 // "marzo del año pasado" is two clicks instead of eighteen. Purely
 // controlled: the parent owns `value` (usually synced to a URL search
 // param) and decides what a month change means (reload data, etc.).
 const MonthSelector = ({ value, onChange, max, markedMonths = [] }: MonthSelectorProps) => {
+  const { t } = useTranslation("app")
+  const lang = useCurrentLang()
   const today = currentMonthKey()
+  const currentLabel = formatMonth(value, lang)
+  // Picker grid: three-letter names, capitalized in both languages ("Ene",
+  // "Jan") — shortMonth() keeps Spanish lowercase for the running text in
+  // the payments card, the grid wants title case.
+  const shortMonths = Array.from({ length: 12 }, (_, i) => {
+    const name = shortMonth(`2000-${String(i + 1).padStart(2, "0")}` as MonthKey, lang)
+    return `${name.charAt(0).toUpperCase()}${name.slice(1)}`
+  })
   const isAtMax = max !== undefined && value >= max
   const isCurrent = value === today
 
@@ -79,14 +89,14 @@ const MonthSelector = ({ value, onChange, max, markedMonths = [] }: MonthSelecto
       <div
         className={styles.group}
         role="group"
-        aria-label="Selector de mes"
+        aria-label={t("shared.monthSelector.group")}
         tabIndex={0}
         onKeyDown={handleKeyDown}
       >
         <button
           type="button"
           className={styles.navButton}
-          aria-label="Mes anterior"
+          aria-label={t("shared.monthSelector.previous")}
           onClick={() => goTo(shiftMonth(value, -1))}
         >
           <ChevronLeft size={18} />
@@ -95,18 +105,18 @@ const MonthSelector = ({ value, onChange, max, markedMonths = [] }: MonthSelecto
         <button
           type="button"
           className={styles.label}
-          aria-label={`Elegir mes (actual: ${formatMonthEsAr(value)})`}
+          aria-label={t("shared.monthSelector.pick", { month: currentLabel })}
           aria-expanded={pickerOpen}
           onClick={() => (pickerOpen ? setPickerOpen(false) : openPicker())}
         >
-          <span aria-live="polite">{formatMonthEsAr(value)}</span>
+          <span aria-live="polite">{currentLabel}</span>
           <ChevronDown size={16} className={styles.labelChevron} aria-hidden="true" />
         </button>
 
         <button
           type="button"
           className={styles.navButton}
-          aria-label="Mes siguiente"
+          aria-label={t("shared.monthSelector.next")}
           onClick={() => goTo(shiftMonth(value, 1))}
           disabled={isAtMax}
         >
@@ -119,17 +129,17 @@ const MonthSelector = ({ value, onChange, max, markedMonths = [] }: MonthSelecto
           onClick={() => onChange(today)}
           disabled={isCurrent}
         >
-          Hoy
+          {t("shared.monthSelector.today")}
         </button>
       </div>
 
       {pickerOpen && (
-        <div className={styles.picker} role="dialog" aria-label="Elegir mes">
+        <div className={styles.picker} role="dialog" aria-label={t("shared.monthSelector.pickerTitle")}>
           <div className={styles.pickerYear}>
             <button
               type="button"
               className={styles.navButton}
-              aria-label="Año anterior"
+              aria-label={t("shared.monthSelector.previousYear")}
               onClick={() => setPickerYear(y => y - 1)}
             >
               <ChevronLeft size={16} />
@@ -138,7 +148,7 @@ const MonthSelector = ({ value, onChange, max, markedMonths = [] }: MonthSelecto
             <button
               type="button"
               className={styles.navButton}
-              aria-label="Año siguiente"
+              aria-label={t("shared.monthSelector.nextYear")}
               onClick={() => setPickerYear(y => y + 1)}
               disabled={max !== undefined && `${pickerYear + 1}-01` > max}
             >
@@ -147,11 +157,11 @@ const MonthSelector = ({ value, onChange, max, markedMonths = [] }: MonthSelecto
           </div>
           {markedMonths.length > 0 && (
             <p className={styles.pickerHint}>
-              <span className={styles.pickerDot} aria-hidden="true" /> con pagos pendientes
+              <span className={styles.pickerDot} aria-hidden="true" /> {t("shared.monthSelector.pendingHint")}
             </p>
           )}
           <div className={styles.pickerGrid}>
-            {SHORT_MONTHS.map((name, i) => {
+            {shortMonths.map((name, i) => {
               const key = `${pickerYear}-${String(i + 1).padStart(2, "0")}` as MonthKey
               const disabled = max !== undefined && key > max
               const selected = key === value
@@ -162,7 +172,7 @@ const MonthSelector = ({ value, onChange, max, markedMonths = [] }: MonthSelecto
                   type="button"
                   className={`${styles.pickerMonth} ${selected ? styles.pickerMonthSelected : ""}`}
                   aria-pressed={selected}
-                  aria-label={marked ? `${name} (con pendientes)` : name}
+                  aria-label={marked ? t("shared.monthSelector.monthWithPending", { month: name }) : name}
                   disabled={disabled}
                   onClick={() => pick(i)}
                 >

@@ -22,9 +22,9 @@ describe("mapSupabaseError", () => {
     expect(error.message).toBe("duplicate key value violates unique constraint")
   })
 
-  it("falls back to a generic message when the error has none", () => {
+  it("falls back to the UNEXPECTED_ERROR code (translated by the UI, never shown raw) when the error has none", () => {
     const error = mapSupabaseError({})
-    expect(error.message).toBe("Ocurrió un error inesperado.")
+    expect(error.message).toBe("UNEXPECTED_ERROR")
   })
 
   it("maps a 23503 PostgrestError into a ForeignKeyViolationError, parsing the constraint from the message", () => {

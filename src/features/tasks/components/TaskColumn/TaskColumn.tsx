@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import type { ITask } from "../../types"
 import TaskCard from "../TaskCard/TaskCard"
 import styles from "./TaskColumn.module.css"
@@ -11,6 +12,7 @@ interface TaskColumnProps {
 }
 
 const TaskColumn = ({ title, tasks, onView, onEdit, onDelete }: TaskColumnProps) => {
+  const { t } = useTranslation("app")
   return (
     <div className={styles.column}>
       <div className={styles.header}>
@@ -18,7 +20,7 @@ const TaskColumn = ({ title, tasks, onView, onEdit, onDelete }: TaskColumnProps)
         <span className={styles.count}>{tasks.length}</span>
       </div>
       <div className={styles.cards}>
-        {tasks.length === 0 && <p className={styles.empty}>Sin tareas</p>}
+        {tasks.length === 0 && <p className={styles.empty}>{t("tasks.columnEmpty")}</p>}
         {tasks.map(t => (
           <TaskCard key={t.id} task={t} onView={onView} onEdit={onEdit} onDelete={onDelete} />
         ))}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import type { IProject } from "../../features/projects/types"
 import type { IClient } from "../../features/clients/types"
 import type { IPayment } from "../../features/payments/types"
@@ -33,6 +34,7 @@ interface UpgradePromptState {
 }
 
 const ProjectsPage = () => {
+  const { t } = useTranslation("app")
   const navigate = useNavigate()
   const [projects, setProjects] = useState<(IProject & { clientes?: { name: string } | null })[]>([])
   const [clients, setClients] = useState<IClient[]>([])
@@ -60,7 +62,7 @@ const ProjectsPage = () => {
     setSelectedProject(null)
     refreshProjects()
     refreshEntitlements()
-    toast.success("Proyecto guardado")
+    toast.success(t("projects.saved"))
   }, selectedProject ?? undefined, handleLimitExceeded)
 
   const closeModal = () => {
@@ -94,24 +96,24 @@ const ProjectsPage = () => {
     const paymentsCount = await countPaymentsByProject(project.id!)
     if (paymentsCount > 0) {
       await confirm({
-        title: `No se puede eliminar ${project.name}`,
-        description: `Tiene ${paymentsCount} pago(s) registrado(s). Eliminá esos pagos primero.`,
-        confirmLabel: "Entendido",
+        title: t("projects.cannotDeleteTitle", { name: project.name }),
+        description: t("projects.cannotDeleteDescription", { count: paymentsCount }),
+        confirmLabel: t("shared.understood"),
         cancelLabel: null,
         danger: false,
       })
       return
     }
 
-    const confirmed = await confirm({ title: `¿Eliminar el proyecto "${project.name}"?` })
+    const confirmed = await confirm({ title: t("projects.confirmDelete", { name: project.name }) })
     if (!confirmed) return
     try {
       await deleteProject(project.id!)
       refreshProjects()
       refreshEntitlements()
-      toast.success("Proyecto eliminado")
+      toast.success(t("projects.deleted"))
     } catch {
-      setDeleteError("No se pudo eliminar el proyecto. Intentalo de nuevo.")
+      setDeleteError(t("projects.deleteError"))
     }
   }
 
@@ -129,8 +131,8 @@ const ProjectsPage = () => {
     setModalMode("create")
   }
 
-  const modalTitle = modalMode === "create" ? "Nuevo Proyecto"
-    : modalMode === "edit" ? "Editar Proyecto"
+  const modalTitle = modalMode === "create" ? t("projects.new")
+    : modalMode === "edit" ? t("projects.edit")
     : ""
 
   const now = new Date()
@@ -147,9 +149,9 @@ const ProjectsPage = () => {
   return (
     <div>
       <PageHeader
-        title="Proyectos"
-        description="Gestiona tu trabajo activo y tus relaciones con los clientes."
-        actionLabel="Nuevo Proyecto"
+        title={t("projects.title")}
+        description={t("projects.description")}
+        actionLabel={t("projects.new")}
         onAction={handleNewProjectAction}
       />
 
@@ -165,18 +167,18 @@ const ProjectsPage = () => {
       ) : (
         <>
           <div className={styles.kpiGrid}>
-            <StatCard label="Activos" value={projects.filter(p => p.status === "activo").length} icon={Briefcase} variant="success" />
-            <StatCard label="Pausados" value={projects.filter(p => p.status === "pausado").length} icon={PauseCircle} variant="warning" />
-            <StatCard label="Completados" value={projects.filter(p => p.status === "completo").length} icon={CheckCircle} variant="success" />
-            <StatCard label="Ingreso Mensual" value={formatCurrency(monthlyIncome)} icon={DollarSign} variant="primary" />
+            <StatCard label={t("projects.stats.active")} value={projects.filter(p => p.status === "activo").length} icon={Briefcase} variant="success" />
+            <StatCard label={t("projects.stats.paused")} value={projects.filter(p => p.status === "pausado").length} icon={PauseCircle} variant="warning" />
+            <StatCard label={t("projects.stats.completed")} value={projects.filter(p => p.status === "completo").length} icon={CheckCircle} variant="success" />
+            <StatCard label={t("projects.stats.monthlyIncome")} value={formatCurrency(monthlyIncome)} icon={DollarSign} variant="primary" />
           </div>
 
           {projects.length === 0 && (
             <EmptyState
               icon={Briefcase}
-              title="Todavía no tenés proyectos"
-              description="Un proyecto agrupa tareas y pagos de un cliente."
-              actionLabel="Crear primer proyecto"
+              title={t("projects.empty.title")}
+              description={t("projects.empty.description")}
+              actionLabel={t("projects.empty.action")}
               onAction={handleNewProjectAction}
             />
           )}
@@ -215,7 +217,7 @@ const ProjectsPage = () => {
 
       <ConfirmDialog
         {...dialogProps}
-        description={dialogProps.description ?? "Esta acción no se puede deshacer."}
+        description={dialogProps.description ?? t("shared.irreversible")}
       />
     </div>
   )

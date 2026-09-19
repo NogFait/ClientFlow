@@ -141,3 +141,39 @@ describe("shortMonthEsAr", () => {
     expect(shortMonthEsAr("2026-01")).toBe("ene")
   })
 })
+
+describe("formatMonth (language-aware)", () => {
+  it("renders the Spanish form for 'es' — identical to formatMonthEsAr", async () => {
+    const { formatMonth } = await import("./month")
+    expect(formatMonth("2026-09", "es")).toBe("Septiembre 2026")
+    expect(formatMonth("2026-09", "es")).toBe(formatMonthEsAr("2026-09"))
+  })
+
+  it("renders the English month name for 'en' (triangulation: different language)", async () => {
+    const { formatMonth } = await import("./month")
+    expect(formatMonth("2026-09", "en")).toBe("September 2026")
+    expect(formatMonth("2026-01", "en")).toBe("January 2026")
+  })
+})
+
+describe("shortMonth (language-aware)", () => {
+  it("keeps the lowercase Spanish abbreviation for 'es'", async () => {
+    const { shortMonth } = await import("./month")
+    expect(shortMonth("2026-10", "es")).toBe("oct")
+  })
+
+  it("uses the capitalized English abbreviation for 'en'", async () => {
+    const { shortMonth } = await import("./month")
+    expect(shortMonth("2026-10", "en")).toBe("Oct")
+    expect(shortMonth("2026-01", "en")).toBe("Jan")
+  })
+})
+
+describe("monthName", () => {
+  it("returns the capitalized full month name for a 0-based index", async () => {
+    const { monthName } = await import("./month")
+    expect(monthName(8, "es")).toBe("Septiembre")
+    expect(monthName(8, "en")).toBe("September")
+    expect(monthName(0, "es")).toBe("Enero")
+  })
+})

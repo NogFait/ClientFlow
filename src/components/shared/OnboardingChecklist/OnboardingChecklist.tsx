@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { Check, X } from "lucide-react"
 import styles from "./OnboardingChecklist.module.css"
 
@@ -31,6 +32,7 @@ interface Step {
 // widgets (chart/tasks) take over. Dismissable and persisted per browser via
 // localStorage; auto-hides once all three steps are already done.
 const OnboardingChecklist = ({ hasClients, hasProjects, hasPayments }: OnboardingChecklistProps) => {
+  const { t } = useTranslation("app")
   const [dismissed, setDismissed] = useState(readDismissed)
   const navigate = useNavigate()
 
@@ -50,23 +52,23 @@ const OnboardingChecklist = ({ hasClients, hasProjects, hasPayments }: Onboardin
   }
 
   const steps: Step[] = [
-    { label: "Cargá tu primer cliente", done: hasClients, path: "/clients" },
-    { label: "Creá un proyecto", done: hasProjects, path: "/projects" },
-    { label: "Registrá un cobro", done: hasPayments, path: "/payments" },
+    { label: t("shared.onboarding.steps.client"), done: hasClients, path: "/clients" },
+    { label: t("shared.onboarding.steps.project"), done: hasProjects, path: "/projects" },
+    { label: t("shared.onboarding.steps.payment"), done: hasPayments, path: "/payments" },
   ]
 
   return (
     <div className={styles.card}>
-      <button type="button" className={styles.dismiss} aria-label="Cerrar" onClick={handleDismiss}>
+      <button type="button" className={styles.dismiss} aria-label={t("shared.onboarding.dismiss")} onClick={handleDismiss}>
         <X size={16} />
       </button>
-      <h2 className={styles.title}>Empezá en 3 pasos</h2>
+      <h2 className={styles.title}>{t("shared.onboarding.title")}</h2>
       <ol className={styles.steps}>
         {steps.map((step, index) => (
           <li key={step.path} className={styles.step}>
             <span
               className={`${styles.stepMarker} ${step.done ? styles.stepMarkerDone : ""}`}
-              aria-label={step.done ? "Paso completado" : undefined}
+              aria-label={step.done ? t("shared.onboarding.stepDone") : undefined}
             >
               {step.done ? <Check size={14} /> : index + 1}
             </span>

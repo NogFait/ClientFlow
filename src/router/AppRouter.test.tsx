@@ -5,6 +5,12 @@ import { MemoryRouter } from "react-router-dom"
 import AppRouter from "./AppRouter"
 import { renderWithLang } from "../test/i18n"
 
+// This file mounts the whole router: every public route in two languages
+// plus the lazy auth/app chunks. Under a fully parallel suite the first
+// lazy import can take longer than vitest's 5s default, which showed up as
+// a one-off timeout — the assertions themselves are instant.
+vi.setConfig({ testTimeout: 20000 })
+
 // AppRouter itself renders below AuthProvider in the real app (App.tsx) —
 // here every route is exercised as an anonymous visitor, so the context is
 // mocked directly rather than requiring a real AuthProvider + supabase mock.

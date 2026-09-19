@@ -1,5 +1,7 @@
+import { Trans, useTranslation } from "react-i18next"
 import Modal from "../../../../components/shared/Modal/Modal"
-import { getPlanCatalogEntry } from "../../domain/planCatalog"
+import { findPlanCatalogEntry } from "../../domain/planCatalog"
+import { usePlanCatalog } from "../../hooks/usePlanCatalog"
 import type { EntitlementResource, PlanCode } from "../../types"
 import styles from "./UpgradePrompt.module.css"
 
@@ -14,27 +16,30 @@ interface UpgradePromptProps {
   onUpgrade?: (plan: PaidPlanCode) => void
 }
 
-const RESOURCE_LABEL: Record<EntitlementResource, string> = {
-  clientes: "clientes",
-  proyectos: "proyectos",
-}
-
 // Presentational only — checkout is wired in M2 (tasks 2.18-2.19). onUpgrade
 // is a placeholder callback until then.
 const UpgradePrompt = ({ isOpen, resource, limit, current, onClose, onUpgrade }: UpgradePromptProps) => {
-  const label = RESOURCE_LABEL[resource]
-  // Prices come from planCatalog (single source of truth shared with
+  const { t } = useTranslation("app")
+  const label = t(`billing.upgradePrompt.resources.${resource}`)
+  // Prices come from the plan catalog (single source of truth shared with
   // PlanCards/PlanBadge) instead of being hardcoded here — keeps this CTA in
   // sync automatically if pricing ever changes.
-  const monthly = getPlanCatalogEntry("pro_monthly")
-  const yearly = getPlanCatalogEntry("pro_yearly")
+  const catalog = usePlanCatalog()
+  const monthly = findPlanCatalogEntry(catalog, "pro_monthly")
+  const yearly = findPlanCatalogEntry(catalog, "pro_yearly")
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Alcanzaste el límite de tu plan">
+    <Modal isOpen={isOpen} onClose={onClose} title={t("billing.upgradePrompt.title")}>
       <div className={styles.content}>
         <p className={styles.message}>
-          Llegaste a <strong>{current} / {limit}</strong> {label} del plan Free. Actualizá a Pro para
-          agregar {label} sin límite.
+          {/* <1> in the string is the <strong> below — Trans keeps the bold
+              span inside a single translatable sentence. */}
+          <Trans
+            t={t}
+            i18nKey="billing.upgradePrompt.message"
+            values={{ current, limit, resource: label }}
+            components={{ 1: <strong /> }}
+          />
         </p>
         <div className={styles.ctaGroup}>
           <button
@@ -42,14 +47,14 @@ const UpgradePrompt = ({ isOpen, resource, limit, current, onClose, onUpgrade }:
             className={styles.ctaButton}
             onClick={() => onUpgrade?.("pro_monthly")}
           >
-            Mensual — {monthly.price}{monthly.priceSuffix}
+            {t("billing.upgradePrompt.monthly", { price: `${monthly.price}${monthly.priceSuffix}` })}
           </button>
           <button
             type="button"
             className={styles.ctaButtonSecondary}
             onClick={() => onUpgrade?.("pro_yearly")}
           >
-            Anual — {yearly.price}{yearly.priceSuffix}
+            {t("billing.upgradePrompt.yearly", { price: `${yearly.price}${yearly.priceSuffix}` })}
           </button>
         </div>
       </div>

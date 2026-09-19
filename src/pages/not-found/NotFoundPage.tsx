@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 
 const NotFoundPage = () => {
+  const { t } = useTranslation("app")
+
   return (
     <div
       style={{
@@ -16,7 +19,7 @@ const NotFoundPage = () => {
     >
       <h1 style={{ fontSize: "4rem", fontWeight: 700, color: "#7c3aed", marginBottom: "0.5rem" }}>404</h1>
       <p style={{ fontSize: "1.125rem", color: "#52525b", marginBottom: "2rem" }}>
-        La página que buscas no existe.
+        {t("notFound.message")}
       </p>
       <Link
         to="/"
@@ -29,7 +32,7 @@ const NotFoundPage = () => {
           fontWeight: 500,
         }}
       >
-        Volver al inicio
+        {t("notFound.back")}
       </Link>
     </div>
   )

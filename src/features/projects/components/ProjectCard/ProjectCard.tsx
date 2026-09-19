@@ -1,14 +1,18 @@
 import type { MouseEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Play, Pause, CheckCircle } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import type { IProject } from "../../types"
 import { formatCurrency } from "../../../../utils/currency"
 import styles from "./ProjectCard.module.css"
 
-const statusConfig: Record<string, { label: string; icon: typeof Play }> = {
-  activo: { label: "Activo", icon: Play },
-  pausado: { label: "Pausado", icon: Pause },
-  completo: { label: "Completado", icon: CheckCircle },
+// Icons per DB status value; labels come from projects.card.status.* (the
+// card says "Completado" where the hub's select says "Completo" — kept as
+// two keys so neither screen's wording changes).
+const statusConfig: Record<string, { key: "activo" | "pausado" | "completo"; icon: typeof Play }> = {
+  activo: { key: "activo", icon: Play },
+  pausado: { key: "pausado", icon: Pause },
+  completo: { key: "completo", icon: CheckCircle },
 }
 
 interface ProjectCardProps {
@@ -24,6 +28,7 @@ interface ProjectCardProps {
 // wrapping buttons and a link would nest interactive elements). Editar and
 // Eliminar stop propagation so they never trigger the card shortcut.
 const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
+  const { t } = useTranslation("app")
   const navigate = useNavigate()
   const config = statusConfig[project.status] ?? statusConfig.activo
   const Icon = config.icon
@@ -50,14 +55,14 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
       <div className={styles.header}>
         <span className={`${styles.badge} ${styles[badgeClass]}`}>
           <Icon size={12} />
-          {config.label}
+          {t(`projects.card.status.${config.key}`)}
         </span>
       </div>
       <h3 className={styles.title}>{project.name}</h3>
       {project.description && <p className={styles.description}>{project.description}</p>}
       <div className={styles.meta}>
-        <span>Cliente: {project.clientes?.name ?? "Sin cliente"}</span>
-        <span>Inicio: {project.start_date ?? "—"}</span>
+        <span>{t("projects.card.client", { name: project.clientes?.name ?? t("projects.noClient") })}</span>
+        <span>{t("projects.card.start", { date: project.start_date ?? "—" })}</span>
       </div>
       <p className={styles.budget}>
         {project.budget != null ? formatCurrency(project.budget) : "—"}
@@ -66,16 +71,16 @@ const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
         <Link
           to={hubPath}
           className={`${styles.actionBtn} ${styles.actionView}`}
-          aria-label={`Ver proyecto ${project.name}`}
+          aria-label={t("projects.card.view", { name: project.name })}
           onClick={stop}
         >
-          Ver
+          {t("shared.view")}
         </Link>
         <button className={`${styles.actionBtn} ${styles.actionEdit}`} onClick={handleEdit}>
-          Editar
+          {t("shared.edit")}
         </button>
         <button className={`${styles.actionBtn} ${styles.actionDelete}`} onClick={handleDelete}>
-          Eliminar
+          {t("shared.delete")}
         </button>
       </div>
     </div>

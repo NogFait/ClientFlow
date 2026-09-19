@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import styles from "./UsageMeter.module.css"
 
 interface UsageMeterProps {
@@ -9,6 +10,7 @@ interface UsageMeterProps {
 // null limit = unlimited (Pro plans) — shown as "used — ilimitado" with no
 // progress bar, since there is nothing to measure progress against.
 const UsageMeter = ({ label, used, limit }: UsageMeterProps) => {
+  const { t } = useTranslation("app")
   const isUnlimited = limit === null
   const percent = isUnlimited ? 0 : limit === 0 ? 100 : Math.min(100, (used / limit) * 100)
 
@@ -16,7 +18,7 @@ const UsageMeter = ({ label, used, limit }: UsageMeterProps) => {
     <div className={styles.meter}>
       <div className={styles.meterHeader}>
         <span className={styles.label}>{label}</span>
-        <span className={styles.value}>{isUnlimited ? `${used} — ilimitado` : `${used} / ${limit}`}</span>
+        <span className={styles.value}>{isUnlimited ? t("billing.meters.unlimited", { used }) : `${used} / ${limit}`}</span>
       </div>
       {!isUnlimited && (
         <div

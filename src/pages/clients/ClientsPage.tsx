@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
+import { useCurrentLang } from "../../i18n/useCurrentLang"
+import { formatDate } from "../../i18n/locale"
 import type { IClient } from "../../features/clients/types"
 import { getClients, deleteClient } from "../../features/clients/services"
 import { countProjectsByClient } from "../../features/projects/services"
@@ -32,6 +35,8 @@ interface UpgradePromptState {
 }
 
 const ClientsPage = () => {
+  const { t } = useTranslation("app")
+  const lang = useCurrentLang()
   const navigate = useNavigate()
   const [clients, setClients] = useState<IClient[]>([])
   const [modalMode, setModalMode] = useState<ModalMode>(null)
@@ -57,7 +62,7 @@ const ClientsPage = () => {
     setSelectedClient(null)
     refreshClients()
     refreshEntitlements()
-    toast.success("Cliente guardado")
+    toast.success(t("clients.saved"))
   }, selectedClient ?? undefined, handleLimitExceeded)
 
   const closeModal = () => {
@@ -92,27 +97,27 @@ const ClientsPage = () => {
     const projectCount = await countProjectsByClient(client.id!)
     if (projectCount > 0) {
       await confirm({
-        title: `No se puede eliminar a ${client.name}`,
-        description: `Tiene ${projectCount} proyecto(s) asociado(s). Eliminá o reasigná esos proyectos primero.`,
-        confirmLabel: "Entendido",
+        title: t("clients.cannotDeleteTitle", { name: client.name }),
+        description: t("clients.cannotDeleteDescription", { count: projectCount }),
+        confirmLabel: t("shared.understood"),
         cancelLabel: null,
         danger: false,
       })
       return
     }
 
-    const confirmed = await confirm({ title: `¿Eliminar a ${client.name}?` })
+    const confirmed = await confirm({ title: t("clients.confirmDelete", { name: client.name }) })
     if (!confirmed) return
     try {
       await deleteClient(client.id!)
       refreshClients()
       refreshEntitlements()
-      toast.success("Cliente eliminado")
+      toast.success(t("clients.deleted"))
     } catch (error) {
       setDeleteError(
         error instanceof ForeignKeyViolationError
-          ? "No se puede eliminar: el cliente tiene proyectos asociados."
-          : "No se pudo eliminar el cliente. Intentalo de nuevo.",
+          ? t("clients.deleteFkError")
+          : t("clients.deleteError"),
       )
     }
   }
@@ -132,17 +137,17 @@ const ClientsPage = () => {
     setModalMode("create")
   }
 
-  const modalTitle = modalMode === "create" ? "Nuevo Cliente"
-    : modalMode === "edit" ? "Editar Cliente"
-    : modalMode === "view" ? "Detalle del Cliente"
+  const modalTitle = modalMode === "create" ? t("clients.new")
+    : modalMode === "edit" ? t("clients.edit")
+    : modalMode === "view" ? t("clients.detail")
     : ""
 
   return (
     <div>
       <PageHeader
-        title="Clientes"
-        description="Gestione las relaciones con sus clientes, realice un seguimiento de su estado y supervise sus niveles de inversión desde una única vista unificada."
-        actionLabel="Nuevo Cliente"
+        title={t("clients.title")}
+        description={t("clients.description")}
+        actionLabel={t("clients.new")}
         onAction={handleNewClientAction}
       />
 
@@ -158,17 +163,17 @@ const ClientsPage = () => {
       ) : (
         <>
           <div className={styles.kpiGrid}>
-            <StatCard label="Total Activos" value={clients.filter(c => c.status === "activo").length} icon={UserCheck} variant="success" />
-            <StatCard label="Pendientes" value={clients.filter(c => c.status === "pendiente").length} icon={Clock} variant="warning" />
-            <StatCard label="Inactivos" value={clients.filter(c => c.status === "inactivo").length} icon={UserX} variant="error" />
+            <StatCard label={t("clients.stats.active")} value={clients.filter(c => c.status === "activo").length} icon={UserCheck} variant="success" />
+            <StatCard label={t("clients.stats.pending")} value={clients.filter(c => c.status === "pendiente").length} icon={Clock} variant="warning" />
+            <StatCard label={t("clients.stats.inactive")} value={clients.filter(c => c.status === "inactivo").length} icon={UserX} variant="error" />
           </div>
 
           {clients.length === 0 && (
             <EmptyState
               icon={Users}
-              title="Todavía no tenés clientes"
-              description="Cargá a las personas o empresas para las que trabajás."
-              actionLabel="Agregar primer cliente"
+              title={t("clients.empty.title")}
+              description={t("clients.empty.description")}
+              actionLabel={t("clients.empty.action")}
               onAction={handleNewClientAction}
             />
           )}
@@ -183,12 +188,12 @@ const ClientsPage = () => {
               <div className={styles.tableWrapper}><table className={styles.clientsTable}>
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Celular</th>
-              <th>Empresa</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th>{t("clients.fields.name")}</th>
+              <th>{t("clients.fields.email")}</th>
+              <th>{t("clients.fields.phone")}</th>
+              <th>{t("clients.fields.company")}</th>
+              <th>{t("clients.fields.status")}</th>
+              <th>{t("clients.fields.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -206,32 +211,32 @@ const ClientsPage = () => {
         {modalMode === "view" && selectedClient && (
           <div className={styles.viewMode}>
             <div className={styles.field}>
-              <span className={styles.label}>Nombre</span>
+              <span className={styles.label}>{t("clients.fields.name")}</span>
               <span className={styles.value}>{selectedClient.name}</span>
             </div>
             <div className={styles.field}>
-              <span className={styles.label}>Email</span>
+              <span className={styles.label}>{t("clients.fields.email")}</span>
               <span className={styles.value}>{selectedClient.email}</span>
             </div>
             <div className={styles.field}>
-              <span className={styles.label}>Celular</span>
+              <span className={styles.label}>{t("clients.fields.phone")}</span>
               <span className={styles.value}>{selectedClient.celular}</span>
             </div>
             <div className={styles.field}>
-              <span className={styles.label}>Empresa</span>
+              <span className={styles.label}>{t("clients.fields.company")}</span>
               <span className={styles.value}>{selectedClient.company}</span>
             </div>
             <div className={styles.field}>
-              <span className={styles.label}>Estado</span>
+              <span className={styles.label}>{t("clients.fields.status")}</span>
               <span className={`${styles.badge} ${styles[`badge${selectedClient.status.charAt(0).toUpperCase() + selectedClient.status.slice(1)}`]}`}>
-                {selectedClient.status === "activo" ? "Activo" : selectedClient.status === "pendiente" ? "Pendiente" : "Inactivo"}
+                {t(`status.client.${selectedClient.status}`)}
               </span>
             </div>
             <div className={styles.field}>
-              <span className={styles.label}>Creado</span>
-              <span className={styles.value}>{new Date(selectedClient.created_at!).toLocaleDateString()}</span>
+              <span className={styles.label}>{t("clients.fields.created")}</span>
+              <span className={styles.value}>{formatDate(selectedClient.created_at!, lang)}</span>
             </div>
-            <button className={styles.closeBtn} onClick={closeModal}>Cerrar</button>
+            <button className={styles.closeBtn} onClick={closeModal}>{t("shared.close")}</button>
           </div>
         )}
 
@@ -260,7 +265,7 @@ const ClientsPage = () => {
 
       <ConfirmDialog
         {...dialogProps}
-        description={dialogProps.description ?? "Esta acción no se puede deshacer."}
+        description={dialogProps.description ?? t("shared.irreversible")}
       />
     </div>
   )

@@ -1,3 +1,8 @@
+import { useTranslation } from "react-i18next"
+import type { TFunction } from "i18next"
+import type { Lang } from "../../../../i18n"
+import { formatDate } from "../../../../i18n/locale"
+import { useCurrentLang } from "../../../../i18n/useCurrentLang"
 import PlanBadge from "../PlanBadge/PlanBadge"
 import UsageMeter from "../UsageMeter/UsageMeter"
 import PlanCards from "../PlanCards/PlanCards"
@@ -16,43 +21,39 @@ interface BillingSettingsProps {
 // Anchored to UTC so the displayed date is deterministic regardless of the
 // viewer's (or CI runner's) local timezone — these are server-computed
 // instants (current_period_end / grace_until), not viewer-local events.
-function formatDateEsAr(iso: string): string {
-  return new Date(iso).toLocaleDateString("es-AR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  })
-}
+const LONG_DATE: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }
 
 // One status line per subscription state — the reactivation gap this
 // redesign fixes: a scheduled-cancel Pro user previously saw only the
 // termination date with no way back in, this line now says they still can.
-function statusMessage(entitlements: Entitlements): string {
+function statusMessage(entitlements: Entitlements, t: TFunction<"app">, lang: Lang): string {
   const { status, cancel_at_period_end, current_period_end, grace_until } = entitlements
+  const date = (iso: string) => formatDate(iso, lang, LONG_DATE)
 
   if (status === "active" && cancel_at_period_end && current_period_end) {
-    return `Termina el ${formatDateEsAr(current_period_end)} — podés reactivarlo cuando quieras`
+    return t("billing.status.endsOn", { date: date(current_period_end) })
   }
   if (status === "active" && current_period_end) {
-    return `Activo · se renueva el ${formatDateEsAr(current_period_end)}`
+    return t("billing.status.renewsOn", { date: date(current_period_end) })
   }
   if (status === "active") {
-    return "Activo"
+    return t("billing.status.active")
   }
   if (status === "past_due" && grace_until) {
-    return `Pago pendiente · acceso Pro hasta ${formatDateEsAr(grace_until)}`
+    return t("billing.status.pastDueUntil", { date: date(grace_until) })
   }
   if (status === "past_due") {
-    return "Pago pendiente"
+    return t("billing.status.pastDue")
   }
   if (status === "canceled") {
-    return "Sin suscripción activa"
+    return t("billing.status.canceled")
   }
-  return "Plan gratuito"
+  return t("billing.status.free")
 }
 
 const BillingSettings = ({ entitlements, onUpgrade, onManage, loading, error }: BillingSettingsProps) => {
+  const { t } = useTranslation("app")
+  const lang = useCurrentLang()
   const { plan, status, limits, usage, cancel_at_period_end } = entitlements
 
   const isPaying = status === "active" || status === "past_due"
@@ -63,19 +64,19 @@ const BillingSettings = ({ entitlements, onUpgrade, onManage, loading, error }: 
       <section className={styles.panel}>
         <div className={styles.panelHeader}>
           <PlanBadge plan={plan} status={status} />
-          <p className={styles.statusLine}>{statusMessage(entitlements)}</p>
+          <p className={styles.statusLine}>{statusMessage(entitlements, t, lang)}</p>
         </div>
 
         <div className={styles.meters}>
-          <UsageMeter label="Clientes" used={usage.clientes} limit={limits.clientes} />
-          <UsageMeter label="Proyectos" used={usage.proyectos} limit={limits.proyectos} />
+          <UsageMeter label={t("billing.meters.clients")} used={usage.clientes} limit={limits.clientes} />
+          <UsageMeter label={t("billing.meters.projects")} used={usage.proyectos} limit={limits.proyectos} />
         </div>
 
         {isPaying && (
           <div className={styles.actions}>
             {showsReactivate && (
               <button type="button" className={styles.ctaButton} disabled={loading} onClick={onManage}>
-                Reactivar suscripción
+                {t("billing.reactivate")}
               </button>
             )}
             <button
@@ -84,7 +85,7 @@ const BillingSettings = ({ entitlements, onUpgrade, onManage, loading, error }: 
               disabled={loading}
               onClick={onManage}
             >
-              Gestionar suscripción
+              {t("billing.manage")}
             </button>
           </div>
         )}

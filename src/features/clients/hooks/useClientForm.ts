@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import type { IClient } from "../types"
 import { createClient, updateClient } from "../services"
 import { LimitExceededError } from "../../billing/domain/errors"
@@ -8,6 +9,7 @@ export function useClientForm(
   defaultValues?: IClient,
   onLimitExceeded?: (error: LimitExceededError) => void,
 ) {
+  const { t } = useTranslation("app")
   const { register, handleSubmit, reset, setError, formState: { errors, isSubmitting } } = useForm<IClient>({ values: defaultValues })
 
   const onSubmit = async (data: IClient) => {
@@ -26,7 +28,7 @@ export function useClientForm(
       }
       setError("root.serverError", {
         type: "manual",
-        message: "Ocurrió un error al guardar el cliente. Intentalo de nuevo.",
+        message: t("clients.saveError"),
       })
     }
   }

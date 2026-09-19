@@ -1,1 +1,372 @@
-{}
+{
+  "nav": {
+    "userFallback": "User",
+    "openMenu": "Open menu",
+    "logout": "Log out"
+  },
+  "sidebar": {
+    "tagline": "Freelancer CRM",
+    "menuLabel": "Navigation menu",
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar",
+    "items": {
+      "dashboard": "Dashboard",
+      "clients": "Clients",
+      "projects": "Projects",
+      "tasks": "Tasks",
+      "payments": "Payments",
+      "billing": "Plan & billing"
+    }
+  },
+  "shared": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "closeNotification": "Dismiss notification",
+    "delete": "Delete",
+    "deleting": "Deleting…",
+    "edit": "Edit",
+    "view": "View",
+    "save": "Save",
+    "saving": "Saving...",
+    "required": "Required",
+    "understood": "Got it",
+    "retry": "Retry",
+    "irreversible": "This action cannot be undone.",
+    "errorBoundary": {
+      "title": "Something went wrong",
+      "reload": "Reload page"
+    },
+    "onboarding": {
+      "title": "Get started in 3 steps",
+      "dismiss": "Close",
+      "stepDone": "Step completed",
+      "steps": {
+        "client": "Add your first client",
+        "project": "Create a project",
+        "payment": "Record a payment"
+      }
+    },
+    "monthSelector": {
+      "group": "Month selector",
+      "previous": "Previous month",
+      "next": "Next month",
+      "pick": "Choose month (current: {{month}})",
+      "pickerTitle": "Choose month",
+      "today": "Today",
+      "previousYear": "Previous year",
+      "nextYear": "Next year",
+      "pendingHint": "with pending payments",
+      "monthWithPending": "{{month}} (with pending)"
+    }
+  },
+  "status": {
+    "client": {
+      "activo": "Active",
+      "pendiente": "Pending",
+      "inactivo": "Inactive"
+    },
+    "project": {
+      "activo": "Active",
+      "pausado": "Paused",
+      "completo": "Completed"
+    },
+    "task": {
+      "pendiente": "To do",
+      "en_progreso": "In progress",
+      "hechas": "Done"
+    },
+    "payment": {
+      "pendiente": "Pending",
+      "pagado": "Paid"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "method": {
+      "efectivo": "Cash",
+      "transferencia": "Bank transfer",
+      "tarjeta": "Card",
+      "other": "Other"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "welcomeNamed": "Welcome {{name}}",
+    "receivable": "Receivable",
+    "overdueNote": "{{amount}} overdue",
+    "collectedThisMonth": "Collected this month",
+    "tasks": "Tasks",
+    "dueToday": "Due today",
+    "overdue": "Overdue",
+    "activeProjects": "Active Projects",
+    "monthlyStats": "Monthly Stats",
+    "noPayments": {
+      "title": "No payments recorded yet",
+      "description": "Record your payments to see how your income evolves month by month.",
+      "action": "Record payment"
+    },
+    "upcomingTasks": "Upcoming Tasks",
+    "noTasks": {
+      "title": "No pending tasks with a due date",
+      "description": "Give your tasks a due date to see them here before they're overdue.",
+      "action": "View tasks"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "description": "Manage your client relationships, track their status and keep an eye on their investment levels from one unified view.",
+    "new": "New Client",
+    "edit": "Edit Client",
+    "detail": "Client Details",
+    "saved": "Client saved",
+    "deleted": "Client deleted",
+    "cannotDeleteTitle": "{{name}} can't be deleted",
+    "cannotDeleteDescription": "It has {{count}} associated project(s). Delete or reassign those projects first.",
+    "confirmDelete": "Delete {{name}}?",
+    "deleteFkError": "Can't delete: the client has associated projects.",
+    "deleteError": "The client couldn't be deleted. Please try again.",
+    "saveError": "Something went wrong while saving the client. Please try again.",
+    "stats": {
+      "active": "Total Active",
+      "pending": "Pending",
+      "inactive": "Inactive"
+    },
+    "empty": {
+      "title": "You don't have any clients yet",
+      "description": "Add the people or companies you work for.",
+      "action": "Add first client"
+    },
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "company": "Company",
+      "status": "Status",
+      "actions": "Actions",
+      "created": "Created"
+    },
+    "aria": {
+      "view": "View {{name}}",
+      "edit": "Edit {{name}}",
+      "delete": "Delete {{name}}"
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "description": "Manage your active work and your client relationships.",
+    "new": "New Project",
+    "edit": "Edit Project",
+    "saved": "Project saved",
+    "deleted": "Project deleted",
+    "cannotDeleteTitle": "{{name}} can't be deleted",
+    "cannotDeleteDescription": "It has {{count}} recorded payment(s). Delete those payments first.",
+    "confirmDelete": "Delete the project \"{{name}}\"?",
+    "deleteFkError": "Can't delete: the project has associated payments.",
+    "deleteError": "The project couldn't be deleted. Please try again.",
+    "saveError": "Something went wrong while saving the project. Please try again.",
+    "stats": {
+      "active": "Active",
+      "paused": "Paused",
+      "completed": "Completed",
+      "monthlyIncome": "Monthly Income"
+    },
+    "empty": {
+      "title": "You don't have any projects yet",
+      "description": "A project groups a client's tasks and payments.",
+      "action": "Create first project"
+    },
+    "card": {
+      "status": {
+        "activo": "Active",
+        "pausado": "Paused",
+        "completo": "Completed"
+      },
+      "client": "Client: {{name}}",
+      "start": "Start: {{date}}",
+      "view": "View project {{name}}"
+    },
+    "noClient": "No client",
+    "fields": {
+      "name": "Name",
+      "description": "Description",
+      "client": "Client",
+      "status": "Status",
+      "budget": "Budget",
+      "startDate": "Start date",
+      "endDate": "End date"
+    }
+  },
+  "projectHub": {
+    "notFound": {
+      "title": "Project not found",
+      "description": "It may have been deleted, or you may not have access to it.",
+      "back": "Back to projects"
+    },
+    "loadError": "The project couldn't be loaded. Please try again.",
+    "breadcrumb": "Projects",
+    "statusLabel": "Project status",
+    "budget": "Budget",
+    "noBudget": "No budget",
+    "collected": "Collected",
+    "pendingCollection": "Pending collection",
+    "paymentsCount": "{{count}} payment(s)",
+    "tasks": "Tasks",
+    "tasksDone": "{{done}} / {{total}} done",
+    "newTask": "+ New task",
+    "newTaskTitle": "New task",
+    "taskSaved": "Task saved",
+    "noTasks": {
+      "title": "No tasks in this project",
+      "description": "Add tasks to keep track of the work."
+    },
+    "markPending": "Mark as pending",
+    "markDone": "Mark as done",
+    "payments": "Payments",
+    "registerPayment": "+ Record payment",
+    "registerPaymentTitle": "Record payment",
+    "paymentSaved": "Payment recorded",
+    "noPayments": {
+      "title": "No payments in this project",
+      "description": "Record payments to keep track of income."
+    },
+    "paymentsFooter": "Collected {{paid}} · Pending {{pending}}"
+  },
+  "tasks": {
+    "title": "Task Board",
+    "create": "Create Task",
+    "new": "New Task",
+    "edit": "Edit Task",
+    "detail": "Task Details",
+    "saved": "Task saved",
+    "deleted": "Task deleted",
+    "confirmDelete": "Delete \"{{title}}\"?",
+    "deleteError": "The task couldn't be deleted. Please try again.",
+    "saveError": "Something went wrong while saving the task. Please try again.",
+    "empty": {
+      "title": "You don't have any tasks yet",
+      "description": "Organize your projects' work into To do, In progress and Done.",
+      "action": "Create first task"
+    },
+    "columnEmpty": "No tasks",
+    "due": "Due: {{date}}",
+    "noProject": "No project",
+    "view": {
+      "statusDone": "Done"
+    },
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "project": "Project",
+      "status": "Status",
+      "priority": "Priority",
+      "dueDate": "Due date",
+      "due": "Due",
+      "created": "Created"
+    }
+  },
+  "payments": {
+    "title": "Payments & Income",
+    "description": "Manage your finances and keep track of your projects' income",
+    "register": "Record payment",
+    "edit": "Edit payment",
+    "detail": "Payment Details",
+    "registered": "Payment recorded",
+    "registeredIn": "Payment recorded in {{month}}",
+    "updated": "Payment updated",
+    "deleted": "Payment deleted",
+    "confirmDelete": "Delete the {{amount}} payment?",
+    "deleteError": "The payment couldn't be deleted. Please try again.",
+    "saveError": "Something went wrong while saving the payment. Please try again.",
+    "loadError": "This month's payments couldn't be loaded. Please try again.",
+    "stats": {
+      "collectedIn": "Collected in {{month}}",
+      "pendingIn": "Pending in {{month}}",
+      "nextProjected": "Next projected payment",
+      "accumulated": "Total {{year}}",
+      "pending": "pending",
+      "pendingMonths": "pending · {{months}}"
+    },
+    "empty": {
+      "title": "No payments recorded in {{month}}",
+      "description": "Log every payment to see your income and what's still owed."
+    },
+    "noProject": "No project",
+    "fields": {
+      "date": "Date",
+      "client": "Client",
+      "project": "Project",
+      "amount": "Amount",
+      "status": "Status",
+      "method": "Method",
+      "actions": "Actions",
+      "paymentDate": "Payment date",
+      "notes": "Notes",
+      "created": "Created"
+    },
+    "aria": {
+      "view": "View {{amount}} payment",
+      "edit": "Edit {{amount}} payment",
+      "delete": "Delete {{amount}} payment"
+    }
+  },
+  "billing": {
+    "title": "Plan & billing",
+    "description": "Manage your plan, your usage and your payment method.",
+    "updating": "Updating your plan…",
+    "status": {
+      "endsOn": "Ends on {{date}} — you can reactivate it anytime",
+      "renewsOn": "Active · renews on {{date}}",
+      "active": "Active",
+      "pastDueUntil": "Payment pending · Pro access until {{date}}",
+      "pastDue": "Payment pending",
+      "canceled": "No active subscription",
+      "free": "Free plan"
+    },
+    "meters": {
+      "clients": "Clients",
+      "projects": "Projects",
+      "unlimited": "{{used}} — unlimited"
+    },
+    "reactivate": "Reactivate subscription",
+    "manage": "Manage subscription",
+    "planCards": {
+      "current": "Current plan",
+      "recommended": "Recommended",
+      "currentCta": "Your current plan",
+      "choose": "Choose {{name}}"
+    },
+    "badge": {
+      "pastDue": "Payment pending",
+      "canceled": "Canceled"
+    },
+    "upgradePrompt": {
+      "title": "You've reached your plan's limit",
+      "message": "You're at <1>{{current}} / {{limit}}</1> {{resource}} on the Free plan. Upgrade to Pro to add unlimited {{resource}}.",
+      "monthly": "Monthly — {{price}}",
+      "yearly": "Yearly — {{price}}",
+      "resources": {
+        "clientes": "clients",
+        "proyectos": "projects"
+      }
+    },
+    "errors": {
+      "billing_disabled": "Billing isn't available right now.",
+      "unauthorized": "Your session expired. Please log in again.",
+      "invalid_plan": "The selected plan isn't valid.",
+      "already_subscribed": "You already have an active Pro subscription.",
+      "missing_email": "Your account has no valid billing email.",
+      "no_billing_customer": "You don't have a subscription to manage yet.",
+      "default": "Something went wrong. Please try again."
+    }
+  },
+  "errors": {
+    "unexpected": "An unexpected error occurred."
+  },
+  "notFound": {
+    "message": "The page you're looking for doesn't exist.",
+    "back": "Back to home"
+  }
+}

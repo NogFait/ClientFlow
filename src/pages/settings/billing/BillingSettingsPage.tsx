@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Navigate, useSearchParams } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import PageHeader from "../../../components/shared/PageHeader/PageHeader"
 import Loader from "../../../components/shared/Loader/Loader"
 import BillingSettings from "../../../features/billing/components/BillingSettings/BillingSettings"
@@ -20,6 +21,7 @@ function isPaidPlanCode(value: string): value is PaidPlanCode {
 }
 
 const BillingSettingsPage = () => {
+  const { t } = useTranslation("app")
   const [searchParams, setSearchParams] = useSearchParams()
   const checkoutStatus = searchParams.get("checkout")
   const planParam = searchParams.get("plan")
@@ -80,9 +82,9 @@ const BillingSettingsPage = () => {
 
   return (
     <div>
-      <PageHeader title="Plan y facturación" description="Gestioná tu plan, tu uso y tu método de pago." />
+      <PageHeader title={t("billing.title")} description={t("billing.description")} />
 
-      {updating && <div className={styles.banner}>Actualizando tu plan…</div>}
+      {updating && <div className={styles.banner}>{t("billing.updating")}</div>}
 
       {loading || !entitlements ? (
         <div className={styles.loaderSection}>

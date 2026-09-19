@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import {
   LayoutDashboard,
   Users,
@@ -9,20 +10,33 @@ import {
   Receipt,
   PanelLeftClose,
   PanelLeftOpen,
+  type LucideIcon,
 } from "lucide-react"
 import { BILLING_ENABLED } from "../../../config/features"
 import { useSidebarState } from "./useSidebarState"
 import { useMediaQuery } from "../../../hooks/useMediaQuery"
 import styles from "./Sidebar.module.css"
 
-const navItems = [
-  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/clients", label: "Clientes", icon: Users },
-  { path: "/projects", label: "Proyectos", icon: Briefcase },
-  { path: "/tasks", label: "Tareas", icon: CheckSquare },
-  { path: "/payments", label: "Pagos", icon: CreditCard },
+// Labels are resolved at render (t("sidebar.items.<key>")) so a language
+// switch re-labels the nav without remounting it. The key union is spelled
+// out (not inferred) so the conditional spread below can't widen it to
+// string and lose the typed-key check on t().
+type NavKey = "dashboard" | "clients" | "projects" | "tasks" | "payments" | "billing"
+
+interface NavItem {
+  path: string
+  key: NavKey
+  icon: LucideIcon
+}
+
+const navItems: NavItem[] = [
+  { path: "/dashboard", key: "dashboard", icon: LayoutDashboard },
+  { path: "/clients", key: "clients", icon: Users },
+  { path: "/projects", key: "projects", icon: Briefcase },
+  { path: "/tasks", key: "tasks", icon: CheckSquare },
+  { path: "/payments", key: "payments", icon: CreditCard },
   // Hidden entirely when billing is off (spec account-billing-ui: flag-gated route).
-  ...(BILLING_ENABLED ? [{ path: "/settings/billing", label: "Plan y facturación", icon: Receipt }] : []),
+  ...(BILLING_ENABLED ? [{ path: "/settings/billing", key: "billing" as const, icon: Receipt }] : []),
 ]
 
 const MOBILE_QUERY = "(max-width: 767px)"
@@ -37,6 +51,7 @@ interface SidebarProps {
 const noop = () => {}
 
 const Sidebar = ({ mobileOpen = false, onCloseMobile = noop }: SidebarProps) => {
+  const { t } = useTranslation("app")
   const location = useLocation()
   const { collapsed, toggle } = useSidebarState()
   const isMobile = useMediaQuery(MOBILE_QUERY)
@@ -81,13 +96,13 @@ const Sidebar = ({ mobileOpen = false, onCloseMobile = noop }: SidebarProps) => 
         className={asideClassName}
         role={isDrawerOpen ? "dialog" : undefined}
         aria-modal={isDrawerOpen ? true : undefined}
-        aria-label={isDrawerOpen ? "Menú de navegación" : undefined}
+        aria-label={isDrawerOpen ? t("sidebar.menuLabel") : undefined}
       >
         <div className={styles.logo}>
           {!isRail && (
             <div className={styles.logoText}>
               <h1 className={styles.logoTitle}>ClientFlow</h1>
-              <p className={styles.logoSub}>Freelancer CRM</p>
+              <p className={styles.logoSub}>{t("sidebar.tagline")}</p>
             </div>
           )}
           {!isMobile && (
@@ -95,7 +110,7 @@ const Sidebar = ({ mobileOpen = false, onCloseMobile = noop }: SidebarProps) => 
               type="button"
               className={styles.collapseToggle}
               onClick={toggle}
-              aria-label={collapsed ? "Expandir sidebar" : "Colapsar sidebar"}
+              aria-label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
             >
               {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
             </button>
@@ -104,6 +119,7 @@ const Sidebar = ({ mobileOpen = false, onCloseMobile = noop }: SidebarProps) => 
         <nav className={styles.nav}>
           {navItems.map((item) => {
             const Icon = item.icon
+            const label = t(`sidebar.items.${item.key}`)
             // Nested detail routes (e.g. the project hub at /projects/:id)
             // should keep their parent's nav item highlighted too.
             const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
@@ -112,11 +128,11 @@ const Sidebar = ({ mobileOpen = false, onCloseMobile = noop }: SidebarProps) => 
                 key={item.path}
                 to={item.path}
                 className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
-                title={isRail ? item.label : undefined}
-                aria-label={isRail ? item.label : undefined}
+                title={isRail ? label : undefined}
+                aria-label={isRail ? label : undefined}
               >
                 <Icon size={18} className={styles.navIcon} />
-                {!isRail && item.label}
+                {!isRail && label}
               </Link>
             )
           })}

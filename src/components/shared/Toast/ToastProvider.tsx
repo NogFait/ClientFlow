@@ -1,5 +1,6 @@
 import { useSyncExternalStore, type ReactNode } from "react"
 import { Info, X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { dismiss, getSnapshot, subscribe } from "./toastStore"
 import styles from "./Toast.module.css"
 
@@ -17,6 +18,7 @@ const variantClass: Record<string, string> = {
 // toastStore module via useSyncExternalStore — React-Compiler-safe, and the
 // store itself is plain data testable without mounting this component.
 export const ToastProvider = ({ children }: ToastProviderProps) => {
+  const { t } = useTranslation("app")
   const toasts = useSyncExternalStore(subscribe, getSnapshot)
 
   return (
@@ -33,7 +35,7 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
               type="button"
               className={styles.dismissButton}
               onClick={() => dismiss(toast.id)}
-              aria-label="Cerrar notificación"
+              aria-label={t("shared.closeNotification")}
             >
               <X size={14} aria-hidden="true" />
             </button>

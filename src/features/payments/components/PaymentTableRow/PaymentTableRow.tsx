@@ -1,5 +1,8 @@
 import { Link } from "react-router-dom"
 import { CheckCircle, Clock, Eye } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import { useCurrentLang } from "../../../../i18n/useCurrentLang"
+import { formatDate } from "../../../../i18n/locale"
 import type { IPayment } from "../../types"
 import { formatCurrency } from "../../../../utils/currency"
 import styles from "./PaymentTableRow.module.css"
@@ -12,11 +15,13 @@ interface PaymentTableRowProps {
 }
 
 const PaymentTableRow = ({ payment, onView, onEdit, onDelete }: PaymentTableRowProps) => {
+  const { t } = useTranslation("app")
+  const lang = useCurrentLang()
   const isPagado = payment.status === "pagado"
 
   return (
     <tr className={styles.row}>
-      <td className={styles.cell}>{payment.payment_date ? new Date(payment.payment_date).toLocaleDateString() : "—"}</td>
+      <td className={styles.cell}>{payment.payment_date ? formatDate(payment.payment_date, lang) : "—"}</td>
       <td className={styles.cell}>{payment.proyectos?.clientes?.name ?? "—"}</td>
       <td className={styles.cell}>
         {payment.project_id && payment.proyectos?.name
@@ -29,21 +34,18 @@ const PaymentTableRow = ({ payment, onView, onEdit, onDelete }: PaymentTableRowP
       <td className={styles.cell}>
         <span className={`${styles.badge} ${isPagado ? styles.badgePagado : styles.badgePendiente}`}>
           {isPagado ? <CheckCircle size={12} /> : <Clock size={12} />}
-          {isPagado ? "Pagado" : "Pendiente"}
+          {t(`status.payment.${payment.status}`)}
         </span>
       </td>
       <td className={styles.cell}>
-        {payment.method === "efectivo" ? "Efectivo"
-          : payment.method === "transferencia" ? "Transferencia"
-          : payment.method === "tarjeta" ? "Tarjeta"
-          : "Otro"}
+        {t(`status.method.${payment.method}`)}
       </td>
       <td className={styles.cellActions}>
         <button className={`${styles.actionBtn} ${styles.actionView}`} onClick={() => onView(payment)}>
-          <Eye size={14} /> Ver
+          <Eye size={14} /> {t("shared.view")}
         </button>
-        <button className={`${styles.actionBtn} ${styles.actionEdit}`} onClick={() => onEdit(payment)}>Editar</button>
-        <button className={`${styles.actionBtn} ${styles.actionDelete}`} onClick={() => onDelete(payment)}>Eliminar</button>
+        <button className={`${styles.actionBtn} ${styles.actionEdit}`} onClick={() => onEdit(payment)}>{t("shared.edit")}</button>
+        <button className={`${styles.actionBtn} ${styles.actionDelete}`} onClick={() => onDelete(payment)}>{t("shared.delete")}</button>
       </td>
     </tr>
   )

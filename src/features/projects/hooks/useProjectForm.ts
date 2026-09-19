@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import type { IProject } from "../types"
 import { createProject, updateProject } from "../services"
 import { LimitExceededError } from "../../billing/domain/errors"
@@ -8,6 +9,7 @@ export function useProjectForm(
     defaultValues?:IProject,
     onLimitExceeded?: (error: LimitExceededError) => void,
 ){
+    const { t } = useTranslation("app")
     const {register, handleSubmit, reset, setError, formState: {errors, isSubmitting}} = useForm<IProject>({values: defaultValues})
 
     const onSubmit = async (data: IProject) =>{
@@ -28,7 +30,7 @@ export function useProjectForm(
             }
             setError("root.serverError", {
                 type: "manual",
-                message: "Ocurrió un error al guardar el proyecto. Intentalo de nuevo.",
+                message: t("projects.saveError"),
             })
         }
     }

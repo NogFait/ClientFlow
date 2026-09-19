@@ -1,4 +1,5 @@
 import { useId } from "react"
+import { useTranslation } from "react-i18next"
 import type { UseFormRegister, FieldErrors, UseFormHandleSubmit } from "react-hook-form"
 import type { ITask, TaskStatus, TaskPriority } from "../../types"
 import type { IProject } from "../../../projects/types"
@@ -25,6 +26,7 @@ const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCa
   // Prefixes every field id with a per-mount unique id — this form can be
   // rendered more than once on the same page in principle (create/edit
   // modals), so plain string ids like "task-title" would collide.
+  const { t } = useTranslation("app")
   const uid = useId()
   const titleId = `${uid}-title`
   const titleErrorId = `${uid}-title-error`
@@ -42,7 +44,7 @@ const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCa
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <div className={styles.field}>
-        <label htmlFor={titleId} className={styles.label}>Título</label>
+        <label htmlFor={titleId} className={styles.label}>{t("tasks.fields.title")}</label>
         <input
           id={titleId}
           className={`${styles.input} ${errors.title ? styles.inputError : ''}`}
@@ -50,11 +52,11 @@ const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCa
           aria-describedby={errors.title ? titleErrorId : undefined}
           {...register("title", { required: true })}
         />
-        {errors.title && <span id={titleErrorId} className={styles.error}>Requerido</span>}
+        {errors.title && <span id={titleErrorId} className={styles.error}>{t("shared.required")}</span>}
       </div>
 
       <div className={styles.field}>
-        <label htmlFor={descriptionId} className={styles.label}>Descripción</label>
+        <label htmlFor={descriptionId} className={styles.label}>{t("tasks.fields.description")}</label>
         <textarea
           id={descriptionId}
           className={`${styles.textarea} ${errors.description ? styles.inputError : ''}`}
@@ -67,7 +69,7 @@ const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCa
 
       {!lockedProjectId && (
         <div className={styles.field}>
-          <label htmlFor={projectId} className={styles.label}>Proyecto</label>
+          <label htmlFor={projectId} className={styles.label}>{t("tasks.fields.project")}</label>
           <select
             id={projectId}
             className={`${styles.select} ${errors.project_id ? styles.inputError : ''}`}
@@ -75,7 +77,7 @@ const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCa
             aria-describedby={errors.project_id ? projectErrorId : undefined}
             {...register("project_id")}
           >
-            <option value="">Sin proyecto</option>
+            <option value="">{t("tasks.noProject")}</option>
             {projects.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
@@ -85,7 +87,7 @@ const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCa
       )}
 
       <div className={styles.field}>
-        <label htmlFor={statusId} className={styles.label}>Estado</label>
+        <label htmlFor={statusId} className={styles.label}>{t("tasks.fields.status")}</label>
         <select
           id={statusId}
           className={`${styles.select} ${errors.status ? styles.inputError : ''}`}
@@ -95,7 +97,7 @@ const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCa
         >
           {statuses.map(s => (
             <option key={s} value={s}>
-              {s === "pendiente" ? "Pendiente" : s === "en_progreso" ? "En Progreso" : "Hechas"}
+              {t(`status.task.${s}`)}
             </option>
           ))}
         </select>
@@ -103,7 +105,7 @@ const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCa
       </div>
 
       <div className={styles.field}>
-        <label htmlFor={priorityId} className={styles.label}>Prioridad</label>
+        <label htmlFor={priorityId} className={styles.label}>{t("tasks.fields.priority")}</label>
         <select
           id={priorityId}
           className={`${styles.select} ${errors.priority ? styles.inputError : ''}`}
@@ -113,7 +115,7 @@ const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCa
         >
           {priorities.map(p => (
             <option key={p} value={p}>
-              {p === "low" ? "Baja" : p === "medium" ? "Media" : "Alta"}
+              {t(`status.priority.${p}`)}
             </option>
           ))}
         </select>
@@ -121,7 +123,7 @@ const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCa
       </div>
 
       <div className={styles.field}>
-        <label htmlFor={dueDateId} className={styles.label}>Fecha límite</label>
+        <label htmlFor={dueDateId} className={styles.label}>{t("tasks.fields.dueDate")}</label>
         <input
           id={dueDateId}
           type="date"
@@ -139,14 +141,14 @@ const TaskForm = ({ register, handleSubmit, onSubmit, errors, isSubmitting, onCa
 
       <div className={styles.actions}>
         <button type="button" onClick={onCancel} className={styles.cancelBtn}>
-          Cancelar
+          {t("shared.cancel")}
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
           className={`${styles.submitBtn} ${isSubmitting ? styles.submitBtnDisabled : ''}`}
         >
-          {isSubmitting ? "Guardando..." : "Guardar"}
+          {isSubmitting ? t("shared.saving") : t("shared.save")}
         </button>
       </div>
     </form>

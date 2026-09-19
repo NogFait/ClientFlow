@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
+import { useTranslation } from "react-i18next"
+import { useCurrentLang } from "../../../i18n/useCurrentLang"
+import { formatDate as formatLocaleDate } from "../../../i18n/locale"
 import { ChevronRight, DollarSign, Clock, CheckSquare, ClipboardList, Receipt, FolderX } from "lucide-react"
 import { useProjectHub } from "../../../features/projects/hooks/useProjectHub"
 import { useProjectForm } from "../../../features/projects/hooks/useProjectForm"
@@ -9,7 +12,6 @@ import { deleteProject, countPaymentsByProject } from "../../../features/project
 import { getClients } from "../../../features/clients/services"
 import type { IClient } from "../../../features/clients/types"
 import type { ProjectStatus } from "../../../features/projects/types"
-import type { ITask } from "../../../features/tasks/types"
 import ProjectForm from "../../../features/projects/components/ProjectForm/ProjectForm"
 import TaskForm from "../../../features/tasks/components/TaskForm/TaskForm"
 import PaymentForm from "../../../features/payments/components/PaymentForm/PaymentForm"
@@ -26,28 +28,14 @@ import styles from "./ProjectHubPage.module.css"
 
 type ModalKind = "edit" | "task" | "payment" | null
 
-const statusLabels: Record<ProjectStatus, string> = {
-  activo: "Activo",
-  pausado: "Pausado",
-  completo: "Completo",
-}
-
-const priorityLabels: Record<ITask["priority"], string> = {
-  low: "Baja",
-  medium: "Media",
-  high: "Alta",
-}
-
-const methodLabels: Record<string, string> = {
-  efectivo: "Efectivo",
-  transferencia: "Transferencia",
-  tarjeta: "Tarjeta",
-  other: "Otro",
-}
-
-const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : "—")
+// DB values, in the order the status <select> lists them; labels come from
+// status.project.* in app.json.
+const PROJECT_STATUSES: ProjectStatus[] = ["activo", "pausado", "completo"]
 
 const ProjectHubPage = () => {
+  const { t } = useTranslation("app")
+  const lang = useCurrentLang()
+  const formatDate = (value?: string) => (value ? formatLocaleDate(value, lang) : "—")
   const { id = "" } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const toast = useToast()
@@ -74,19 +62,19 @@ const ProjectHubPage = () => {
   const projectForm = useProjectForm(() => {
     setModal(null)
     refresh()
-    toast.success("Proyecto guardado")
+    toast.success(t("projects.saved"))
   }, project ?? undefined)
 
   const taskForm = useTaskForm(() => {
     setModal(null)
     refresh()
-    toast.success("Tarea guardada")
+    toast.success(t("projectHub.taskSaved"))
   }, undefined, id)
 
   const paymentForm = usePaymentForm(() => {
     setModal(null)
     refresh()
-    toast.success("Pago registrado")
+    toast.success(t("projectHub.paymentSaved"))
   }, undefined, id)
 
   const closeModal = () => {
@@ -103,26 +91,26 @@ const ProjectHubPage = () => {
     const paymentsCount = await countPaymentsByProject(project.id)
     if (paymentsCount > 0) {
       await confirm({
-        title: `No se puede eliminar ${project.name}`,
-        description: `Tiene ${paymentsCount} pago(s) registrado(s). Eliminá esos pagos primero.`,
-        confirmLabel: "Entendido",
+        title: t("projects.cannotDeleteTitle", { name: project.name }),
+        description: t("projects.cannotDeleteDescription", { count: paymentsCount }),
+        confirmLabel: t("shared.understood"),
         cancelLabel: null,
         danger: false,
       })
       return
     }
 
-    const confirmed = await confirm({ title: `¿Eliminar el proyecto "${project.name}"?` })
+    const confirmed = await confirm({ title: t("projects.confirmDelete", { name: project.name }) })
     if (!confirmed) return
     try {
       await deleteProject(project.id)
-      toast.success("Proyecto eliminado")
+      toast.success(t("projects.deleted"))
       navigate("/projects")
     } catch (err) {
       toast.error(
         err instanceof ForeignKeyViolationError
-          ? "No se puede eliminar: el proyecto tiene pagos asociados."
-          : "No se pudo eliminar el proyecto. Intentalo de nuevo.",
+          ? t("projects.deleteFkError")
+          : t("projects.deleteError"),
       )
     }
   }
@@ -144,10 +132,10 @@ const ProjectHubPage = () => {
       <div className={styles.notFoundState}>
         <EmptyState
           icon={FolderX}
-          title="Proyecto no encontrado"
-          description="Puede que haya sido eliminado o que no tengas acceso a él."
+          title={t("projectHub.notFound.title")}
+          description={t("projectHub.notFound.description")}
         />
-        <Link className={styles.backLink} to="/projects">Volver a proyectos</Link>
+        <Link className={styles.backLink} to="/projects">{t("projectHub.notFound.back")}</Link>
       </div>
     )
   }
@@ -155,8 +143,8 @@ const ProjectHubPage = () => {
   if (error || !project) {
     return (
       <div className={styles.errorState}>
-        <p>No se pudo cargar el proyecto. Intentalo de nuevo.</p>
-        <button type="button" className={styles.retryBtn} onClick={refresh}>Reintentar</button>
+        <p>{t("projectHub.loadError")}</p>
+        <button type="button" className={styles.retryBtn} onClick={refresh}>{t("shared.retry")}</button>
       </div>
     )
   }
@@ -164,7 +152,7 @@ const ProjectHubPage = () => {
   return (
     <div>
       <nav className={styles.breadcrumb} aria-label="breadcrumb">
-        <Link to="/projects">Proyectos</Link>
+        <Link to="/projects">{t("projectHub.breadcrumb")}</Link>
         <ChevronRight size={14} aria-hidden="true" />
         <span>{project.name}</span>
       </nav>
@@ -172,36 +160,36 @@ const ProjectHubPage = () => {
       <div className={styles.header}>
         <div className={styles.headerInfo}>
           <h1 className={styles.title}>{project.name}</h1>
-          <p className={styles.clientName}>{project.clientes?.name ?? "Sin cliente"}</p>
+          <p className={styles.clientName}>{project.clientes?.name ?? t("projects.noClient")}</p>
           <p className={styles.dates}>{formatDate(project.start_date)} → {formatDate(project.end_date)}</p>
         </div>
         <div className={styles.headerActions}>
-          <label htmlFor="hub-status" className={styles.statusLabel}>Estado del proyecto</label>
+          <label htmlFor="hub-status" className={styles.statusLabel}>{t("projectHub.statusLabel")}</label>
           <select
             id="hub-status"
-            aria-label="Estado del proyecto"
+            aria-label={t("projectHub.statusLabel")}
             className={styles.statusSelect}
             value={project.status}
             onChange={handleStatusChange}
           >
-            {(Object.keys(statusLabels) as ProjectStatus[]).map((s) => (
-              <option key={s} value={s}>{statusLabels[s]}</option>
+            {PROJECT_STATUSES.map((s) => (
+              <option key={s} value={s}>{t(`status.project.${s}`)}</option>
             ))}
           </select>
-          <button type="button" className={styles.editBtn} onClick={() => setModal("edit")}>Editar</button>
-          <button type="button" className={styles.deleteBtn} onClick={handleDelete}>Eliminar</button>
+          <button type="button" className={styles.editBtn} onClick={() => setModal("edit")}>{t("shared.edit")}</button>
+          <button type="button" className={styles.deleteBtn} onClick={handleDelete}>{t("shared.delete")}</button>
         </div>
       </div>
 
       <div className={styles.statsGrid}>
         <StatCard
-          label="Presupuesto"
-          value={summary.budget != null ? formatCurrency(summary.budget) : "Sin presupuesto"}
+          label={t("projectHub.budget")}
+          value={summary.budget != null ? formatCurrency(summary.budget) : t("projectHub.noBudget")}
           icon={DollarSign}
           variant="primary"
         />
         <StatCard
-          label="Cobrado"
+          label={t("projectHub.collected")}
           value={formatCurrency(summary.paid)}
           secondaryValue={summary.paidPct != null ? `${summary.paidPct} %` : undefined}
           icon={CheckSquare}
@@ -209,15 +197,15 @@ const ProjectHubPage = () => {
           progressPct={summary.paidPct ?? undefined}
         />
         <StatCard
-          label="Pendiente de cobro"
+          label={t("projectHub.pendingCollection")}
           value={formatCurrency(summary.pending)}
-          secondaryValue={`${summary.pendingCount} pago(s)`}
+          secondaryValue={t("projectHub.paymentsCount", { count: summary.pendingCount })}
           icon={Clock}
           variant="warning"
         />
         <StatCard
-          label="Tareas"
-          value={`${summary.tasksDone} / ${summary.tasksTotal} hechas`}
+          label={t("projectHub.tasks")}
+          value={t("projectHub.tasksDone", { done: summary.tasksDone, total: summary.tasksTotal })}
           icon={ClipboardList}
           variant="default"
           progressPct={summary.tasksPct ?? undefined}
@@ -227,15 +215,15 @@ const ProjectHubPage = () => {
       <div className={styles.sections}>
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Tareas</h2>
-            <button type="button" className={styles.sectionAction} onClick={() => setModal("task")}>+ Nueva tarea</button>
+            <h2 className={styles.sectionTitle}>{t("projectHub.tasks")}</h2>
+            <button type="button" className={styles.sectionAction} onClick={() => setModal("task")}>{t("projectHub.newTask")}</button>
           </div>
           {tasks.length === 0 ? (
             <EmptyState
               icon={ClipboardList}
-              title="Sin tareas en este proyecto"
-              description="Agregá tareas para hacer seguimiento del trabajo."
-              actionLabel="+ Nueva tarea"
+              title={t("projectHub.noTasks.title")}
+              description={t("projectHub.noTasks.description")}
+              actionLabel={t("projectHub.newTask")}
               onAction={() => setModal("task")}
             />
           ) : (
@@ -253,11 +241,11 @@ const ProjectHubPage = () => {
                         type="checkbox"
                         checked={isDone}
                         onChange={() => toggleTaskDone(task)}
-                        aria-label={isDone ? "Marcar como pendiente" : "Marcar como hecha"}
+                        aria-label={isDone ? t("projectHub.markPending") : t("projectHub.markDone")}
                       />
                     </label>
                     <span className={`${styles.taskTitle} ${isDone ? styles.taskTitleDone : ""}`}>{task.title}</span>
-                    <span className={styles.priorityBadge}>{priorityLabels[task.priority]}</span>
+                    <span className={styles.priorityBadge}>{t(`status.priority.${task.priority}`)}</span>
                     <span className={styles.dueDate}>{formatDate(task.due_date)}</span>
                   </li>
                 )
@@ -268,15 +256,15 @@ const ProjectHubPage = () => {
 
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Pagos</h2>
-            <button type="button" className={styles.sectionAction} onClick={() => setModal("payment")}>+ Registrar pago</button>
+            <h2 className={styles.sectionTitle}>{t("projectHub.payments")}</h2>
+            <button type="button" className={styles.sectionAction} onClick={() => setModal("payment")}>{t("projectHub.registerPayment")}</button>
           </div>
           {payments.length === 0 ? (
             <EmptyState
               icon={Receipt}
-              title="Sin pagos en este proyecto"
-              description="Registrá los cobros para hacer seguimiento de los ingresos."
-              actionLabel="+ Registrar pago"
+              title={t("projectHub.noPayments.title")}
+              description={t("projectHub.noPayments.description")}
+              actionLabel={t("projectHub.registerPayment")}
               onAction={() => setModal("payment")}
             />
           ) : (
@@ -289,22 +277,22 @@ const ProjectHubPage = () => {
                       <span className={styles.paymentDate}>{formatDate(payment.payment_date)}</span>
                       <span className={styles.paymentAmount}>{formatCurrency(Number(payment.amount))}</span>
                       <span className={`${styles.badge} ${isPagado ? styles.badgePagado : styles.badgePendiente}`}>
-                        {isPagado ? "Pagado" : "Pendiente"}
+                        {t(`status.payment.${payment.status}`)}
                       </span>
-                      <span className={styles.paymentMethod}>{methodLabels[payment.method] ?? payment.method}</span>
+                      <span className={styles.paymentMethod}>{t(`status.method.${payment.method}`)}</span>
                     </li>
                   )
                 })}
               </ul>
               <p className={styles.paymentsFooter}>
-                Cobrado {formatCurrency(summary.paid)} · Pendiente {formatCurrency(summary.pending)}
+                {t("projectHub.paymentsFooter", { paid: formatCurrency(summary.paid), pending: formatCurrency(summary.pending) })}
               </p>
             </>
           )}
         </section>
       </div>
 
-      <Modal isOpen={modal === "edit"} onClose={closeModal} title="Editar Proyecto">
+      <Modal isOpen={modal === "edit"} onClose={closeModal} title={t("projects.edit")}>
         <ProjectForm
           register={projectForm.register}
           handleSubmit={projectForm.handleSubmit}
@@ -316,7 +304,7 @@ const ProjectHubPage = () => {
         />
       </Modal>
 
-      <Modal isOpen={modal === "task"} onClose={closeModal} title="Nueva tarea">
+      <Modal isOpen={modal === "task"} onClose={closeModal} title={t("projectHub.newTaskTitle")}>
         <TaskForm
           register={taskForm.register}
           handleSubmit={taskForm.handleSubmit}
@@ -329,7 +317,7 @@ const ProjectHubPage = () => {
         />
       </Modal>
 
-      <Modal isOpen={modal === "payment"} onClose={closeModal} title="Registrar pago">
+      <Modal isOpen={modal === "payment"} onClose={closeModal} title={t("projectHub.registerPaymentTitle")}>
         <PaymentForm
           register={paymentForm.register}
           handleSubmit={paymentForm.handleSubmit}
@@ -344,7 +332,7 @@ const ProjectHubPage = () => {
 
       <ConfirmDialog
         {...dialogProps}
-        description={dialogProps.description ?? "Esta acción no se puede deshacer."}
+        description={dialogProps.description ?? t("shared.irreversible")}
       />
     </div>
   )

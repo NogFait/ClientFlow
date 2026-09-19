@@ -1,10 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { LogOut, Menu } from "lucide-react";
 import { supabase } from "../../../services/supabaseClient";
 import { BILLING_ENABLED } from "../../../config/features";
 import { useAuthState } from "../../../features/auth/context/authContext";
 import { useEntitlementsContext } from "../../../features/billing/context/entitlementsContext";
 import PlanBadge from "../../../features/billing/components/PlanBadge/PlanBadge";
+import LanguageSwitch from "../../shared/LanguageSwitch/LanguageSwitch";
 import styles from "./Navbar.module.css";
 
 interface NavbarProps {
@@ -17,10 +19,11 @@ interface NavbarProps {
 const noop = () => {}
 
 const Navbar = ({ mobileNavOpen = false, onOpenMobileNav = noop }: NavbarProps) => {
+  const { t } = useTranslation("app");
   const navigate = useNavigate();
   const { user } = useAuthState();
   const { entitlements, loading: entitlementsLoading } = useEntitlementsContext();
-  const userName: string = (user?.user_metadata?.name as string | undefined) ?? "Usuario";
+  const userName: string = (user?.user_metadata?.name as string | undefined) ?? t("nav.userFallback");
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -36,13 +39,17 @@ const Navbar = ({ mobileNavOpen = false, onOpenMobileNav = noop }: NavbarProps) 
       <button
         type="button"
         className={styles.hamburger}
-        aria-label="Abrir menú"
+        aria-label={t("nav.openMenu")}
         aria-expanded={mobileNavOpen}
         onClick={onOpenMobileNav}
       >
         <Menu size={20} />
       </button>
       <div className={styles.spacer} />
+      {/* Preference mode: app routes carry no language in the URL, so the
+          switch stores the choice and changes the tree's language in place
+          (Layout's usePreferredLanguageSync re-applies it on every visit). */}
+      <LanguageSwitch mode="preference" className={styles.languageSwitch} />
       {showsPlanBadge && entitlements && (
         <Link to="/settings/billing" className={styles.planBadgeLink}>
           <PlanBadge plan={entitlements.plan} status={entitlements.status} compact />
@@ -59,7 +66,7 @@ const Navbar = ({ mobileNavOpen = false, onOpenMobileNav = noop }: NavbarProps) 
         onClick={handleLogout}
       >
         <LogOut size={16} />
-        Salir
+        {t("nav.logout")}
       </button>
     </div>
   );
