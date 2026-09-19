@@ -1,8 +1,13 @@
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
+import { toLocalizedPath } from "../../i18n/paths"
+import { useCurrentLang } from "../../i18n/useCurrentLang"
 
 const NotFoundPage = () => {
   const { t } = useTranslation("app")
+  // Home links follow the chosen language: a user reading in English must
+  // land on /en, not be bounced to the Spanish home by a hardcoded "/".
+  const lang = useCurrentLang()
 
   return (
     <div
@@ -22,7 +27,7 @@ const NotFoundPage = () => {
         {t("notFound.message")}
       </p>
       <Link
-        to="/"
+        to={toLocalizedPath("/", lang)}
         style={{
           padding: "0.625rem 1.5rem",
           background: "#7c3aed",

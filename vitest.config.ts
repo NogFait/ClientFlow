@@ -13,6 +13,10 @@ export default defineConfig({
           name: 'client',
           environment: 'jsdom',
           setupFiles: ['src/test/setup.ts'],
+          // Page tests mount lazy routes in two languages; under a fully
+          // parallel run a cold chunk import can brush vitest's 5s default,
+          // which showed up as one-off timeouts (assertions are instant).
+          testTimeout: 15000,
           include: ['src/**/*.test.{ts,tsx}'],
           // Tests must never depend on the developer's .env: any module that
           // (transitively) imports supabaseClient.ts calls createClient(),

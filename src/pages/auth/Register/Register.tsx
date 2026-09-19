@@ -2,6 +2,8 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { toLocalizedPath } from "../../../i18n/paths"
+import { useCurrentLang } from "../../../i18n/useCurrentLang"
 import { useRegisterForm } from "../../../features/auth/hooks/useAuth"
 import { usePageMeta } from "../../../hooks/usePageMeta"
 import { usePreferredLanguageSync } from "../../../i18n/usePreferredLanguageSync"
@@ -11,6 +13,9 @@ import styles from "./Register.module.css"
 // Same language handling as Login: stored preference, "preference" switch.
 const Register = () => {
   const { t } = useTranslation("auth")
+  // Home links follow the chosen language: a user reading in English must
+  // land on /en, not be bounced to the Spanish home by a hardcoded "/".
+  const lang = useCurrentLang()
   usePreferredLanguageSync()
   usePageMeta({ title: t("register.metaTitle"), noindex: true })
 
@@ -21,7 +26,7 @@ const Register = () => {
     <div className={styles.page}>
       <section className={styles.brandPanel}>
         <div className={styles.brandRow}>
-          <Link to="/" className={styles.brand}>
+          <Link to={toLocalizedPath("/", lang)} className={styles.brand}>
             <img src="/icon-192.png" alt="ClientFlow" className={styles.brandLogo} />
             <span className={styles.brandName}>ClientFlow</span>
           </Link>

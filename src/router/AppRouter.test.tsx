@@ -5,12 +5,6 @@ import { MemoryRouter } from "react-router-dom"
 import AppRouter from "./AppRouter"
 import { renderWithLang } from "../test/i18n"
 
-// This file mounts the whole router: every public route in two languages
-// plus the lazy auth/app chunks. Under a fully parallel suite the first
-// lazy import can take longer than vitest's 5s default, which showed up as
-// a one-off timeout — the assertions themselves are instant.
-vi.setConfig({ testTimeout: 20000 })
-
 // AppRouter itself renders below AuthProvider in the real app (App.tsx) —
 // here every route is exercised as an anonymous visitor, so the context is
 // mocked directly rather than requiring a real AuthProvider + supabase mock.
@@ -113,7 +107,10 @@ describe("AppRouter — English public surface (/en/*)", () => {
     renderWithLang(<AppRouter />, "en", { initialEntries: ["/blog"] })
 
     expect(await screen.findByRole("heading", { level: 1, name: "Blog" })).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: /Iniciar sesión/i })).toBeInTheDocument()
+    // "Blog" reads the same in both languages, so the heading alone doesn't
+    // prove the pin — wait for a Spanish-only string (the language switch
+    // re-renders after the lazy page mounts).
+    expect(await screen.findByRole("link", { name: /Iniciar sesión/i })).toBeInTheDocument()
   })
 
   it("switches from / to /en client-side via the ES|EN control and back", async () => {

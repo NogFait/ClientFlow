@@ -2,6 +2,8 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { toLocalizedPath } from "../../../i18n/paths"
+import { useCurrentLang } from "../../../i18n/useCurrentLang"
 import { useLoginForm } from "../../../features/auth/hooks/useAuth"
 import { usePageMeta } from "../../../hooks/usePageMeta"
 import { usePreferredLanguageSync } from "../../../i18n/usePreferredLanguageSync"
@@ -12,6 +14,9 @@ import styles from "./Login.module.css"
 // stored preference drives it and the switch works in "preference" mode.
 const Login = () => {
   const { t } = useTranslation("auth")
+  // Home links follow the chosen language: a user reading in English must
+  // land on /en, not be bounced to the Spanish home by a hardcoded "/".
+  const lang = useCurrentLang()
   usePreferredLanguageSync()
   usePageMeta({ title: t("login.metaTitle"), noindex: true })
 
@@ -22,7 +27,7 @@ const Login = () => {
     <div className={styles.page}>
       <section className={styles.brandPanel}>
         <div className={styles.brandRow}>
-          <Link to="/" className={styles.brand}>
+          <Link to={toLocalizedPath("/", lang)} className={styles.brand}>
             <img src="/icon-192.png" alt="ClientFlow" className={styles.brandLogo} />
             <span className={styles.brandName}>ClientFlow</span>
           </Link>

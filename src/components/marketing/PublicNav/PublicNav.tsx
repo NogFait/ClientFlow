@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { Menu, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useHasSession } from "../../../hooks/useHasSession"
@@ -21,12 +21,22 @@ const PublicNav = () => {
   const { t } = useTranslation()
   const lang = useCurrentLang()
   const { hasSession } = useHasSession()
+  const { pathname } = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
 
+  // The section links are anchors that only exist on the landing. On the
+  // landing a plain "#como" keeps native in-page scrolling; anywhere else
+  // (blog, pricing, legal) they must first route back to the landing — in
+  // the current language — where LandingPage's hash effect finishes the
+  // scroll once the section has mounted.
+  const landingPath = toLocalizedPath("/", lang)
+  const onLanding = pathname === landingPath || pathname === `${landingPath}/`
+  const anchorHref = (hash: string) => (onLanding ? hash : `${landingPath}${hash}`)
+
   const anchorLinks = [
-    { href: "#como", label: t("nav.how") },
-    { href: "#precios", label: t("nav.pricing") },
-    { href: "#faq", label: t("nav.faq") },
+    { href: anchorHref("#como"), label: t("nav.how") },
+    { href: anchorHref("#precios"), label: t("nav.pricing") },
+    { href: anchorHref("#faq"), label: t("nav.faq") },
   ]
 
   // Real routes (not landing anchors) shown next to the anchors — a router
@@ -42,11 +52,17 @@ const PublicNav = () => {
         </Link>
 
         <div className={styles.anchors}>
-          {anchorLinks.map((link) => (
-            <a key={link.href} href={link.href} className={styles.anchorLink}>
-              {link.label}
-            </a>
-          ))}
+          {anchorLinks.map((link) =>
+            onLanding ? (
+              <a key={link.href} href={link.href} className={styles.anchorLink}>
+                {link.label}
+              </a>
+            ) : (
+              <Link key={link.href} to={link.href} className={styles.anchorLink}>
+                {link.label}
+              </Link>
+            ),
+          )}
           {routeLinks.map((link) => (
             <Link key={link.to} to={link.to} className={styles.anchorLink}>
               {link.label}
@@ -85,16 +101,17 @@ const PublicNav = () => {
 
       {menuOpen && (
         <div className={styles.mobileMenu}>
-          {anchorLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className={styles.mobileLink}
-              onClick={() => setMenuOpen(false)}
-            >
-              {link.label}
-            </a>
-          ))}
+          {anchorLinks.map((link) =>
+            onLanding ? (
+              <a key={link.href} href={link.href} className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                {link.label}
+              </a>
+            ) : (
+              <Link key={link.href} to={link.href} className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                {link.label}
+              </Link>
+            ),
+          )}
           {routeLinks.map((link) => (
             <Link key={link.to} to={link.to} className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
               {link.label}

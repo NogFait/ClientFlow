@@ -41,3 +41,15 @@ describe("Login — language preference", () => {
     expect(screen.getByRole("heading", { name: "Welcome back" })).toBeInTheDocument()
   })
 })
+
+describe("Login — brand link keeps the chosen language", () => {
+  it("points the ClientFlow logo to /en when the UI is in English", () => {
+    renderWithLang(<Login />, "en", { initialEntries: ["/login"] })
+    expect(screen.getByRole("link", { name: /ClientFlow/i })).toHaveAttribute("href", "/en")
+  })
+
+  it("points it to / in Spanish (triangulation)", () => {
+    renderWithLang(<Login />, "es", { initialEntries: ["/login"] })
+    expect(screen.getByRole("link", { name: /ClientFlow/i })).toHaveAttribute("href", "/")
+  })
+})
