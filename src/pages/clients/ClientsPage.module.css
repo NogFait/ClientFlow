@@ -1,21 +1,23 @@
 .kpiGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--spacing-4);
   margin-bottom: var(--spacing-8);
 }
 
 @media (max-width: 1023px) {
+  /* Two columns down to phones — same as the project hub: half the
+     scroll, all the numbers (StatCard already shrinks its value there). */
   .kpiGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Three cards in two columns leave a hole: the odd last one spans both. */
+  .kpiGrid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 }
 
-@media (max-width: 639px) {
-  .kpiGrid {
-    grid-template-columns: 1fr;
-  }
-}
 
 .tableWrapper {
   border-radius: var(--radius-lg);

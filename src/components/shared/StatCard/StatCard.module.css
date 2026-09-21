@@ -114,6 +114,17 @@
   display: flex;
   align-items: baseline;
   gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+/* In a half-width card the amount keeps its digits together and the
+   companion label ("pendiente · sep") drops to the next line instead of
+   squeezing the number into "$ 125. / 000,0 / 0". */
+@media (max-width: 767px) {
+  .valueRow .value {
+    overflow-wrap: normal;
+    white-space: nowrap;
+  }
 }
 
 .subLabel {
