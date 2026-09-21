@@ -152,6 +152,23 @@
       "view": "Ver a {{name}}",
       "edit": "Editar a {{name}}",
       "delete": "Eliminar a {{name}}"
+    },
+    "notes": {
+      "title": "Historial",
+      "hint": "Lo que hablaste, mandaste o acordaste con este cliente, con fecha.",
+      "empty": "Todavía no hay notas. Anotá acá lo que hablaste con este cliente: presupuestos enviados, llamadas, acuerdos.",
+      "loadError": "No pudimos cargar el historial. Probá de nuevo.",
+      "date": "Fecha",
+      "text": "Nota",
+      "placeholder": "Ej.: Le pasé el presupuesto, lo ve con el socio. Quedé en escribirle el 15.",
+      "add": "Agregar nota",
+      "adding": "Guardando...",
+      "blank": "Escribí algo antes de guardar la nota.",
+      "saveError": "No pudimos guardar la nota. Probá de nuevo.",
+      "deleteError": "No pudimos eliminar la nota. Probá de nuevo.",
+      "confirmDelete": "¿Eliminar esta nota?",
+      "yes": "Sí",
+      "no": "No"
     }
   },
   "projects": {

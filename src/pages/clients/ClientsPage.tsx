@@ -11,6 +11,7 @@ import { useClientForm } from "../../features/clients/hooks/useClientForm"
 import ClientCard from "../../features/clients/components/ClientCard/ClientCard"
 import ClientMobileCard from "../../features/clients/components/ClientCard/ClientMobileCard"
 import ClientForm from "../../features/clients/components/ClientForm/ClientForm"
+import ClientNotes from "../../features/clients/notes/components/ClientNotes/ClientNotes"
 import Modal from "../../components/shared/Modal/Modal"
 import ConfirmDialog from "../../components/shared/ConfirmDialog/ConfirmDialog"
 import { useConfirm } from "../../hooks/useConfirm"
@@ -236,6 +237,7 @@ const ClientsPage = () => {
               <span className={styles.label}>{t("clients.fields.created")}</span>
               <span className={styles.value}>{formatDate(selectedClient.created_at!, lang)}</span>
             </div>
+            <ClientNotes key={selectedClient.id} clientId={selectedClient.id!} />
             <button className={styles.closeBtn} onClick={closeModal}>{t("shared.close")}</button>
           </div>
         )}

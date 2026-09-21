@@ -41,6 +41,15 @@ vi.mock("../../features/projects/services", () => ({
   countProjectsByClient: (id: string) => countProjectsByClientMock(id),
 }))
 
+// The detail modal embeds the client's history (ClientNotes); its service
+// is mocked so opening "Ver" never reaches Supabase from this page test.
+const getClientNotesMock = vi.fn()
+vi.mock("../../features/clients/notes/services", () => ({
+  getClientNotes: (id: string) => getClientNotesMock(id),
+  createClientNote: vi.fn(),
+  deleteClientNote: vi.fn(),
+}))
+
 // Entitlements permissive enough that the soft pre-check in
 // handleNewClientAction (canCreate) does NOT block — this test exercises the
 // server-side LimitExceededError path (the trigger rejecting the INSERT),
@@ -66,6 +75,7 @@ vi.mock("../../features/billing/context/entitlementsContext", () => ({
 }))
 
 beforeEach(() => {
+  getClientNotesMock.mockResolvedValue([])
   // Default: client has no proyectos, so existing delete-confirmation tests
   // (written before the block-and-explain check existed) keep exercising
   // the normal confirm+delete flow unless a test overrides this.
@@ -394,5 +404,24 @@ describe("ClientsPage — responsive table/card layout", () => {
     expect(screen.getByRole("button", { name: /editar a juan pérez/i })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /eliminar a juan pérez/i })).toBeInTheDocument()
     expect(screen.queryByRole("table")).not.toBeInTheDocument()
+  })
+})
+
+describe("ClientsPage — client detail history", () => {
+  it("shows the client's dated history (notes) inside the detail modal", async () => {
+    getClientsMock.mockResolvedValue([sampleClient])
+    getClientNotesMock.mockResolvedValue([
+      { id: "n1", client_id: "c1", note_date: "2026-09-03", content: "Le pasé presupuesto" },
+    ])
+    const user = userEvent.setup()
+    renderClientsPage()
+
+    await user.click(await screen.findByRole("button", { name: "Ver" }))
+
+    const dialog = await screen.findByRole("dialog")
+    expect(within(dialog).getByRole("heading", { name: "Historial" })).toBeInTheDocument()
+    expect(await within(dialog).findByText("Le pasé presupuesto")).toBeInTheDocument()
+    expect(within(dialog).getByText("3/9/2026")).toBeInTheDocument()
+    expect(getClientNotesMock).toHaveBeenCalledWith("c1")
   })
 })

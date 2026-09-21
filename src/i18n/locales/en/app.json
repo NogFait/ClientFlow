@@ -152,6 +152,23 @@
       "view": "View {{name}}",
       "edit": "Edit {{name}}",
       "delete": "Delete {{name}}"
+    },
+    "notes": {
+      "title": "History",
+      "hint": "What you discussed, sent or agreed with this client, dated.",
+      "empty": "No notes yet. Write down what you discussed with this client: quotes sent, calls, agreements.",
+      "loadError": "We couldn't load the history. Try again.",
+      "date": "Date",
+      "text": "Note",
+      "placeholder": "E.g.: Sent the quote, they'll review it with their partner. Following up on the 15th.",
+      "add": "Add note",
+      "adding": "Saving...",
+      "blank": "Write something before saving the note.",
+      "saveError": "We couldn't save the note. Try again.",
+      "deleteError": "We couldn't delete the note. Try again.",
+      "confirmDelete": "Delete this note?",
+      "yes": "Yes",
+      "no": "No"
     }
   },
   "projects": {
