@@ -169,6 +169,15 @@
       "confirmDelete": "¿Eliminar esta nota?",
       "yes": "Sí",
       "no": "No"
+    },
+    "ranking": {
+      "title": "¿Quién te deja más plata?",
+      "description": "Cobrado este año, pendiente y proyectos, por cliente. Para saber a quién cuidar y a quién reclamar.",
+      "collected": "cobrado",
+      "pending": "{{amount}} pendiente",
+      "projects_one": "{{count}} proyecto",
+      "projects_other": "{{count}} proyectos",
+      "empty": "Cuando registres cobros vas a ver acá qué clientes te dejan más plata y cuánto te deben."
     }
   },
   "projects": {
@@ -377,6 +386,11 @@
       "missing_email": "Tu cuenta no tiene un email válido para facturar.",
       "no_billing_customer": "Todavía no tenés una suscripción para gestionar.",
       "default": "Ocurrió un error. Intentalo de nuevo."
+    },
+    "proFeature": {
+      "tag": "Pro",
+      "cta": "Ver planes Pro",
+      "hint": "Disponible en el plan Pro."
     }
   },
   "errors": {

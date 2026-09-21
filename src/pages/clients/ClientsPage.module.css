@@ -176,3 +176,7 @@
   padding: 0 0 0 var(--spacing-3);
   line-height: 1;
 }
+
+.rankingSection {
+  margin-bottom: var(--spacing-6);
+}

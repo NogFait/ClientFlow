@@ -169,6 +169,15 @@
       "confirmDelete": "Delete this note?",
       "yes": "Yes",
       "no": "No"
+    },
+    "ranking": {
+      "title": "Who brings in the most?",
+      "description": "Collected this year, pending and projects, per client. Know who to look after and who to chase.",
+      "collected": "collected",
+      "pending": "{{amount}} pending",
+      "projects_one": "{{count}} project",
+      "projects_other": "{{count}} projects",
+      "empty": "Once you record payments you'll see here which clients bring in the most and how much they owe."
     }
   },
   "projects": {
@@ -377,6 +386,11 @@
       "missing_email": "Your account has no valid billing email.",
       "no_billing_customer": "You don't have a subscription to manage yet.",
       "default": "Something went wrong. Please try again."
+    },
+    "proFeature": {
+      "tag": "Pro",
+      "cta": "See Pro plans",
+      "hint": "Available on the Pro plan."
     }
   },
   "errors": {

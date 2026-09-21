@@ -37,8 +37,14 @@ vi.mock("../../features/clients/services", () => ({
   deleteClient: (id: string) => deleteClientMock(id),
 }))
 
+const getProjectsMock = vi.fn()
+const getPaymentsMock = vi.fn()
 vi.mock("../../features/projects/services", () => ({
   countProjectsByClient: (id: string) => countProjectsByClientMock(id),
+  getProjects: () => getProjectsMock(),
+}))
+vi.mock("../../features/payments/services", () => ({
+  getPayments: () => getPaymentsMock(),
 }))
 
 // The detail modal embeds the client's history (ClientNotes); its service
@@ -68,16 +74,20 @@ const freeEntitlementsUnderLimit: Entitlements = {
 }
 
 const refreshEntitlementsMock = vi.fn()
+let currentEntitlements: Entitlements = freeEntitlementsUnderLimit
 
 vi.mock("../../features/billing/context/entitlementsContext", () => ({
   useEntitlementsContext: () => ({
-    entitlements: freeEntitlementsUnderLimit,
+    entitlements: currentEntitlements,
     refresh: refreshEntitlementsMock,
     loading: false,
   }),
 }))
 
 beforeEach(() => {
+  getProjectsMock.mockResolvedValue([])
+  getPaymentsMock.mockResolvedValue([])
+  currentEntitlements = freeEntitlementsUnderLimit
   getClientNotesMock.mockResolvedValue([])
   getLatestNoteByClientMock.mockResolvedValue({})
   createClientNoteMock.mockReset()
@@ -88,6 +98,8 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  getProjectsMock.mockReset()
+  getPaymentsMock.mockReset()
   getClientsMock.mockReset()
   createClientMock.mockReset()
   deleteClientMock.mockReset()
@@ -482,5 +494,45 @@ describe("ClientsPage — last note in the list", () => {
     const row = (await screen.findByText("Juan Pérez")).closest("tr")!
     expect(await within(row).findByText("Llamé, no atendió")).toBeInTheDocument()
     expect(getLatestNoteByClientMock).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe("ClientsPage — client ranking (Pro)", () => {
+  it("shows the ranking locked with a Pro tag and a link to plans for a Free user", async () => {
+    getClientsMock.mockResolvedValue([sampleClient])
+    renderClientsPage()
+
+    await screen.findByText("Juan Pérez")
+    const locked = screen.getByLabelText("¿Quién te deja más plata?")
+    expect(within(locked).getByText("Pro")).toBeInTheDocument()
+    expect(within(locked).getByRole("button", { name: /Ver planes Pro/i })).toBeInTheDocument()
+    // The title is shown on purpose (Free users see what they'd get); the
+    // ranking content itself must not be rendered.
+    expect(screen.queryByText(/Cuando registres cobros/i)).not.toBeInTheDocument()
+    expect(within(locked).queryByRole("list")).not.toBeInTheDocument()
+  })
+
+  it("renders the ranking from real clients, projects and payments for a Pro user", async () => {
+    currentEntitlements = { ...freeEntitlementsUnderLimit, plan: "pro_monthly", status: "active", limits: { clientes: null, proyectos: null } }
+    const year = new Date().getFullYear()
+    getClientsMock.mockResolvedValue([sampleClient, { ...sampleClient, id: "c2", name: "Ana López" }])
+    getProjectsMock.mockResolvedValue([
+      { id: "p1", client_id: "c1", name: "Web", status: "activo" },
+      { id: "p2", client_id: "c2", name: "Logo", status: "activo" },
+    ])
+    getPaymentsMock.mockResolvedValue([
+      { id: "pay1", project_id: "p1", amount: 1000, status: "pagado", method: "transferencia", payment_date: `${year}-02-01` },
+      { id: "pay2", project_id: "p2", amount: 5000, status: "pagado", method: "transferencia", payment_date: `${year}-03-01` },
+      { id: "pay3", project_id: "p2", amount: 700, status: "pendiente", method: "transferencia" },
+    ])
+    renderClientsPage()
+
+    const heading = await screen.findByRole("heading", { name: /Quién te deja más plata/i })
+    const card = heading.closest("section")!
+    const items = await within(card).findAllByRole("listitem")
+    expect(within(items[0]).getByText("Ana López")).toBeInTheDocument()
+    expect(within(items[1]).getByText("Juan Pérez")).toBeInTheDocument()
+    expect(within(items[0]).getByText(/pendiente/)).toBeInTheDocument()
+    expect(screen.queryByText("Pro")).not.toBeInTheDocument()
   })
 })

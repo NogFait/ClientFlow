@@ -6,6 +6,10 @@ import type { Entitlements } from "../../features/billing/types"
 
 const getClientsMock = vi.fn()
 
+vi.mock("../../features/payments/services", () => ({
+  getPayments: vi.fn().mockResolvedValue([]),
+}))
+
 vi.mock("../../features/clients/notes/services", () => ({
   getClientNotes: vi.fn().mockResolvedValue([]),
   getLatestNoteByClient: vi.fn().mockResolvedValue({}),
@@ -22,6 +26,7 @@ vi.mock("../../features/clients/services", () => ({
 
 vi.mock("../../features/projects/services", () => ({
   countProjectsByClient: vi.fn(),
+  getProjects: vi.fn().mockResolvedValue([]),
 }))
 
 const entitlements: Entitlements = {

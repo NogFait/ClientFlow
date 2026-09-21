@@ -5,7 +5,12 @@ import { useCurrentLang } from "../../i18n/useCurrentLang"
 import { formatDate } from "../../i18n/locale"
 import type { IClient } from "../../features/clients/types"
 import { getClients, deleteClient } from "../../features/clients/services"
-import { countProjectsByClient } from "../../features/projects/services"
+import { countProjectsByClient, getProjects } from "../../features/projects/services"
+import { getPayments } from "../../features/payments/services"
+import { rankClients, type ClientRankRow } from "../../features/clients/domain/clientRanking"
+import ClientRanking from "../../features/clients/components/ClientRanking/ClientRanking"
+import ProFeature from "../../features/billing/components/ProFeature/ProFeature"
+import { todayDateOnly } from "../../i18n/locale"
 import { ForeignKeyViolationError } from "../../services/supabaseErrors"
 import { useClientForm } from "../../features/clients/hooks/useClientForm"
 import ClientCard from "../../features/clients/components/ClientCard/ClientCard"
@@ -44,6 +49,9 @@ const ClientsPage = () => {
   const [clients, setClients] = useState<IClient[]>([])
   // Newest note per client id — the "last activity" line in each row.
   const [latestNotes, setLatestNotes] = useState<Record<string, IClientNote>>({})
+  // "¿Quién te deja más plata?" (Pro) — rolled up from projects + payments.
+  const [ranking, setRanking] = useState<ClientRankRow[]>([])
+  const rankingYear = Number(todayDateOnly().slice(0, 4))
   const [modalMode, setModalMode] = useState<ModalMode>(null)
   const [selectedClient, setSelectedClient] = useState<IClient | null>(null)
   const [loading, setLoading] = useState(true)
@@ -85,6 +93,13 @@ const ClientsPage = () => {
     getClients().then(setClients).catch(() => {}).finally(() => setLoading(false))
     getLatestNoteByClient().then(setLatestNotes).catch(() => {})
   }, [])
+
+  // Best effort, like the notes: the ranking failing must not hide the list.
+  useEffect(() => {
+    Promise.all([getProjects(), getPayments()])
+      .then(([projects, payments]) => setRanking(rankClients({ clients, projects, payments, year: rankingYear })))
+      .catch(() => {})
+  }, [clients, rankingYear])
 
   const handleView = (client: IClient) => {
     setSelectedClient(client)
@@ -178,6 +193,14 @@ const ClientsPage = () => {
             <StatCard label={t("clients.stats.pending")} value={clients.filter(c => c.status === "pendiente").length} icon={Clock} variant="warning" />
             <StatCard label={t("clients.stats.inactive")} value={clients.filter(c => c.status === "inactivo").length} icon={UserX} variant="error" />
           </div>
+
+          {clients.length > 0 && (
+            <div className={styles.rankingSection}>
+              <ProFeature title={t("clients.ranking.title")} description={t("clients.ranking.description")}>
+                <ClientRanking year={rankingYear} rows={ranking} />
+              </ProFeature>
+            </div>
+          )}
 
           {clients.length === 0 && (
             <EmptyState
