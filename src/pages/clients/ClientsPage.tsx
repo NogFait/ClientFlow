@@ -12,6 +12,8 @@ import ClientCard from "../../features/clients/components/ClientCard/ClientCard"
 import ClientMobileCard from "../../features/clients/components/ClientCard/ClientMobileCard"
 import ClientForm from "../../features/clients/components/ClientForm/ClientForm"
 import ClientNotes from "../../features/clients/notes/components/ClientNotes/ClientNotes"
+import { getLatestNoteByClient } from "../../features/clients/notes/services"
+import type { IClientNote } from "../../features/clients/notes/types"
 import Modal from "../../components/shared/Modal/Modal"
 import ConfirmDialog from "../../components/shared/ConfirmDialog/ConfirmDialog"
 import { useConfirm } from "../../hooks/useConfirm"
@@ -40,6 +42,8 @@ const ClientsPage = () => {
   const lang = useCurrentLang()
   const navigate = useNavigate()
   const [clients, setClients] = useState<IClient[]>([])
+  // Newest note per client id — the "last activity" line in each row.
+  const [latestNotes, setLatestNotes] = useState<Record<string, IClientNote>>({})
   const [modalMode, setModalMode] = useState<ModalMode>(null)
   const [selectedClient, setSelectedClient] = useState<IClient | null>(null)
   const [loading, setLoading] = useState(true)
@@ -50,6 +54,11 @@ const ClientsPage = () => {
   const refreshClients = async () => {
     const updated = await getClients()
     setClients(updated)
+  }
+
+  // Best effort: a failure here must not hide the client list.
+  const refreshLatestNotes = () => {
+    getLatestNoteByClient().then(setLatestNotes).catch(() => {})
   }
 
   const handleLimitExceeded = (error: LimitExceededError) => {
@@ -74,6 +83,7 @@ const ClientsPage = () => {
 
   useEffect(() => {
     getClients().then(setClients).catch(() => {}).finally(() => setLoading(false))
+    getLatestNoteByClient().then(setLatestNotes).catch(() => {})
   }, [])
 
   const handleView = (client: IClient) => {
@@ -182,7 +192,7 @@ const ClientsPage = () => {
             isMobile ? (
               <div className={styles.mobileList}>
                 {clients.map(c => (
-                  <ClientMobileCard key={c.id} client={c} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} />
+                  <ClientMobileCard key={c.id} client={c} latestNote={latestNotes[c.id!]} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} />
                 ))}
               </div>
             ) : (
@@ -199,7 +209,7 @@ const ClientsPage = () => {
           </thead>
           <tbody>
             {clients.map(c => (
-              <ClientCard key={c.id} client={c} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} />
+              <ClientCard key={c.id} client={c} latestNote={latestNotes[c.id!]} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} />
             ))}
           </tbody>
                       </table></div>
@@ -237,7 +247,7 @@ const ClientsPage = () => {
               <span className={styles.label}>{t("clients.fields.created")}</span>
               <span className={styles.value}>{formatDate(selectedClient.created_at!, lang)}</span>
             </div>
-            <ClientNotes key={selectedClient.id} clientId={selectedClient.id!} />
+            <ClientNotes key={selectedClient.id} clientId={selectedClient.id!} onChange={refreshLatestNotes} />
             <button className={styles.closeBtn} onClick={closeModal}>{t("shared.close")}</button>
           </div>
         )}

@@ -90,3 +90,35 @@ describe("deleteClientNote", () => {
     await expect(deleteClientNote("n1")).rejects.toThrow("network down")
   })
 })
+
+describe("getLatestNoteByClient", () => {
+  it("returns the newest note per client from one ordered query (RLS already scopes it to the user)", async () => {
+    const rows = [
+      { id: "n3", client_id: "c1", note_date: "2026-09-15", content: "Quedé en escribirle" },
+      { id: "n2", client_id: "c2", note_date: "2026-09-10", content: "Aprobó el presupuesto" },
+      { id: "n1", client_id: "c1", note_date: "2026-09-03", content: "Le pasé presupuesto" },
+    ]
+    const order2 = vi.fn().mockResolvedValue({ data: rows, error: null })
+    const order1 = vi.fn().mockReturnValue({ order: order2 })
+    const select = vi.fn().mockReturnValue({ order: order1 })
+    fromMock.mockReturnValue({ select })
+    const { getLatestNoteByClient } = await import("./services")
+
+    const latest = await getLatestNoteByClient()
+
+    expect(latest).toEqual({ c1: rows[0], c2: rows[1] })
+    expect(fromMock).toHaveBeenCalledWith("notas")
+    expect(order1).toHaveBeenCalledWith("note_date", { ascending: false })
+    expect(order2).toHaveBeenCalledWith("created_at", { ascending: false })
+  })
+
+  it("returns an empty map when there are no notes, and throws the Supabase message on failure", async () => {
+    const { getLatestNoteByClient } = await import("./services")
+
+    fromMock.mockReturnValue({ select: () => ({ order: () => ({ order: vi.fn().mockResolvedValue({ data: [], error: null }) }) }) })
+    await expect(getLatestNoteByClient()).resolves.toEqual({})
+
+    fromMock.mockReturnValue({ select: () => ({ order: () => ({ order: vi.fn().mockResolvedValue({ data: null, error: { message: "boom" } }) }) }) })
+    await expect(getLatestNoteByClient()).rejects.toThrow("boom")
+  })
+})

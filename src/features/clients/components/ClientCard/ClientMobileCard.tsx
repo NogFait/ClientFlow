@@ -1,6 +1,9 @@
 import { Check, Clock, X, Eye, Pencil, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import type { IClient } from "../../types"
+import type { IClientNote } from "../../notes/types"
+import { useCurrentLang } from "../../../../i18n/useCurrentLang"
+import { formatDateOnly } from "../../../../i18n/locale"
 import styles from "./ClientMobileCard.module.css"
 
 // Icons per DB status value; the label comes from status.client.* at render.
@@ -12,6 +15,7 @@ const statusConfig: Record<string, { key: "activo" | "pendiente" | "inactivo"; i
 
 interface ClientMobileCardProps {
   client: IClient
+  latestNote?: IClientNote
   onView: (client: IClient) => void
   onEdit: (client: IClient) => void
   onDelete: (client: IClient) => void
@@ -21,8 +25,9 @@ interface ClientMobileCardProps {
 // the table's six columns don't fit and the action buttons become
 // unreachable without horizontal scrolling. Same data as ClientCard, laid
 // out vertically with a full-width action row of ≥40px tap targets.
-const ClientMobileCard = ({ client, onView, onEdit, onDelete }: ClientMobileCardProps) => {
+const ClientMobileCard = ({ client, latestNote, onView, onEdit, onDelete }: ClientMobileCardProps) => {
   const { t } = useTranslation("app")
+  const lang = useCurrentLang()
   const config = statusConfig[client.status] ?? statusConfig.pendiente
   const Icon = config.icon
   const statusKey = client.status.charAt(0).toUpperCase() + client.status.slice(1)
@@ -42,6 +47,12 @@ const ClientMobileCard = ({ client, onView, onEdit, onDelete }: ClientMobileCard
         <span className={styles.detailLine}>{client.celular}</span>
         <span className={styles.detailLine}>{client.company}</span>
       </div>
+      {latestNote && (
+        <p className={styles.lastNote}>
+          <time className={styles.lastNoteDate} dateTime={latestNote.note_date}>{formatDateOnly(latestNote.note_date, lang)}</time>
+          <span className={styles.lastNoteText}>{latestNote.content}</span>
+        </p>
+      )}
       <div className={styles.actions}>
         <button
           type="button"

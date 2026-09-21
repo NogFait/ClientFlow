@@ -44,9 +44,12 @@ vi.mock("../../features/projects/services", () => ({
 // The detail modal embeds the client's history (ClientNotes); its service
 // is mocked so opening "Ver" never reaches Supabase from this page test.
 const getClientNotesMock = vi.fn()
+const getLatestNoteByClientMock = vi.fn()
+const createClientNoteMock = vi.fn()
 vi.mock("../../features/clients/notes/services", () => ({
   getClientNotes: (id: string) => getClientNotesMock(id),
-  createClientNote: vi.fn(),
+  getLatestNoteByClient: () => getLatestNoteByClientMock(),
+  createClientNote: (note: unknown) => createClientNoteMock(note),
   deleteClientNote: vi.fn(),
 }))
 
@@ -76,6 +79,8 @@ vi.mock("../../features/billing/context/entitlementsContext", () => ({
 
 beforeEach(() => {
   getClientNotesMock.mockResolvedValue([])
+  getLatestNoteByClientMock.mockResolvedValue({})
+  createClientNoteMock.mockReset()
   // Default: client has no proyectos, so existing delete-confirmation tests
   // (written before the block-and-explain check existed) keep exercising
   // the normal confirm+delete flow unless a test overrides this.
@@ -423,5 +428,59 @@ describe("ClientsPage — client detail history", () => {
     expect(await within(dialog).findByText("Le pasé presupuesto")).toBeInTheDocument()
     expect(within(dialog).getByText("3/9/2026")).toBeInTheDocument()
     expect(getClientNotesMock).toHaveBeenCalledWith("c1")
+  })
+})
+
+describe("ClientsPage — last note in the list", () => {
+  const latest = { c1: { id: "n9", client_id: "c1", note_date: "2026-09-15", content: "Quedé en escribirle el 15" } }
+
+  it("shows each client's latest note (date · text) under the name in the table", async () => {
+    getClientsMock.mockResolvedValue([sampleClient])
+    getLatestNoteByClientMock.mockResolvedValue(latest)
+    renderClientsPage()
+
+    const row = (await screen.findByText("Juan Pérez")).closest("tr")!
+    expect(within(row).getByText("15/9/2026")).toBeInTheDocument()
+    expect(within(row).getByText("Quedé en escribirle el 15")).toBeInTheDocument()
+  })
+
+  it("shows nothing extra for a client without notes (triangulation)", async () => {
+    getClientsMock.mockResolvedValue([sampleClient])
+    renderClientsPage()
+
+    const row = (await screen.findByText("Juan Pérez")).closest("tr")!
+    expect(within(row).queryByText(/\/2026/)).not.toBeInTheDocument()
+  })
+
+  it("shows the latest note in the mobile card too", async () => {
+    installMatchMedia(true)
+    getClientsMock.mockResolvedValue([sampleClient])
+    getLatestNoteByClientMock.mockResolvedValue(latest)
+    renderClientsPage()
+
+    expect(await screen.findByText("Quedé en escribirle el 15")).toBeInTheDocument()
+    expect(screen.queryByRole("table")).not.toBeInTheDocument()
+  })
+
+  it("refreshes the list's latest note after adding one from the detail modal", async () => {
+    getClientsMock.mockResolvedValue([sampleClient])
+    getLatestNoteByClientMock.mockResolvedValueOnce({})
+    const added = { id: "n10", client_id: "c1", note_date: "2026-09-21", content: "Llamé, no atendió" }
+    createClientNoteMock.mockResolvedValue(added)
+    getLatestNoteByClientMock.mockResolvedValue({ c1: added })
+    const user = userEvent.setup()
+    renderClientsPage()
+
+    await user.click(await screen.findByRole("button", { name: "Ver" }))
+    const dialog = await screen.findByRole("dialog")
+    await user.type(within(dialog).getByLabelText(/^Nota$/i), "Llamé, no atendió")
+    await user.click(within(dialog).getByRole("button", { name: /Agregar nota/i }))
+    await within(dialog).findAllByRole("listitem")
+    // Two "Cerrar" controls: the header X and the footer button — either works.
+    await user.click(within(dialog).getAllByRole("button", { name: "Cerrar" }).at(-1)!)
+
+    const row = (await screen.findByText("Juan Pérez")).closest("tr")!
+    expect(await within(row).findByText("Llamé, no atendió")).toBeInTheDocument()
+    expect(getLatestNoteByClientMock).toHaveBeenCalledTimes(2)
   })
 })

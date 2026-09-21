@@ -9,6 +9,8 @@ import styles from "./ClientNotes.module.css"
 
 interface ClientNotesProps {
   clientId: string
+  /** Fired after a note is added or removed, so the list outside can refresh its "last note" line. */
+  onChange?: () => void
 }
 
 type LoadState = "loading" | "ready" | "error"
@@ -17,7 +19,7 @@ type LoadState = "loading" | "ready" | "error"
 // one. Lives inside the client detail modal. Deleting asks inline (the
 // shared ConfirmDialog is a Modal without a portal — nesting it inside the
 // detail modal would stack two fixed overlays).
-const ClientNotes = ({ clientId }: ClientNotesProps) => {
+const ClientNotes = ({ clientId, onChange }: ClientNotesProps) => {
   const { t } = useTranslation("app")
   const lang = useCurrentLang()
   const [notes, setNotes] = useState<IClientNote[]>([])
@@ -60,6 +62,7 @@ const ClientNotes = ({ clientId }: ClientNotesProps) => {
       const created = await createClientNote({ client_id: clientId, note_date: noteDate, content: trimmed })
       setNotes((current) => [created, ...current])
       setContent("")
+      onChange?.()
     } catch {
       setFormError(t("clients.notes.saveError"))
     } finally {
@@ -72,6 +75,7 @@ const ClientNotes = ({ clientId }: ClientNotesProps) => {
     try {
       await deleteClientNote(id)
       setNotes((current) => current.filter((note) => note.id !== id))
+      onChange?.()
     } catch {
       setDeleteError(t("clients.notes.deleteError"))
     } finally {

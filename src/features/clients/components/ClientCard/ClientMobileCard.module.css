@@ -99,3 +99,26 @@
   border-color: var(--color-error);
   color: var(--color-error-text);
 }
+
+/* Latest note: date · text, clipped to two lines */
+.lastNote {
+  margin: 0;
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.lastNoteDate {
+  flex-shrink: 0;
+  color: var(--color-primary-600);
+  font-weight: var(--font-weight-medium);
+}
+
+.lastNoteText {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

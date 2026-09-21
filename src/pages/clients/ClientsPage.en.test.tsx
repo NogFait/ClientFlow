@@ -8,6 +8,7 @@ const getClientsMock = vi.fn()
 
 vi.mock("../../features/clients/notes/services", () => ({
   getClientNotes: vi.fn().mockResolvedValue([]),
+  getLatestNoteByClient: vi.fn().mockResolvedValue({}),
   createClientNote: vi.fn(),
   deleteClientNote: vi.fn(),
 }))

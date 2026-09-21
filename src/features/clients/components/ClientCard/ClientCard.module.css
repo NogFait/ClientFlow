@@ -88,3 +88,31 @@
   border-color: var(--color-error);
   color: var(--color-error-text);
 }
+
+.name {
+  display: block;
+}
+
+/* "date · text" of the latest note, one line, clipped */
+.lastNote {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 2px;
+  max-width: 260px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-tertiary);
+}
+
+.lastNoteDate {
+  flex-shrink: 0;
+  color: var(--color-primary-600);
+  font-weight: var(--font-weight-medium);
+}
+
+.lastNoteText {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
