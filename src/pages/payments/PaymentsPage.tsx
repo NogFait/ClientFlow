@@ -6,6 +6,9 @@ import { formatDateOnly, todayDateOnly } from "../../i18n/locale"
 import type { IPayment } from "../../features/payments/types"
 import type { IProject } from "../../features/projects/types"
 import { getPaymentsInRange, getPaymentTotals, deletePayment, type PaymentTotals } from "../../features/payments/services"
+import { buildPaymentsCsv, csvFilename, type CsvLabels, type CsvPaymentRow } from "../../features/payments/domain/paymentsCsv"
+import { downloadTextFile } from "../../utils/download"
+import ProFeature from "../../features/billing/components/ProFeature/ProFeature"
 import { getProjects } from "../../features/projects/services"
 import { usePaymentForm } from "../../features/payments/hooks/usePaymentForm"
 import PaymentTableRow from "../../features/payments/components/PaymentTableRow/PaymentTableRow"
@@ -18,7 +21,7 @@ import { useConfirm } from "../../hooks/useConfirm"
 import { useMediaQuery } from "../../hooks/useMediaQuery"
 import PageHeader from "../../components/shared/PageHeader/PageHeader"
 import MonthSelector from "../../components/shared/MonthSelector/MonthSelector"
-import { DollarSign, Clock, Calendar, TrendingUp } from "lucide-react"
+import { DollarSign, Clock, Calendar, TrendingUp, Download } from "lucide-react"
 import StatCard from "../../components/shared/StatCard/StatCard"
 import Loader from "../../components/shared/Loader/Loader"
 import EmptyState from "../../components/shared/EmptyState/EmptyState"
@@ -60,6 +63,45 @@ const PaymentsPage = () => {
     loaded?.key === requestKey ? loaded.yearTotals : { paid: 0, pending: 0, pendingByMonth: {} }
   const pendingMonths = Object.keys(yearTotals.pendingByMonth ?? {}).sort() as MonthKey[]
   const toast = useToast()
+  const [exporting, setExporting] = useState<"month" | "year" | null>(null)
+
+  // Export to CSV (Pro): the month already on screen, or the whole year
+  // fetched on demand. Names, not ids — the file is for the accountant.
+  const toCsvRows = (list: PaymentWithRelations[]): CsvPaymentRow[] =>
+    list.map((p) => ({
+      payment_date: p.payment_date,
+      client: p.proyectos?.clientes?.name ?? "",
+      project: p.proyectos?.name ?? "",
+      amount: Number(p.amount),
+      method: p.method,
+      status: p.status,
+      notes: p.notes ?? "",
+    }))
+  const csvLabels: CsvLabels = {
+    header: [
+      t("payments.export.columns.date"), t("payments.export.columns.client"), t("payments.export.columns.project"),
+      t("payments.export.columns.amount"), t("payments.export.columns.method"), t("payments.export.columns.status"),
+      t("payments.export.columns.notes"),
+    ],
+    method: {
+      efectivo: t("status.method.efectivo"), transferencia: t("status.method.transferencia"),
+      tarjeta: t("status.method.tarjeta"), other: t("status.method.other"),
+    },
+    status: { pendiente: t("status.payment.pendiente"), pagado: t("status.payment.pagado") },
+  }
+  const handleExport = async (scope: "month" | "year") => {
+    setExporting(scope)
+    try {
+      const list = scope === "month" ? payments : await getPaymentsInRange(yearRange(month))
+      const filename = csvFilename(scope, month)
+      downloadTextFile(filename, buildPaymentsCsv(toCsvRows(list), { lang, labels: csvLabels }), "text/csv;charset=utf-8")
+      toast.success(t("payments.export.done", { filename }))
+    } catch {
+      toast.error(t("payments.export.error"))
+    } finally {
+      setExporting(null)
+    }
+  }
 
   const handleFormSuccess = (saved: IPayment) => {
     const wasEdit = editingPayment !== null
@@ -163,7 +205,21 @@ const PaymentsPage = () => {
         actionLabel={t("payments.register")}
         onAction={() => { setEditingPayment(null); setModalOpen(true) }}
       >
-        <MonthSelector value={month} onChange={handleMonthChange} markedMonths={pendingMonths} />
+        <div className={styles.toolbar}>
+          <MonthSelector value={month} onChange={handleMonthChange} markedMonths={pendingMonths} />
+          <ProFeature variant="inline" title={t("payments.export.title")} description={t("payments.export.description")}>
+            <div className={styles.exportGroup} role="group" aria-label={t("payments.export.title")}>
+              <button type="button" className={styles.exportBtn} disabled={exporting !== null} onClick={() => handleExport("month")}>
+                <Download size={14} aria-hidden="true" />
+                {exporting === "month" ? t("payments.export.exporting") : t("payments.export.month", { month: monthLabel })}
+              </button>
+              <button type="button" className={styles.exportBtn} disabled={exporting !== null} onClick={() => handleExport("year")}>
+                <Download size={14} aria-hidden="true" />
+                {exporting === "year" ? t("payments.export.exporting") : t("payments.export.year", { year: month.slice(0, 4) })}
+              </button>
+            </div>
+          </ProFeature>
+        </div>
       </PageHeader>
 
       {deleteError && (

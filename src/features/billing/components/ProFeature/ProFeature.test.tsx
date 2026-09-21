@@ -80,3 +80,32 @@ describe("ProFeature", () => {
     expect(screen.getByText("Pro")).toBeInTheDocument()
   })
 })
+
+describe("ProFeature — inline variant (toolbar buttons)", () => {
+  it("renders a single locked button with the title and Pro tag for a Free user, which leads to billing", async () => {
+    entitlements = base
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={["/payments"]}>
+        <Routes>
+          <Route
+            path="/payments"
+            element={
+              <ProFeature variant="inline" title="Exportar a Excel" description="CSV del mes o del año.">
+                <button type="button">Exportar mes</button>
+              </ProFeature>
+            }
+          />
+          <Route path="/settings/billing" element={<div data-testid="billing-page">billing</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByRole("button", { name: "Exportar mes" })).not.toBeInTheDocument()
+    const locked = screen.getByRole("button", { name: /Exportar a Excel/i })
+    expect(locked).toHaveAttribute("title", "CSV del mes o del año.")
+    expect(locked.textContent).toContain("Pro")
+    await user.click(locked)
+    expect(await screen.findByTestId("billing-page")).toBeInTheDocument()
+  })
+})

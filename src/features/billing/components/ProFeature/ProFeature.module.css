@@ -87,3 +87,24 @@
 .cta:hover {
   background: var(--color-primary-700);
 }
+
+/* Inline variant: a toolbar button that reads as locked */
+.inline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  height: 40px;
+  padding: 0 14px;
+  border: 1px dashed var(--color-primary-600);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.inline:hover {
+  background: var(--color-primary-100);
+}

@@ -33,6 +33,22 @@ vi.mock("../../features/projects/services", () => ({
   getProjects: () => getProjectsMock(),
 }))
 
+// Export to CSV is Pro; the page reads the plan from the entitlements context.
+import type { Entitlements } from "../../features/billing/types"
+const freeEntitlements: Entitlements = {
+  plan: "free", status: "free", limits: { clientes: 3, proyectos: 5 }, usage: { clientes: 0, proyectos: 0 },
+  current_period_end: null, cancel_at_period_end: false, grace_until: null,
+}
+let currentEntitlements: Entitlements = freeEntitlements
+vi.mock("../../features/billing/context/entitlementsContext", () => ({
+  useEntitlementsContext: () => ({ entitlements: currentEntitlements, refresh: vi.fn(), loading: false }),
+}))
+
+const downloadTextFileMock = vi.fn()
+vi.mock("../../utils/download", () => ({
+  downloadTextFile: (...args: unknown[]) => downloadTextFileMock(...args),
+}))
+
 function installMatchMedia(matches: boolean) {
   window.matchMedia = ((query: string) =>
     ({
@@ -44,6 +60,8 @@ function installMatchMedia(matches: boolean) {
 }
 
 afterEach(() => {
+  currentEntitlements = freeEntitlements
+  downloadTextFileMock.mockReset()
   getPaymentsInRangeMock.mockReset()
   getPaymentTotalsMock.mockReset()
   createPaymentMock.mockReset()
@@ -412,5 +430,57 @@ describe("PaymentsPage — create while viewing another month", () => {
     expect(await screen.findByText(`Pago registrado en ${formatMonthEsAr(pastMonth)}`)).toBeInTheDocument()
     await waitFor(() => expect(screen.getByText(formatMonthEsAr(pastMonth))).toBeInTheDocument())
     expect(getPaymentsInRangeMock).toHaveBeenCalledWith(monthRange(pastMonth))
+  })
+})
+
+describe("PaymentsPage — export to CSV (Pro)", () => {
+  it("shows a locked 'Exportar a Excel' control (not the export buttons) for a Free user", async () => {
+    getPaymentsInRangeMock.mockResolvedValue([samplePayment])
+    getPaymentTotalsMock.mockResolvedValue({ paid: 0, pending: 150.5 })
+    getProjectsMock.mockResolvedValue([])
+    renderAt()
+
+    await screen.findByText("Acme")
+    expect(screen.getByRole("button", { name: /Exportar a Excel/i })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /^Exportar (?!a Excel)/i })).not.toBeInTheDocument()
+  })
+
+  it("downloads the month as CSV (header + one row with names, not ids) for a Pro user", async () => {
+    currentEntitlements = { ...freeEntitlements, plan: "pro_monthly", status: "active", limits: { clientes: null, proyectos: null } }
+    getPaymentsInRangeMock.mockResolvedValue([{ ...samplePayment, notes: "Seña" }])
+    getPaymentTotalsMock.mockResolvedValue({ paid: 0, pending: 150.5 })
+    getProjectsMock.mockResolvedValue([])
+    const user = userEvent.setup()
+    renderAtWithToast()
+    await screen.findByText("Acme")
+
+    // "Exportar septiembre 2026" (month name + year) vs "Exportar 2026" (year only)
+    await user.click(screen.getByRole("button", { name: /^Exportar [a-záéíóúñ]+ \d{4}$/i }))
+
+    await waitFor(() => expect(downloadTextFileMock).toHaveBeenCalledTimes(1))
+    const [filename, content, mime] = downloadTextFileMock.mock.calls[0] as [string, string, string]
+    expect(filename).toMatch(/^clientflow-pagos-\d{4}-\d{2}\.csv$/)
+    expect(mime).toContain("text/csv")
+    const lines = content.split("\r\n")
+    expect(lines[0]).toBe("\uFEFFFecha;Cliente;Proyecto;Monto;Método;Estado;Notas")
+    expect(lines[1]).toBe(`${samplePayment.payment_date};Acme;Sitio Web;150,5;Efectivo;Pendiente;Seña`)
+    expect(await screen.findByText(/Archivo descargado/i)).toBeInTheDocument()
+  })
+
+  it("fetches the whole year and names the file by year when exporting the year", async () => {
+    currentEntitlements = { ...freeEntitlements, plan: "pro_yearly", status: "active", limits: { clientes: null, proyectos: null } }
+    getPaymentsInRangeMock.mockResolvedValue([samplePayment])
+    getPaymentTotalsMock.mockResolvedValue({ paid: 0, pending: 150.5 })
+    getProjectsMock.mockResolvedValue([])
+    const user = userEvent.setup()
+    renderAtWithToast()
+    await screen.findByText("Acme")
+    const year = samplePayment.payment_date.slice(0, 4)
+
+    await user.click(screen.getByRole("button", { name: `Exportar ${year}` }))
+
+    await waitFor(() => expect(downloadTextFileMock).toHaveBeenCalledTimes(1))
+    expect(getPaymentsInRangeMock).toHaveBeenCalledWith({ from: `${year}-01-01`, to: `${Number(year) + 1}-01-01` })
+    expect((downloadTextFileMock.mock.calls[0] as [string])[0]).toBe(`clientflow-pagos-${year}.csv`)
   })
 })

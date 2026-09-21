@@ -15,6 +15,14 @@ vi.mock("../../features/payments/services", () => ({
   deletePayment: vi.fn(),
 }))
 
+vi.mock("../../features/billing/context/entitlementsContext", () => ({
+  useEntitlementsContext: () => ({
+    entitlements: { plan: "free", status: "free", limits: { clientes: 3, proyectos: 5 }, usage: { clientes: 0, proyectos: 0 }, current_period_end: null, cancel_at_period_end: false, grace_until: null },
+    refresh: vi.fn(),
+    loading: false,
+  }),
+}))
+
 vi.mock("../../features/projects/services", () => ({
   getProjects: () => Promise.resolve([]),
 }))

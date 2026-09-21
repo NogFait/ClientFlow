@@ -9,6 +9,8 @@ import styles from "./ProFeature.module.css"
 interface ProFeatureProps {
   title: string
   description: string
+  /** "card" (default) for page sections; "inline" for a toolbar control. */
+  variant?: "card" | "inline"
   children: ReactNode
 }
 
@@ -17,12 +19,22 @@ interface ProFeatureProps {
 // half the upgrade. Locked while entitlements are still loading so Pro
 // content never flashes for a Free user. Server-side features (the
 // weekly email) check the plan on the server; this is UI only.
-const ProFeature = ({ title, description, children }: ProFeatureProps) => {
+const ProFeature = ({ title, description, variant = "card", children }: ProFeatureProps) => {
   const { t } = useTranslation("app")
   const navigate = useNavigate()
   const { entitlements } = useEntitlementsContext()
 
   if (entitlements && isPro(entitlements)) return <>{children}</>
+
+  if (variant === "inline") {
+    return (
+      <button type="button" className={styles.inline} title={description} onClick={() => navigate("/settings/billing")}>
+        <Lock size={14} aria-hidden="true" />
+        {title}
+        <span className={styles.tag}>{t("billing.proFeature.tag")}</span>
+      </button>
+    )
+  }
 
   return (
     <section className={styles.locked} aria-label={title}>

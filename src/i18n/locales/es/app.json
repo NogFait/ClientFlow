@@ -336,6 +336,24 @@
       "view": "Ver pago de {{amount}}",
       "edit": "Editar pago de {{amount}}",
       "delete": "Eliminar pago de {{amount}}"
+    },
+    "export": {
+      "title": "Exportar a Excel",
+      "description": "Un CSV con fecha, cliente, proyecto, monto, método y estado. Listo para tu contador.",
+      "month": "Exportar {{month}}",
+      "year": "Exportar {{year}}",
+      "exporting": "Exportando...",
+      "done": "Archivo descargado: {{filename}}",
+      "error": "No pudimos generar el archivo. Probá de nuevo.",
+      "columns": {
+        "date": "Fecha",
+        "client": "Cliente",
+        "project": "Proyecto",
+        "amount": "Monto",
+        "method": "Método",
+        "status": "Estado",
+        "notes": "Notas"
+      }
     }
   },
   "billing": {

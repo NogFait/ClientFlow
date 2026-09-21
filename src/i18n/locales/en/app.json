@@ -336,6 +336,24 @@
       "view": "View {{amount}} payment",
       "edit": "Edit {{amount}} payment",
       "delete": "Delete {{amount}} payment"
+    },
+    "export": {
+      "title": "Export to Excel",
+      "description": "A CSV with date, client, project, amount, method and status. Ready for your accountant.",
+      "month": "Export {{month}}",
+      "year": "Export {{year}}",
+      "exporting": "Exporting...",
+      "done": "File downloaded: {{filename}}",
+      "error": "We couldn't generate the file. Try again.",
+      "columns": {
+        "date": "Date",
+        "client": "Client",
+        "project": "Project",
+        "amount": "Amount",
+        "method": "Method",
+        "status": "Status",
+        "notes": "Notes"
+      }
     }
   },
   "billing": {
