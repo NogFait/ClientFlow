@@ -52,3 +52,10 @@
   background-color: var(--color-primary-700);
   box-shadow: var(--shadow-md);
 }
+
+.aside {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}

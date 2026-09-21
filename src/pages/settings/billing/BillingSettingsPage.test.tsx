@@ -151,9 +151,23 @@ describe("BillingSettingsPage — weekly digest (Pro)", () => {
     vi.doMock("../../../config/features", () => ({ BILLING_ENABLED: true }))
     await renderAt("/settings/billing")
 
-    const locked = await screen.findByLabelText("Resumen semanal por email")
+    const locked = await screen.findByRole("button", { name: /Resumen semanal por email/i })
     expect(within(locked).getByText("Pro")).toBeInTheDocument()
     expect(screen.queryByRole("switch")).not.toBeInTheDocument()
+  })
+
+  it("places the toggle in the page header, next to the title, for a Pro user", async () => {
+    vi.doMock("../../../config/features", () => ({ BILLING_ENABLED: true }))
+    entitlementsContextValue = {
+      entitlements: { ...freeEntitlements, plan: "pro_monthly", status: "active", limits: { clientes: null, proyectos: null } },
+      loading: false,
+      refresh: refreshMock,
+    }
+    await renderAt("/settings/billing")
+
+    const toggle = await screen.findByRole("switch", { name: /Resumen semanal por email/i })
+    const header = screen.getByRole("heading", { level: 1, name: /Plan y facturación/i }).closest("[class*=header]")!
+    expect(header).toContainElement(toggle)
   })
 
   it("shows the working toggle for a Pro user", async () => {

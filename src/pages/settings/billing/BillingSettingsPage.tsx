@@ -84,7 +84,17 @@ const BillingSettingsPage = () => {
 
   return (
     <div>
-      <PageHeader title={t("billing.title")} description={t("billing.description")} />
+      <PageHeader
+        title={t("billing.title")}
+        description={t("billing.description")}
+        aside={
+          entitlements && !loading ? (
+            <ProFeature variant="inline" title={t("billing.weeklyDigest.title")} description={t("billing.weeklyDigest.description")}>
+              <WeeklyDigestToggle variant="compact" />
+            </ProFeature>
+          ) : undefined
+        }
+      />
 
       {updating && <div className={styles.banner}>{t("billing.updating")}</div>}
 
@@ -93,20 +103,13 @@ const BillingSettingsPage = () => {
           <Loader />
         </div>
       ) : (
-        <>
-          <BillingSettings
-            entitlements={entitlements}
-            onUpgrade={upgrade}
-            onManage={manage}
-            loading={checkoutLoading}
-            error={checkoutError}
-          />
-          <div className={styles.proSection}>
-            <ProFeature title={t("billing.weeklyDigest.title")} description={t("billing.weeklyDigest.description")}>
-              <WeeklyDigestToggle />
-            </ProFeature>
-          </div>
-        </>
+        <BillingSettings
+          entitlements={entitlements}
+          onUpgrade={upgrade}
+          onManage={manage}
+          loading={checkoutLoading}
+          error={checkoutError}
+        />
       )}
     </div>
   )

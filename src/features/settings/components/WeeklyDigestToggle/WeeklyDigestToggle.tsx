@@ -4,9 +4,14 @@ import { Mail } from "lucide-react"
 import { getUserSettings, setWeeklyDigest } from "../../services"
 import styles from "./WeeklyDigestToggle.module.css"
 
+interface WeeklyDigestToggleProps {
+  /** "card" explains the digest; "compact" is label + switch for a page header. */
+  variant?: "card" | "compact"
+}
+
 // Opt-out for the Pro weekly digest. Optimistic: flips at once, reverts on
 // failure. Rendered inside <ProFeature> on the billing page.
-const WeeklyDigestToggle = () => {
+const WeeklyDigestToggle = ({ variant = "card" }: WeeklyDigestToggleProps) => {
   const { t } = useTranslation("app")
   const [enabled, setEnabled] = useState<boolean | null>(null)
   const [saving, setSaving] = useState(false)
@@ -42,6 +47,31 @@ const WeeklyDigestToggle = () => {
     }
   }
 
+  const switchButton = (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={enabled === true}
+      aria-label={t("billing.weeklyDigest.toggleLabel")}
+      className={`${styles.switch} ${enabled ? styles.switchOn : ""}`}
+      disabled={enabled === null || saving}
+      onClick={toggle}
+    >
+      <span className={styles.knob} />
+    </button>
+  )
+
+  if (variant === "compact") {
+    return (
+      <div className={styles.compact} title={t("billing.weeklyDigest.description")}>
+        <Mail size={14} className={styles.compactIcon} aria-hidden="true" />
+        <span className={styles.compactLabel}>{t("billing.weeklyDigest.title")}</span>
+        {switchButton}
+        {error && <span className={styles.error} role="alert">{error}</span>}
+      </div>
+    )
+  }
+
   return (
     <section className={styles.card} aria-labelledby="weekly-digest-title">
       <div className={styles.header}>
@@ -55,17 +85,7 @@ const WeeklyDigestToggle = () => {
       </div>
       <div className={styles.controlRow}>
         <span className={styles.state}>{enabled ? t("billing.weeklyDigest.on") : t("billing.weeklyDigest.off")}</span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={enabled === true}
-          aria-label={t("billing.weeklyDigest.toggleLabel")}
-          className={`${styles.switch} ${enabled ? styles.switchOn : ""}`}
-          disabled={enabled === null || saving}
-          onClick={toggle}
-        >
-          <span className={styles.knob} />
-        </button>
+        {switchButton}
       </div>
       {error && <p className={styles.error} role="alert">{error}</p>}
     </section>

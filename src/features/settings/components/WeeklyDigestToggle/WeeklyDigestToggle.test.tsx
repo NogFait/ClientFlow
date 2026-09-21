@@ -53,3 +53,17 @@ describe("WeeklyDigestToggle", () => {
     expect(toggle).toHaveAttribute("aria-checked", "true")
   })
 })
+
+describe("WeeklyDigestToggle — compact (page header)", () => {
+  it("renders just the label and the switch, no card copy, and still saves", async () => {
+    const user = userEvent.setup()
+    render(<WeeklyDigestToggle variant="compact" />)
+
+    const toggle = await screen.findByRole("switch", { name: /Resumen semanal por email/i })
+    expect(screen.getByText("Resumen semanal por email")).toBeInTheDocument()
+    expect(screen.queryByText(/Todos los lunes/i)).not.toBeInTheDocument()
+
+    await user.click(toggle)
+    await waitFor(() => expect(setWeeklyDigestMock).toHaveBeenCalledWith(false))
+  })
+})

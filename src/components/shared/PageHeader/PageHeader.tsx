@@ -10,9 +10,12 @@ interface PageHeaderProps {
   // Optional extra content (e.g. a MonthSelector) rendered below the
   // title/action row — additive, so existing callers are unaffected.
   children?: ReactNode
+  // Optional control rendered in the title row, right-aligned (e.g. the
+  // weekly digest switch) — where the action button goes when there is none.
+  aside?: ReactNode
 }
 
-const PageHeader = ({ title, description, actionLabel, onAction, children }: PageHeaderProps) => {
+const PageHeader = ({ title, description, actionLabel, onAction, children, aside }: PageHeaderProps) => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
@@ -20,11 +23,16 @@ const PageHeader = ({ title, description, actionLabel, onAction, children }: Pag
           <h1 className={styles.title}>{title}</h1>
           {description && <p className={styles.description}>{description}</p>}
         </div>
-        {actionLabel && onAction && (
-          <button className={styles.actionButton} onClick={onAction}>
-            <Plus size={16} className={styles.actionIcon} />
-            {actionLabel}
-          </button>
+        {(aside || (actionLabel && onAction)) && (
+          <div className={styles.aside}>
+            {aside}
+            {actionLabel && onAction && (
+              <button className={styles.actionButton} onClick={onAction}>
+                <Plus size={16} className={styles.actionIcon} />
+                {actionLabel}
+              </button>
+            )}
+          </div>
         )}
       </div>
       {children && <div className={styles.extra}>{children}</div>}

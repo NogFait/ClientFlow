@@ -15,8 +15,3 @@
   justify-content: center;
   min-height: 120px;
 }
-
-.proSection {
-  max-width: 640px;
-  margin-top: var(--spacing-6);
-}
