@@ -61,3 +61,25 @@ export function getSupabaseAdminEnv(): SupabaseAdminEnv {
 export function getBillingProviderId(): string {
   return process.env.BILLING_PROVIDER ?? "polar"
 }
+
+// Vercel sends `Authorization: Bearer $CRON_SECRET` on scheduled invocations;
+// anyone else hitting /api/cron/* without it gets 401.
+export function getCronSecret(): string {
+  return required("CRON_SECRET")
+}
+
+export interface DigestEmailEnv {
+  apiKey: string
+  from: string
+  appUrl: string
+}
+
+// Weekly digest sender. RESEND_API_KEY is a Resend "sending access" key;
+// the from address must belong to the verified clientflow.lat domain.
+export function getDigestEmailEnv(): DigestEmailEnv {
+  return {
+    apiKey: required("RESEND_API_KEY"),
+    from: process.env.DIGEST_FROM ?? "ClientFlow <resumen@clientflow.lat>",
+    appUrl: process.env.APP_URL ?? "https://clientflow.lat",
+  }
+}

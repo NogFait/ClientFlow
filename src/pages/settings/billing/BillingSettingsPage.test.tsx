@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, within, waitFor } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import type { Entitlements } from "../../../features/billing/types"
 
@@ -23,6 +23,14 @@ vi.mock("../../../features/billing/context/entitlementsContext", () => ({
   useEntitlementsContext: () => entitlementsContextValue,
 }))
 
+// The weekly digest toggle (Pro) lives on this page; its service is mocked
+// so the page test never reaches Supabase.
+const getUserSettingsMock = vi.fn()
+vi.mock("../../../features/settings/services", () => ({
+  getUserSettings: () => getUserSettingsMock(),
+  setWeeklyDigest: vi.fn(),
+}))
+
 vi.mock("../../../features/billing/hooks/useCheckout", () => ({
   useCheckout: () => ({ upgrade: upgradeMock, manage: manageMock, loading: false, error: null }),
 }))
@@ -40,6 +48,7 @@ async function renderAt(path: string) {
 }
 
 beforeEach(() => {
+  getUserSettingsMock.mockReset().mockResolvedValue({ weekly_digest: true })
   refreshMock.mockReset().mockResolvedValue(undefined)
   upgradeMock.mockReset()
   manageMock.mockReset()
@@ -134,5 +143,28 @@ describe("BillingSettingsPage — enabled", () => {
 
     await waitFor(() => expect(screen.getByText("Free", { selector: "span" })).toBeInTheDocument())
     expect(upgradeMock).not.toHaveBeenCalled()
+  })
+})
+
+describe("BillingSettingsPage — weekly digest (Pro)", () => {
+  it("shows the digest as a locked Pro feature for a Free user", async () => {
+    vi.doMock("../../../config/features", () => ({ BILLING_ENABLED: true }))
+    await renderAt("/settings/billing")
+
+    const locked = await screen.findByLabelText("Resumen semanal por email")
+    expect(within(locked).getByText("Pro")).toBeInTheDocument()
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument()
+  })
+
+  it("shows the working toggle for a Pro user", async () => {
+    vi.doMock("../../../config/features", () => ({ BILLING_ENABLED: true }))
+    entitlementsContextValue = {
+      entitlements: { ...freeEntitlements, plan: "pro_monthly", status: "active", limits: { clientes: null, proyectos: null } },
+      loading: false,
+      refresh: refreshMock,
+    }
+    await renderAt("/settings/billing")
+
+    expect(await screen.findByRole("switch", { name: /Resumen semanal por email/i })).toHaveAttribute("aria-checked", "true")
   })
 })

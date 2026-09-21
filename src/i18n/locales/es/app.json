@@ -409,6 +409,14 @@
       "tag": "Pro",
       "cta": "Ver planes Pro",
       "hint": "Disponible en el plan Pro."
+    },
+    "weeklyDigest": {
+      "title": "Resumen semanal por email",
+      "description": "Todos los lunes a la mañana: pagos por vencer y vencidos, tareas de la semana y clientes con los que hace más de 30 días que no hablás. Si no hay nada que contar, no se manda.",
+      "toggleLabel": "Resumen semanal por email",
+      "on": "Activado",
+      "off": "Desactivado",
+      "saveError": "No pudimos guardar el cambio. Probá de nuevo."
     }
   },
   "errors": {

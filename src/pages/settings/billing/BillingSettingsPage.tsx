@@ -7,6 +7,8 @@ import BillingSettings from "../../../features/billing/components/BillingSetting
 import { useEntitlementsContext } from "../../../features/billing/context/entitlementsContext"
 import { useCheckout } from "../../../features/billing/hooks/useCheckout"
 import { BILLING_ENABLED } from "../../../config/features"
+import ProFeature from "../../../features/billing/components/ProFeature/ProFeature"
+import WeeklyDigestToggle from "../../../features/settings/components/WeeklyDigestToggle/WeeklyDigestToggle"
 import type { PaidPlanCode } from "../../../features/billing/ports/BillingProvider"
 import styles from "./BillingSettingsPage.module.css"
 
@@ -91,13 +93,20 @@ const BillingSettingsPage = () => {
           <Loader />
         </div>
       ) : (
-        <BillingSettings
-          entitlements={entitlements}
-          onUpgrade={upgrade}
-          onManage={manage}
-          loading={checkoutLoading}
-          error={checkoutError}
-        />
+        <>
+          <BillingSettings
+            entitlements={entitlements}
+            onUpgrade={upgrade}
+            onManage={manage}
+            loading={checkoutLoading}
+            error={checkoutError}
+          />
+          <div className={styles.proSection}>
+            <ProFeature title={t("billing.weeklyDigest.title")} description={t("billing.weeklyDigest.description")}>
+              <WeeklyDigestToggle />
+            </ProFeature>
+          </div>
+        </>
       )}
     </div>
   )

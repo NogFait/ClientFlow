@@ -409,6 +409,14 @@
       "tag": "Pro",
       "cta": "See Pro plans",
       "hint": "Available on the Pro plan."
+    },
+    "weeklyDigest": {
+      "title": "Weekly email summary",
+      "description": "Every Monday morning: payments due and overdue, this week's tasks, and clients you haven't talked to in 30+ days. If there's nothing to report, it isn't sent.",
+      "toggleLabel": "Weekly email summary",
+      "on": "On",
+      "off": "Off",
+      "saveError": "We couldn't save the change. Try again."
     }
   },
   "errors": {
