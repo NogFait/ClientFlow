@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useCurrentLang } from "../../i18n/useCurrentLang"
-import { formatDate } from "../../i18n/locale"
+import { formatDate, formatDateOnly } from "../../i18n/locale"
 import type { ITask } from "../../features/tasks/types"
 import type { IProject } from "../../features/projects/types"
 import { getTasks, deleteTask } from "../../features/tasks/services"
@@ -164,7 +164,7 @@ const TaskPage = () => {
             {selectedWithProject.due_date && (
               <div className={styles.field}>
                 <span className={styles.label}>{t("tasks.fields.due")}</span>
-                <span className={styles.value}>{formatDate(selectedWithProject.due_date, lang)}</span>
+                <span className={styles.value}>{formatDateOnly(selectedWithProject.due_date, lang)}</span>
               </div>
             )}
             <div className={styles.field}>

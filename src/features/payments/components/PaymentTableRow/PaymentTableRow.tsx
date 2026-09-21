@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 import { CheckCircle, Clock, Eye } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useCurrentLang } from "../../../../i18n/useCurrentLang"
-import { formatDate } from "../../../../i18n/locale"
+import { formatDateOnly } from "../../../../i18n/locale"
 import type { IPayment } from "../../types"
 import { formatCurrency } from "../../../../utils/currency"
 import styles from "./PaymentTableRow.module.css"
@@ -21,7 +21,7 @@ const PaymentTableRow = ({ payment, onView, onEdit, onDelete }: PaymentTableRowP
 
   return (
     <tr className={styles.row}>
-      <td className={styles.cell}>{payment.payment_date ? formatDate(payment.payment_date, lang) : "—"}</td>
+      <td className={styles.cell}>{payment.payment_date ? formatDateOnly(payment.payment_date, lang) : "—"}</td>
       <td className={styles.cell}>{payment.proyectos?.clientes?.name ?? "—"}</td>
       <td className={styles.cell}>
         {payment.project_id && payment.proyectos?.name

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useCurrentLang } from "../../../i18n/useCurrentLang"
-import { formatDate as formatLocaleDate } from "../../../i18n/locale"
+import { formatDateOnly } from "../../../i18n/locale"
 import { ChevronRight, DollarSign, Clock, CheckSquare, ClipboardList, Receipt, FolderX } from "lucide-react"
 import { useProjectHub } from "../../../features/projects/hooks/useProjectHub"
 import { useProjectForm } from "../../../features/projects/hooks/useProjectForm"
@@ -35,7 +35,8 @@ const PROJECT_STATUSES: ProjectStatus[] = ["activo", "pausado", "completo"]
 const ProjectHubPage = () => {
   const { t } = useTranslation("app")
   const lang = useCurrentLang()
-  const formatDate = (value?: string) => (value ? formatLocaleDate(value, lang) : "—")
+  // start_date/end_date/due_date/payment_date are all DB `date` columns.
+  const formatDate = (value?: string) => (value ? formatDateOnly(value, lang) : "—")
   const { id = "" } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const toast = useToast()

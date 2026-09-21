@@ -83,7 +83,9 @@ describe("ProjectHubPage — English", () => {
     expect(screen.getByText("Card")).toBeInTheDocument()
     expect(screen.getByText("Pending")).toBeInTheDocument()
     // en-US date; computed because date-only strings parse as UTC midnight.
-    expect(screen.getByText(new Date("2026-02-01").toLocaleDateString("en-US"))).toBeInTheDocument()
+    // The stored calendar day: the suite runs in UTC-3, where the old
+    // new Date("2026-02-01") expectation read as January 31st.
+    expect(screen.getByText("2/1/2026")).toBeInTheDocument()
     expect(screen.queryByText("Presupuesto")).not.toBeInTheDocument()
   })
 

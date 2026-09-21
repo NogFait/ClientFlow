@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useCurrentLang } from "../../../../i18n/useCurrentLang"
-import { formatDate } from "../../../../i18n/locale"
+import { formatDateOnly } from "../../../../i18n/locale"
 import type { ITask } from "../../types"
 import styles from "./TaskCard.module.css"
 
@@ -39,7 +39,7 @@ const TaskCard = ({ task, onView, onEdit, onDelete }: TaskCardProps) => {
             ? <Link to={`/projects/${task.project_id}`}>{task.proyectos.name}</Link>
             : "—"}
         </span>
-        {task.due_date && <span>{t("tasks.due", { date: formatDate(task.due_date, lang) })}</span>}
+        {task.due_date && <span>{t("tasks.due", { date: formatDateOnly(task.due_date, lang) })}</span>}
       </div>
       <div className={styles.actions}>
         <button className={`${styles.actionBtn} ${styles.actionView}`} onClick={() => onView(task)}>{t("shared.view")}</button>

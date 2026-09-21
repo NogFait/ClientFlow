@@ -24,6 +24,11 @@ export default defineConfig({
           env: {
             VITE_SUPABASE_URL: 'http://localhost:54321',
             VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+            // The whole suite runs on the users' clock (UTC-3), on CI too:
+            // any `new Date("YYYY-MM-DD")` sneaking back into the UI shows
+            // the previous day here and fails fast. TZ is process-wide, so
+            // it is set once for every worker rather than per test file.
+            TZ: 'America/Argentina/Buenos_Aires',
           },
         },
       },

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { useCurrentLang } from "../../../../i18n/useCurrentLang"
-import { formatDate, formatDateTime } from "../../../../i18n/locale"
+import { formatDateOnly, formatDateTime } from "../../../../i18n/locale"
 import type { IPayment } from "../../types"
 import { formatCurrency } from "../../../../utils/currency"
 import styles from "./PaymentView.module.css"
@@ -32,7 +32,7 @@ const PaymentView = ({ payment }: PaymentViewProps) => {
     <div className={styles.field}>
       <span className={styles.label}>{t("payments.fields.paymentDate")}</span>
       <span className={styles.value}>
-        {payment.payment_date ? formatDate(payment.payment_date, lang) : "—"}
+        {payment.payment_date ? formatDateOnly(payment.payment_date, lang) : "—"}
       </span>
     </div>
     <div className={styles.field}>

@@ -1,5 +1,6 @@
 import type { IPayment } from "../../payments/types"
 import type { ITask } from "../../tasks/types"
+import { todayDateOnly } from "../../../i18n/locale"
 
 export interface DashboardSummary {
   /** Sum of every pending payment, dated or not. */
@@ -47,9 +48,5 @@ export function summarizeDashboard(payments: IPayment[], tasks: ITask[], today: 
 
 // Local calendar date as "YYYY-MM-DD" (what the DB stores), not the UTC one
 // `toISOString()` would give — at 22:00 in Mendoza the UTC date is tomorrow.
-export function localIsoDate(now: Date = new Date()): string {
-  const y = now.getFullYear()
-  const m = String(now.getMonth() + 1).padStart(2, "0")
-  const d = String(now.getDate()).padStart(2, "0")
-  return `${y}-${m}-${d}`
-}
+// Same helper the rest of the app uses; kept exported under this name.
+export const localIsoDate = todayDateOnly

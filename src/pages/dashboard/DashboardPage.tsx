@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useCurrentLang } from "../../i18n/useCurrentLang"
-import { formatDate } from "../../i18n/locale"
+import { formatDateOnly, isInMonth, monthKeyOf, todayDateOnly } from "../../i18n/locale"
 import { monthName } from "../../utils/month"
 import { useAuthState } from "../../features/auth/context/authContext"
 import { getClients } from "../../features/clients/services"
@@ -60,28 +60,23 @@ const DashboardPage = () => {
       setActiveProjects(projects.filter(p => p.status === "activo").length)
       setSummary(summarizeDashboard(payments, tasks, localIsoDate()))
 
+      // payment_date is a DB `date` ("YYYY-MM-DD"): bucket by the string,
+      // never through new Date() — that is UTC midnight, i.e. the previous
+      // day (and, on the 1st, the previous month) in Argentina.
       const now = new Date()
       const currentMonth = now.getMonth()
       const currentYear = now.getFullYear()
+      const currentKey = monthKeyOf(todayDateOnly(now))
       const income = payments
-        .filter(p => {
-          if (p.status !== "pagado" || !p.payment_date) return false
-          const d = new Date(p.payment_date)
-          return d.getMonth() === currentMonth && d.getFullYear() === currentYear
-        })
+        .filter(p => p.status === "pagado" && !!p.payment_date && isInMonth(p.payment_date, currentYear, currentMonth))
         .reduce((sum, p) => sum + Number(p.amount), 0)
       setMonthlyIncome(income)
 
       const byMonth = new Map<string, number>()
       payments
-        .filter(p => {
-          if (p.status !== "pagado" || !p.payment_date) return false
-          const d = new Date(p.payment_date)
-          return d.getFullYear() < currentYear || (d.getFullYear() === currentYear && d.getMonth() <= currentMonth)
-        })
+        .filter(p => p.status === "pagado" && !!p.payment_date && monthKeyOf(p.payment_date) <= currentKey)
         .forEach(p => {
-          const d = new Date(p.payment_date!)
-          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+          const key = monthKeyOf(p.payment_date!)
           byMonth.set(key, (byMonth.get(key) ?? 0) + Number(p.amount))
         })
       setMonthlyEarnings(
@@ -92,7 +87,7 @@ const DashboardPage = () => {
 
       const upcoming = tasks
         .filter(t => t.status !== "hechas" && t.due_date)
-        .sort((a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime())
+        .sort((a, b) => a.due_date!.localeCompare(b.due_date!))
         .slice(0, 8)
       setUpcomingTasks(upcoming)
     }).catch(() => {})
@@ -186,11 +181,10 @@ const DashboardPage = () => {
               <div className={styles.card}>
                 <ul className={styles.taskList}>
                   {upcomingTasks.map(task => {
-                    const due = new Date(task.due_date!)
-                    const today = new Date()
-                    today.setHours(0, 0, 0, 0)
-                    const isOverdue = due.getTime() < today.getTime()
-                    const formatted = formatDate(due, lang, { day: "2-digit", month: "short" })
+                    // String comparison of "YYYY-MM-DD" is chronological; a
+                    // task due today must not read as overdue.
+                    const isOverdue = task.due_date! < todayDateOnly()
+                    const formatted = formatDateOnly(task.due_date!, lang, { day: "2-digit", month: "short" })
 
                     return (
                       <li key={task.id} className={`${styles.taskItem} ${isOverdue ? styles.taskOverdue : ""}`} onClick={() => navigate("/tasks")}>

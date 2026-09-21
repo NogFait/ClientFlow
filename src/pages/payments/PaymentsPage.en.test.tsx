@@ -65,7 +65,9 @@ describe("PaymentsPage — English", () => {
     // Dates follow the UI language (en-US month/day/year). Computed rather
     // than literal: date-only ISO strings parse as UTC midnight, so the
     // rendered day depends on the runner's timezone.
-    expect(screen.getByText(new Date("2026-09-05").toLocaleDateString("en-US"))).toBeInTheDocument()
+    // The stored calendar day, whatever the clock's timezone (the suite runs
+    // in UTC-3, where a naive new Date("2026-09-05") would read as the 4th).
+    expect(screen.getByText("9/5/2026")).toBeInTheDocument()
     expect(screen.queryByText(/Septiembre/)).not.toBeInTheDocument()
   })
 

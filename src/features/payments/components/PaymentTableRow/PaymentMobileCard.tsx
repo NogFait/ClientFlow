@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 import { CheckCircle, Clock, Eye, Pencil, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useCurrentLang } from "../../../../i18n/useCurrentLang"
-import { formatDate } from "../../../../i18n/locale"
+import { formatDateOnly } from "../../../../i18n/locale"
 import type { IPayment } from "../../types"
 import { formatCurrency } from "../../../../utils/currency"
 import styles from "./PaymentMobileCard.module.css"
@@ -42,7 +42,7 @@ const PaymentMobileCard = ({ payment, onView, onEdit, onDelete }: PaymentMobileC
       <div className={styles.details}>
         <span className={styles.detailLine}>{clientName} — {projectLink}</span>
         <span className={styles.detailLine}>
-          {payment.payment_date ? formatDate(payment.payment_date, lang) : "—"} · {t(`status.method.${payment.method}`)}
+          {payment.payment_date ? formatDateOnly(payment.payment_date, lang) : "—"} · {t(`status.method.${payment.method}`)}
         </span>
       </div>
       <div className={styles.actions}>

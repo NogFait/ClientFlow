@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
+import { isInMonth } from "../../i18n/locale"
 import type { IProject } from "../../features/projects/types"
 import type { IClient } from "../../features/clients/types"
 import type { IPayment } from "../../features/payments/types"
@@ -139,11 +140,7 @@ const ProjectsPage = () => {
   const currentMonth = now.getMonth()
   const currentYear = now.getFullYear()
   const monthlyIncome = payments
-    .filter(p => {
-      if (p.status !== "pagado") return false
-      const d = new Date(p.payment_date!)
-      return d.getMonth() === currentMonth && d.getFullYear() === currentYear
-    })
+    .filter(p => p.status === "pagado" && !!p.payment_date && isInMonth(p.payment_date, currentYear, currentMonth))
     .reduce((sum, p) => sum + Number(p.amount), 0)
 
   return (

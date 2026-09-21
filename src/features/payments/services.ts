@@ -1,4 +1,5 @@
 import { supabase } from "../../services/supabaseClient"
+import { todayDateOnly } from "../../i18n/locale"
 import type { IPayment } from "./types"
 
 export async function getPayments() {
@@ -83,7 +84,7 @@ export async function createPayment(payment: IPayment) {
     .insert({
       ...payment,
       user_id: user?.id,
-      payment_date: payment.payment_date || new Date().toISOString().split("T")[0],
+      payment_date: payment.payment_date || todayDateOnly(),
     })
   if (error) throw new Error(error.message)
 }

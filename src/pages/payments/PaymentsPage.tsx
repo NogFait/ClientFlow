@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useCurrentLang } from "../../i18n/useCurrentLang"
-import { formatDate } from "../../i18n/locale"
+import { formatDateOnly, todayDateOnly } from "../../i18n/locale"
 import type { IPayment } from "../../features/payments/types"
 import type { IProject } from "../../features/projects/types"
 import { getPaymentsInRange, getPaymentTotals, deletePayment, type PaymentTotals } from "../../features/payments/services"
@@ -67,7 +67,7 @@ const PaymentsPage = () => {
     setEditingPayment(null)
 
     if (!wasEdit) {
-      const effectiveDate = saved.payment_date || new Date().toISOString().split("T")[0]
+      const effectiveDate = saved.payment_date || todayDateOnly()
       const savedMonth = effectiveDate.slice(0, 7) as MonthKey
       if (savedMonth !== month) {
         setSearchParams({ month: savedMonth })
@@ -134,10 +134,10 @@ const PaymentsPage = () => {
 
   const proximoPago = payments
     .filter(p => p.status === "pendiente" && p.payment_date)
-    .sort((a, b) => new Date(a.payment_date!).getTime() - new Date(b.payment_date!).getTime())[0]
+    .sort((a, b) => a.payment_date!.localeCompare(b.payment_date!))[0]
 
   const proximoPagoValue = proximoPago
-    ? `${formatDate(proximoPago.payment_date!, lang)} — ${formatCurrency(Number(proximoPago.amount))}`
+    ? `${formatDateOnly(proximoPago.payment_date!, lang)} — ${formatCurrency(Number(proximoPago.amount))}`
     : "—"
 
   const totalGanado = payments
