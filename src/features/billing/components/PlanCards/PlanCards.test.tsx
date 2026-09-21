@@ -66,7 +66,9 @@ describe("PlanCards", () => {
   it("lists the plan features for the Pro cards", () => {
     render(<PlanCards entitlements={freeEntitlements} onUpgrade={vi.fn()} />)
 
-    expect(screen.getAllByText("Clientes ilimitados")).toHaveLength(2)
+    // Pro sells benefits, not limits: the weekly digest leads the list.
+    expect(screen.getAllByText(/Resumen semanal por email/)).toHaveLength(2)
+    expect(screen.getAllByText("Clientes y proyectos ilimitados")).toHaveLength(2)
     expect(screen.getAllByText("Soporte prioritario")).toHaveLength(2)
     expect(screen.getByText("3 clientes")).toBeInTheDocument()
   })

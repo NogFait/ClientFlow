@@ -21,7 +21,8 @@ describe("planCatalog", () => {
     const monthly = getPlanCatalogEntry("pro_monthly")
     expect(monthly.price).toBe("USD 12")
     expect(monthly.priceSuffix).toBe("/mes")
-    expect(monthly.features).toContain("Clientes ilimitados")
+    expect(monthly.features[0]).toMatch(/^Resumen semanal por email/)
+    expect(monthly.features).toContain("Clientes y proyectos ilimitados")
     expect(monthly.badge).toBeUndefined()
   })
 

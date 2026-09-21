@@ -2,17 +2,33 @@
   "plans": {
     "free": {
       "name": "Free",
-      "features": ["3 clients", "5 projects", "Unlimited tasks and payments within them"]
+      "features": [
+        "3 clients",
+        "5 projects",
+        "Unlimited tasks and payments within them"
+      ]
     },
     "pro_monthly": {
       "name": "Pro monthly",
       "priceSuffix": "/month",
-      "features": ["Unlimited clients", "Unlimited projects", "Unlimited tasks and payments", "Priority support"]
+      "features": [
+        "Weekly email summary: every Monday, what to collect, what's due and who to write to",
+        "Who brings in the most: client ranking by collected and pending",
+        "Export payments to Excel: the month or the year, ready for your accountant",
+        "Unlimited clients and projects",
+        "Priority support"
+      ]
     },
     "pro_yearly": {
       "name": "Pro yearly",
       "priceSuffix": "/year",
-      "features": ["Unlimited clients", "Unlimited projects", "Unlimited tasks and payments", "Priority support"],
+      "features": [
+        "Weekly email summary: every Monday, what to collect, what's due and who to write to",
+        "Who brings in the most: client ranking by collected and pending",
+        "Export payments to Excel: the month or the year, ready for your accountant",
+        "Unlimited clients and projects",
+        "Priority support"
+      ],
       "badge": "2 months free",
       "note": "equivalent to USD 10/month"
     }

@@ -2,17 +2,33 @@
   "plans": {
     "free": {
       "name": "Free",
-      "features": ["3 clientes", "5 proyectos", "Tareas y pagos ilimitados dentro de ellos"]
+      "features": [
+        "3 clientes",
+        "5 proyectos",
+        "Tareas y pagos ilimitados dentro de ellos"
+      ]
     },
     "pro_monthly": {
       "name": "Pro mensual",
       "priceSuffix": "/mes",
-      "features": ["Clientes ilimitados", "Proyectos ilimitados", "Tareas y pagos ilimitados", "Soporte prioritario"]
+      "features": [
+        "Resumen semanal por email: cada lunes, qué cobrar, qué vence y a quién escribirle",
+        "¿Quién te deja más plata?: ranking de clientes por cobrado y pendiente",
+        "Exportá los pagos a Excel: el mes o el año, listo para tu contador",
+        "Clientes y proyectos ilimitados",
+        "Soporte prioritario"
+      ]
     },
     "pro_yearly": {
       "name": "Pro anual",
       "priceSuffix": "/año",
-      "features": ["Clientes ilimitados", "Proyectos ilimitados", "Tareas y pagos ilimitados", "Soporte prioritario"],
+      "features": [
+        "Resumen semanal por email: cada lunes, qué cobrar, qué vence y a quién escribirle",
+        "¿Quién te deja más plata?: ranking de clientes por cobrado y pendiente",
+        "Exportá los pagos a Excel: el mes o el año, listo para tu contador",
+        "Clientes y proyectos ilimitados",
+        "Soporte prioritario"
+      ],
       "badge": "2 meses gratis",
       "note": "equivale a USD 10/mes"
     }
