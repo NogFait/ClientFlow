@@ -61,12 +61,16 @@ const Navbar = ({ mobileNavOpen = false, onOpenMobileNav = noop }: NavbarProps) 
         </div>
         <span className={styles.userName}>{userName}</span>
       </div>
-      <button 
+      <button
         className={styles.logoutButton}
         onClick={handleLogout}
+        aria-label={t("nav.logout")}
+        title={t("nav.logout")}
       >
-        <LogOut size={16} />
-        {t("nav.logout")}
+        <LogOut size={16} aria-hidden="true" />
+        {/* Icon-only on phones (see CSS): with the plan badge and the language
+            switch there is no room for the label at 375px. */}
+        <span className={styles.logoutLabel}>{t("nav.logout")}</span>
       </button>
     </div>
   );

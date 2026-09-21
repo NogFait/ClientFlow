@@ -6,7 +6,6 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-3);
-  flex-wrap: wrap;
 }
 
 .spacer {
@@ -27,11 +26,6 @@
   flex-shrink: 0;
 }
 
-@media (max-width: 767px) {
-  .hamburger {
-    display: inline-flex;
-  }
-}
 
 /* The switch sits between the spacer and the plan badge; flex-shrink: 0
    keeps its two segments from collapsing when the user name is long. */
@@ -110,4 +104,34 @@
   color: var(--color-error);
   border-color: var(--color-error);
   background-color: var(--color-error-bg);
+}
+
+/* Phones: one row, no wrapping. Hamburger + language switch + plan badge
+   + logout must fit in 375px, so the logout keeps only its icon and the
+   avatar (whose only job is the hover tooltip with the name) is dropped. */
+@media (max-width: 767px) {
+  .navbar {
+    padding: 0 var(--spacing-4);
+    gap: var(--spacing-2);
+  }
+
+  .hamburger {
+    display: inline-flex;
+  }
+
+  .userInfo {
+    display: none;
+  }
+
+  .logoutLabel {
+    display: none;
+  }
+
+  .logoutButton {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    flex-shrink: 0;
+  }
 }
